@@ -15,5 +15,6 @@ public:
 private:
 	Ram _ram();
 	Disc _disc();
+	cpu _cpu();
 };
 
