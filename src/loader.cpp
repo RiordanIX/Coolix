@@ -20,6 +20,11 @@ using std::stoi;
 using std::cout;
 using std::endl;
 
+loader::loader(Disk disk)
+{
+	_disk = disk;
+}
+
 void loader::readFromFile(string filename) {
     string x;
 
@@ -61,7 +66,8 @@ void loader::readFromFile(string filename) {
 				instruct_t instruction = stoll(x, NULL, 16);
 
 				//Load to disk here
-				cout << instruction << endl;
+				//cout << instruction << endl;
+				_disk.allocate(instruction);
 			}
 
 			cout << "Instructions loaded for process " << pid << endl;
@@ -91,7 +97,8 @@ void loader::readFromFile(string filename) {
 				instruct_t data = stoll(x, NULL, 16);
 
 				//Load to disk here
-				cout << data << endl;
+				//cout << data << endl;
+				_disk.allocate(data);
 			}
 
 			cout << "Data loaded for process " << pid << endl;

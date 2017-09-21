@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
+#include "instruct.h"
 
 class Ram {
 public:
 	Ram();
-
+	bool allocate(instruct_t data);
 
 private:
-	vector<int> _space_;
+	vector<instruct_t> _space_;
 };
 
