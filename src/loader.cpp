@@ -20,8 +20,7 @@ using std::stoi;
 using std::cout;
 using std::endl;
 
-void loader::readFromFile(string filename)
-{
+void loader::readFromFile(string filename) {
     string x;
 
     file.open(filename.c_str());
@@ -29,17 +28,16 @@ void loader::readFromFile(string filename)
 	//Properties of a loaded process
     int pid, instructs, priority, inpBuffer, outBuffer, tmpBuffer;
 
-    if(!file)
+    if(!file) {
         cout << "Unable to read file." << endl;
+	}
 
 	//Read each line (for every space in the file, a newline is made)
-    while(file >> x)
-    {
+    while(file >> x) {
 		//The JOB tag indicates the start of a new process, the three integers
 		//following are the process id, number of instructions, and priority
 		//respectively.
-        if(x.compare(0, 3, "JOB") == 0)
-        {
+        if(x.compare(0, 3, "JOB") == 0) {
             cout << "Creating process..." << endl;
 
 			//Read process id
@@ -58,8 +56,7 @@ void loader::readFromFile(string filename)
 				 << "Loading instructions..." << endl;
 
 			//"Load" the process' instructions to memory
-			for(int i = 0; i < instructs; i++)
-			{
+			for(int i = 0; i < instructs; i++) {
 				file >> x;
 				instruct_t instruction = stoll(x, NULL, 16);
 
@@ -73,8 +70,7 @@ void loader::readFromFile(string filename)
 		//The data tag indicates the start of the process' given data. The
 		//following three numbers are the input, output, and temporary buffer
 		//sizes respectively.
-		else if(x.compare(0, 4, "Data") == 0)
-		{
+		else if(x.compare(0, 4, "Data") == 0) {
 			cout << "Loading data..." << endl;
 
 			//Input buffer size
@@ -90,8 +86,7 @@ void loader::readFromFile(string filename)
 			int tmpBuffer = stoi(x, NULL, 16);
 
 			//Load all of the given data to memory
-			for(int i = 0; i < inpBuffer + outBuffer + tmpBuffer; i++)
-			{
+			for(int i = 0; i < inpBuffer + outBuffer + tmpBuffer; i++) {
 				file >> x;
 				instruct_t data = stoll(x, NULL, 16);
 

@@ -1,9 +1,9 @@
 #include <cstdlib>
-#include "loader.h"
+#include "../src/loader.h"
 
 int main()
 {
 	loader load;
-    
+
     load.readFromFile("Program-File.txt");
 }
