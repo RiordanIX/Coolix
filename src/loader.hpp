@@ -4,13 +4,11 @@
 #include <string>
 #include "disk.hpp"
 
-class loader
-{
+class loader {
 private:
-    std::ifstream file;
-	Disk _disk;
+	std::ifstream file;
 
 public:
-	loader(Disk disk);
-    void readFromFile(std::string filename);
+	void readFromFile(std::string filename, Disk& disk);
 };
+
