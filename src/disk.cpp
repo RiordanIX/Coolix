@@ -1,11 +1,6 @@
 #include <vector>
 #include "disk.hpp"
-
-Disk::Disk(int size)
-{
-	_disk(size, 0);
-	used = 0;
-}
+#include "instruct.hpp"
 
 void Disk::allocate(instruct_t data)
 {

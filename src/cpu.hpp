@@ -1,8 +1,10 @@
 #pragma once
 #include <vector>
+#include <cstdint>
 #include "instruct.hpp"
 
 using std::vector;
+using std::size_t;
 // Default Register size is 16.  May change if requirements change.
 #define DEF_REG_SIZE 16
 
@@ -14,7 +16,7 @@ using std::vector;
  */
 class cpu {
 public:
-	cpu(size_t size=DEF_REG_SIZE) : num_registers(size), registers(size, 0) {}
+	cpu(size_t size = DEF_REG_SIZE) : num_registers(size), registers(size, 0) {}
 	int execute();
 
 	// Public because the dispatcher needs to access it.
