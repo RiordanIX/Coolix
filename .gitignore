@@ -1,3 +1,16 @@
 #Object files
 *.o
 coolix
+# vc project files
+*.vcxproj
+*.filters
+
+# Other types of project files
+stdafx.h
+stdafx.cpp
+ReadMe.txt
+targetver.h
+
+# Swap files
+*.swp
+

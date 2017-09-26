@@ -4,7 +4,7 @@
 int main(int argc, char* argv[]) {
 	if (argc == 1) {
 		std::cout << "Usage:  coolix <run_file>" << std::endl;
-		// Prvent warning using -Wall.
+		// Prevent warning using -Wall.
 		std::cout << argc << " " << argv << std::endl;
 	}
 	else {
