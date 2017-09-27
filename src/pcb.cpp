@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "PCB.h"
+#include "pcb.hpp"
 
 
 PCB::PCB()

@@ -1,6 +1,5 @@
 #pragma once
 #include "instruct.hpp"
-#include "string.h"
 #include "disk.hpp"
 #include <fstream>
 #include <iostream>
@@ -19,10 +18,10 @@ public:
     Process_Memories mem;
     Process_Progeny children;
     Process_Resources resources;
-    
+
     // "pointer to parent (if this process is spawned, else ‘null’)"
     PCB* parent;
-    
+
     // {running, ready, blocked, new}
     enum status {
         READY,
@@ -32,12 +31,12 @@ public:
         WAITING,
         TERMINATED
     };
-    
-    //  pointer to ‘ready-list of active processes’ or ‘resource-list on blocked processes’ of the process, extracted from the 
+
+    //  pointer to ‘ready-list of active processes’ or ‘resource-list on blocked processes’ of the process, extracted from the
     vector<PCB> Ready_Queue;
-     
+
     //  "PC, Registers, Permissions, Buffers, Cache, Active Pages/Blocks"
-    
+
     // "Accumulators, Index, General"
     struct Process_Registers
     {
@@ -52,33 +51,33 @@ public:
         vector<instruct_t> buffers, caches;
         Process_Registers registers;
     };
-    
+
     //  "burst-time, priority, queue-type, time-slice, remain-time"
     struct Process_Sched
     {
         instruct_t tBurst, priority, tSlice, tRemain;
         //  [insert queue type here] -- pointers to queues
     };
-    
+
     // "cpu-time, time-limit, time-delays, start/end times, io-times"
     struct Process_Accounts
     {
         instruct_t tCPU, tLimit, tDelay, tStart, tEnd, tIO;
     };
-    
+
     //  "page-table-base, pages, page-size, base-registers – logical/physical map, limit-reg"
     struct Process_Memories
     {
         // virtual memory not implemented yet
     };
-    
+
     //  "child-procid, child-code-pointers"
     struct Process_Progeny
     {
         instruct_t childId;
         PCB* child;
     };
-    
+
     //  "file-pointers, io-devices – unitclass, unit#, open-file-tables"
     struct Process_Resources
     {
@@ -87,12 +86,12 @@ public:
 
         //  [insert io devices and other stuff here]
     };
-    
-    
+
+
 	PCB();
 	~PCB();
 	void SetPriority(int priorityIn);
-    
+
 private:
 
 };
