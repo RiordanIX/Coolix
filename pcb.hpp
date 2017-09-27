@@ -45,7 +45,7 @@ public:
 
     struct Process_State
     {
-        CPU pc;
+        // CPU pc; // Only have one cpu instance, which is in virt_comp
         //  [insert permissions variable here] -- unneeded?
         //  [insert active pages/blocks here]
         vector<instruct_t> buffers, caches;
@@ -88,8 +88,6 @@ public:
     };
 
 
-	PCB();
-	~PCB();
 	void SetPriority(int priorityIn);
 
 private:
