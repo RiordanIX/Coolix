@@ -1,7 +1,12 @@
 #pragma once
+// fstream for reading stat files for virtual machine specifics
 #include <iostream>
+#include <fstream>
+#include <string>
+
 #include "ram.hpp"
-#include "disc.hpp"
+#include "disk.hpp"
+#include "cpu.hpp"
 
 /** Virtual Computer
  * Creates the virtual computer using stats from a file.
@@ -12,9 +17,11 @@ class virt_comp {
 public:
 	virt_comp();
 	int setup(char* argv[]);
+	void report();
+
 private:
-	Ram _ram();
-	Disc _disc();
-	cpu _cpu();
+	Ram _ram;
+	Disk _disk;
+	cpu _cpu;
 };
 
