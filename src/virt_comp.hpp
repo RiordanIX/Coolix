@@ -16,7 +16,6 @@
 class virt_comp {
 public:
 	virt_comp();
-	int setup(char* argv[]);
 	void report();
 
 private:

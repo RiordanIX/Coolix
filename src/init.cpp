@@ -8,9 +8,8 @@ int main(int argc, char* argv[]) {
 		std::cout << argc << " " << argv << std::endl;
 	}
 	else {
-		virt_comp computer();
-		computer.setup(argv);
-		computer.run();
+		virt_comp computer;
+		computer.report();
 	}
 }
 

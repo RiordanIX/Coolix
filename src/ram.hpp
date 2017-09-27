@@ -7,12 +7,13 @@
 
 class Ram {
 private:
-	unsigned int _size;
+	long unsigned int _size;
 	std::vector<instruct_t> _space_;
 
 public:
-	Ram(unsigned int size=DEFAULT_RAM);
-	void allocate(unsigned int location, instruct_t data);
+	Ram(long unsigned int size=DEFAULT_RAM);
+	void allocate(long unsigned int location, instruct_t data);
+	std::string get_info();
 
 };
 

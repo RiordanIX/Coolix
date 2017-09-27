@@ -57,6 +57,7 @@ void loader::readFromFile(string filename, Disk& disk) {
 			priority = stoi(x, NULL, 16);
 
 			cout << "Process " << pid << " created." << endl
+				 << "Priority: " << priority << endl
 				 << "Loading instructions..." << endl;
 
 			//"Load" the process' instructions to memory
@@ -80,15 +81,15 @@ void loader::readFromFile(string filename, Disk& disk) {
 
 			//Input buffer size
 			file >> x;
-			int inpBuffer = stoi(x, NULL, 16);
+			inpBuffer = stoi(x, NULL, 16);
 
 			//Output buffer size
 			file >> x;
-			int outBuffer = stoi(x, NULL, 16);
+			outBuffer = stoi(x, NULL, 16);
 
 			//Temporary buffer size
 			file >> x;
-			int tmpBuffer = stoi(x, NULL, 16);
+			tmpBuffer = stoi(x, NULL, 16);
 
 			//Load all of the given data to memory
 			for(int i = 0; i < inpBuffer + outBuffer + tmpBuffer; i++) {
@@ -100,10 +101,12 @@ void loader::readFromFile(string filename, Disk& disk) {
 				disk.allocate(data);
 			}
 
-			cout << "Data loaded for process " << pid << endl;
 
 			//process p(pid, instructs, priority, ...
 		}
+		// pid may not be initialized at this point
+		// TODO ensure pid is initialized
+		//cout << "Data loaded for process " << pid << endl;
     }
 
     file.close();
