@@ -30,7 +30,7 @@ void loader::readFromFile(string filename, Disk& disk) {
     file.open(filename.c_str());
 
 	//Properties of a loaded process
-    int pid, instructs, priority, inpBuffer, outBuffer, tmpBuffer;
+    int pid = -1, instructs, priority, inpBuffer, outBuffer, tmpBuffer;
 
     if(!file) {
         cout << "Unable to read file." << endl;
@@ -103,9 +103,15 @@ void loader::readFromFile(string filename, Disk& disk) {
 
 
 			//process p(pid, instructs, priority, ...
+			if(pid != -1)
+			{
+				process p(pid, instructs, inpBuffer, outBuffer, tempBuffer, priority);
+				//put into ready queue
+			}
 		}
 		// pid may not be initialized at this point
 		// TODO ensure pid is initialized
+
 		//cout << "Data loaded for process " << pid << endl;
     }
 

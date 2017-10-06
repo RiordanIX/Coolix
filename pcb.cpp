@@ -3,5 +3,5 @@
 
 void PCB::SetPriority(int p)
 {
-	P = p;
+	priority = p;
 }
