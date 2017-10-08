@@ -10,13 +10,17 @@ class PCB
 {
 
 public:
-    instruct_t cpuid;
-    instruct_t programCounter, code_size;
 	int pid;
 	status currentStatus;
 	int priority;
+	
+	instruct_t diskAddress, ramAddress;
+	
+    instruct_t cpuid;
+    instruct_t programCounter, code_size;
+	
 	vector<instruct_t> registers;
-	vector<instruct_t> locations;
+	vector<instruct_t> buffSizes;
 
     // {running, ready, blocked, new}
     enum status {
@@ -28,7 +32,7 @@ public:
         TERMINATED
     };
 	
-	enum locationType
+	enum buffType
 	{
 		INSTRUCTION = 0,
 		INPUT,
@@ -37,18 +41,25 @@ public:
 		END
 	};
 
-	PCB(instruct_t id, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int p)
+	PCB(instruct_t id, instruct_t address, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int p)
 	{
 		pid = id;
+		currentStatus = status::READY;
 		
-		locations[locationType::INSTRUCTION] = instruct;
-		locations[locationType::INPUT] = inp;
-		locations[locationType::OUTPUT] = out;
-		locations[locationType::TEMP] = temp;
+		diskAddress = address;
+		ramAddress = address;
+		
+		buffSizes[buffType::INSTRUCTION] = instruct;
+		buffSizes[buffType::INPUT] = inp;
+		buffSizes[locationType::OUTPUT] = out;
+		buffSizes[buffType::TEMP] = temp;
 		
 		priority = p;
 	}
 	void SetPriority(int priorityIn);
+	instruct_t get_inp_address();
+	instruct_t get_out_address();
+	instruct_t get_temp_address();
 
 private:
 
