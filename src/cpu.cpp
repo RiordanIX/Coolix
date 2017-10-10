@@ -1,19 +1,23 @@
 #include "cpu.hpp"
+#include "cpu_operations.hpp"
 
-void cpu::decode(instruct_t inst) {
+void cpu::decode_and_execute(instruct_t inst) {
 	std::cout << inst << std::endl;
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
+	instruct_t opcode = inst & OPCODE_MASK;
+	opcode = opcode >> (3*8); // 3 bytes to get to lowest position
+
 	if (format_code == INST_ARITHMETIC) {
-		cpu_arithmetic_operation(inst);
+		cpu_arithmetic_operation(inst, opcode);
 	}
 	else if (format_code == INST_CONDTL_AND_IMMEDIATE) {
-		cpu_condtl_and_immediate_operation(inst);
+		cpu_condtl_and_immediate_operation(inst, opcode);
 	}
 	else if (format_code == INST_UNCONDITIONAL) {
-		cpu_unconditional_operation(inst);
+		cpu_unconditional_operation(inst, opcode);
 	}
 	else if (format_code == INST_IO) {
-		cpu_io_operation(inst);
+		cpu_io_operation(inst, opcode);
 	}
 	else {
 		std::cout << get_info() << std::endl;
@@ -29,5 +33,4 @@ std::string cpu::get_info() {
 	}
 	return info;
 }
-
 
