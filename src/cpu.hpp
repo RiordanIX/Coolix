@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 #include "instruct.hpp"
+#include "cpu_operations.hpp"
 
 using std::vector;
 using std::size_t;
@@ -20,7 +21,7 @@ public:
 	// Public because the dispatcher needs to access it.
 	size_t num_registers;
 	vector<instruct_t> registers;
-    
+
 	cpu(size_t size=DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
 	void decode_and_execute(instruct_t inst);
 	std::string get_info();
