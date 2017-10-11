@@ -24,3 +24,17 @@ std::string Ram::get_info() {
 	return "Ram size: " + std::to_string(_size);
 }
 
+
+/** Returns instruction using index to the first byte in the instruction
+ *
+ */
+instruct_t get_instruction(size_t index) {
+	instruct_t instruct = 0;
+	instruct |= (instruct_t)_space_[index] << (8 * 3); // Shift 3 bytes
+	instruct |= (instruct_t)_space_[index] << (8 * 2);
+	instruct |= (instruct_t)_space_[index] << (8 * 1);
+	instruct |= (instruct_t)_space_[index] << (8 * 0);
+
+	return instruct;
+}
+
