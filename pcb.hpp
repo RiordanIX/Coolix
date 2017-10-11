@@ -37,19 +37,19 @@ public:
 		SHMEM
 	};
 	
-	PCB(instruct_t id, instruct_t address, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int p)
+	PCB(instruct_t id, instruct_t address, instruct_t *pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int p)
 	{
-		auto pid = id;
-		auto currentStatus = READY;
+		pid = id;
+		currentStatus = READY;
+		programCounter = pc; // PC should be a pointer because it points to (i.e. holds the address of) the instruction to be executed.
 		
-		auto diskAddress = address;
-		auto ramAddress = address;
+		diskAddress = address;
+		ramAddress = address;	// virtual memory info to be added later
 		
 		buffSizes[0] = instruct;
 		buffSizes[1] = inp;
 		buffSizes[2] = out;
 		buffSizes[3] = temp;
-		
 		
 		priority = p;
 	}
@@ -67,7 +67,7 @@ private:
 	instruct_t diskAddress, ramAddress;
 	
     instruct_t cpuid;
-    instruct_t programCounter, code_size;
+    instruct_t *programCounter //code_size;
 	
 	vector<instruct_t> registers;
 	vector<instruct_t> buffSizes;
