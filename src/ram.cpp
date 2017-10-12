@@ -44,12 +44,16 @@ std::string Ram::get_info() {
 /** Returns instruction using index to the first byte in the instruction
  *
  */
-instruct_t get_instruction(size_t index) {
+instruct_t Ram::get_instruction(size_t index) {
+	if (index % 4 != 0) {
+		throw "Improper index of an instruction in ram at " +
+				std::to_string(index);
+	}
 	instruct_t instruct = 0;
-	instruct |= (instruct_t)_space[index] << (8 * 3); // Shift 3 bytes
-	instruct |= (instruct_t)_space[index] << (8 * 2);
-	instruct |= (instruct_t)_space[index] << (8 * 1);
-	instruct |= (instruct_t)_space[index] << (8 * 0);
+	instruct |= (instruct_t)_space[index + 0] << (8 * 3); // Shift 3 bytes
+	instruct |= (instruct_t)_space[index + 1] << (8 * 2);
+	instruct |= (instruct_t)_space[index + 2] << (8 * 1);
+	instruct |= (instruct_t)_space[index + 3] << (8 * 0);
 
 	return instruct;
 }

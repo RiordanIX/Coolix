@@ -30,7 +30,7 @@ void loader::readFromFile(string filename, Disk& disk) {
     file.open(filename.c_str());
 
 	//Properties of a loaded process
-    int pid = -1, numInstructs, address priority, inpBuffer, outBuffer, tmpBuffer;
+    int pid = -1, numInstructs, address, priority, inpBuffer, outBuffer, tmpBuffer;
 
     if(!file) {
         cout << "Unable to read file." << endl;
@@ -63,7 +63,7 @@ void loader::readFromFile(string filename, Disk& disk) {
 				 << "Loading instructions..." << endl;
 
 			//"Load" the process' instructions to memory
-			for(int i = 0; i < instructs; i++) {
+			for(int i = 0; i < numInstructs; i++) {
 				file >> x;
 				instruct_t instruction = stoul(x, NULL, 16);
 
@@ -107,7 +107,7 @@ void loader::readFromFile(string filename, Disk& disk) {
 			//process p(pid, instructs, priority, ...
 			if(pid != -1)
 			{
-				process p(pid, address, numInstructs, inpBuffer, outBuffer, tempBuffer, priority);
+				//process p(pid, address, numInstructs, inpBuffer, outBuffer, tempBuffer, priority);
 				//put into ready queue
 			}
 		}

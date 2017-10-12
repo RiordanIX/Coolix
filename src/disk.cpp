@@ -33,7 +33,10 @@ void Disk::allocate(instruct_t data) {
 	allocate(local);
 }
 
-
+byte_t Disk::read_byte(std::size_t pos)
+{
+	return _disk[pos];
+}
 
 /**
  * Because everything is byte-indexed in the disk, we need to convert
