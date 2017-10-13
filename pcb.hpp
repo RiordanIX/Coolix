@@ -24,6 +24,7 @@
 	};
 	
 	enum resourceType {
+		NONE,
 		DISK,
 		STDOUT,
 		KEYBOARD,
@@ -34,7 +35,7 @@ class PCB
 {
 
 public:
-	PCB(instruct_t id, std::size_t raddress, std::size_t daddress std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int p)
+	PCB(instruct_t id, std::size_t raddress, std::size_t daddress std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, vector<instruct_t> reg, int p)
 	{
 		pid = id;
 		currentStatus = READY;
@@ -60,15 +61,22 @@ public:
 	instruct_t get_out_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
 	instruct_t get_temp_address() { return ramAddress + sectionSizes[INTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
 	instruct_t get_end_address() { return ramAddress + sectionSizes[INTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
+	void get_registers (vector<instruct_t> dest);
+	int get_resource_status() { return resource_held; }
+	
 	
 	
 	// SETTERS
-	void SetPriority(int priorityIn);
+	void set_priority(int priorityIn);
+	void stash_registers(vector<instruct_t> source);
+	void acquire_resource(unsigned int code);
+	void set_status(unsigned int code);
+	
 
 private:
 	unsigned int pid;
 	status currentStatus;
-	resourceType resource_held;
+	resourceType resource_held = NONE;
 	int priority;
 	
 	std::size_t diskAddress, ramAddress;
