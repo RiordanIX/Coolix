@@ -42,10 +42,12 @@ void loader::readFromFile(string filename, Disk& disk) {
 		//following are the process id, number of instructions, and priority
 		//respectively.
         if(x.compare(0, 3, "JOB") == 0) {
+#ifdef DEBUG
             cout << "Creating process..." << endl;
+#endif
 
 			address = disk.get_used();
-				
+
 			//Read process id
             file >> x;
             pid = stoi(x, NULL, 16);
@@ -58,10 +60,11 @@ void loader::readFromFile(string filename, Disk& disk) {
 			file >> x;
 			priority = stoi(x, NULL, 16);
 
+#ifdef DEBUG
 			cout << "Process " << pid << " created." << endl
 				 << "Priority: " << priority << endl
 				 << "Loading instructions..." << endl;
-
+#endif
 			//"Load" the process' instructions to memory
 			for(int i = 0; i < numInstructs; i++) {
 				file >> x;
@@ -71,15 +74,18 @@ void loader::readFromFile(string filename, Disk& disk) {
 				//cout << instruction << endl;
 				disk.allocate(instruction);
 			}
-
+#ifdef DEBUG
 			cout << "Instructions loaded for process " << pid << endl;
+#endif
         }
 
 		//The data tag indicates the start of the process' given data. The
 		//following three numbers are the input, output, and temporary buffer
 		//sizes respectively.
 		else if(x.compare(0, 4, "Data") == 0) {
+#ifdef DEBUG
 			cout << "Loading data..." << endl;
+#endif
 
 			//Input buffer size
 			file >> x;

@@ -14,3 +14,9 @@ targetver.h
 # Swap files
 *.swp
 
+# Windows linked files and executables
+*.dll
+*.exe
+
+# Linux linked files
+*.so
