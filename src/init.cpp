@@ -8,7 +8,33 @@ int main(int argc, char* argv[]) {
 		std::cout << argc << " " << argv << std::endl;
 	}
 	else {
-		virt_comp computer;
+		unsigned long ram_size, disk_size, frame_size;
+		std::ifstream stats("stats.stat");
+		if (stats.is_open()) {
+			// TODO Do some error checking in case stats.stat is messed up.
+			// Also, the stats.stat file needs to end with a newline
+			std::string line;
+			getline(stats, line);
+			ram_size = std::stoul(line);
+
+			getline(stats, line);
+			disk_size = std::stoul(line);
+
+			getline(stats, line);
+			frame_size = std::stoul(line);
+
+			getline(stats, line);
+			num_cpus = std::stoul(line);
+		}
+		else {
+			ram_size = 4096;
+			disk_size = 8192;
+			frame_size = 128;
+			num_cpus = 1;
+		}
+		stats.close();
+
+		virt_comp computer = virt_comp(ram_size, disk_size);
 		computer.report();
 	}
 }

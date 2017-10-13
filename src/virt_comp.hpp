@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "ram.hpp"
 #include "disk.hpp"
@@ -15,12 +16,12 @@
  */
 class virt_comp {
 public:
-	virt_comp();
+	virt_comp(unsigned long ram_size, unsigned long disk_size, unsigned long cpus=1);
 	void report();
 
-private:
-	Ram _ram;
-	Disk _disk;
-	cpu _cpu;
+	Ram ram;
+	Disk disk;
+	unsigned long num_cpus;
+	std::vector<cpu> cpus;
 };
 

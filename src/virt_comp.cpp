@@ -1,37 +1,21 @@
 #include "virt_comp.hpp"
 
 
-virt_comp::virt_comp() {
-	std::ifstream stats("stats.stat");
-	if (stats.is_open()) {
-		// TODO Do some error checking in case stats.stat is messed up.
-		// Also, the stats.stat file needs to end with a newline
-		std::string line;
-
-		getline(stats, line);
-		_ram = Ram(std::stoul(line));
-
-		getline(stats, line);
-		_disk = Disk(std::stoul(line));
-		_cpu = cpu();
-
-		stats.close();
-		// returning because can not have an else due to compiler warnings
-		return;
-	}
-	// No else here due to compiler warnings.
-	_ram = Ram();
-	_disk = Disk();
-	_cpu = cpu();
-}
+virt_comp::virt_comp(unsigned long ram_size, unsigned long disk_size,
+					unsigned long num_cpus) :
+		ram(ram_size), disk(disk_size), num_cpus(num_cpus),
+		cpus(_num_cpus, cpu()) {}
 
 
 /** Prints information regarding the state of the virtual machine
  *
  */
 void virt_comp::report() {
-	std::cout << _ram.get_info() << std::endl;
-	std::cout << _disk.get_info() << std::endl;
-	std::cout << _cpu.get_info() << std::endl;
+	std::cout << ram.get_info() << std::endl;
+	std::cout << disk.get_info() << std::endl;
+	for (int i = 0; i < cpus.size(); ++i) {
+		std::cout << "CPU: " << i << std::endl
+		          << cpus[i].get_info() << std::endl;
+	}
 }
 

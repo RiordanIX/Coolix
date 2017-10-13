@@ -11,7 +11,7 @@ void cpu::decode_and_execute(instruct_t inst) {
 		cpu_arithmetic_operation(inst, opcode);
 	}
 	else if (format_code == INST_CONDTL_AND_IMMEDIATE) {
-		cpu_condtl_and_immediate_operation(inst, opcode);
+		cpu_immediate_operation(inst, opcode);
 	}
 	else if (format_code == INST_UNCONDITIONAL) {
 		cpu_unconditional_operation(inst, opcode);
