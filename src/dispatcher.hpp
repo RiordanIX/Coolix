@@ -3,6 +3,7 @@
 #include "instruct.hpp"
 #include "pcb.hpp"
 
+#DEFINE DEFAULT_CPU_CYCLE_TIME 5;
 //  THINGS THAT I DID NOT IMPLEMENT YET
 //  - Counting CPU Cycle
 //  - Record Keeping
@@ -10,7 +11,8 @@
 class Dispatcher
 {
 public: 
-    int count_cpu_cycle = 0;
+    bool wait;
+    int cpu_cycle = DEFAULT_CPU_CYCLE_TIME;
     void dispatch(cpu* CPU, PCB* cProcess, PCB* nProcess);    //  Context Switches. Current process goes out AND new process goes in                                                              // CPU = Which CPU.   cProcess = Current Process.     nProcess = The Next Process
 
 private:
