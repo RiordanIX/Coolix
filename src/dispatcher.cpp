@@ -2,26 +2,22 @@
 #include "PriorityQueue.h"
 #include "std.h"
 
-void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, PCB* nProcess)
+void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, bool wait)
 {
-    for(int i = 0; i < cpu_cycle; i++)
+    count_cpu_cycle+;
+    if(wait)
     {
-        wait = CPU.decode_and_execute();
-        if(wait)
-        {
-            switchOut(CPU, cProcess);
-            switchIn(CPU, nProcess);
-            break;
-        }
+        switchOut(CPU, cProcess);
+        switchIn(CPU);
     }
 }
 
-void Dispatcher::switchIn(cpu* CPU, PCB* nProcess)
+void Dispatcher::switchIn(cpu* CPU)
 {
     for(int i = 0; i < CPU.registers.size(); i++)
     {
-        CPU.registers[i] = nProcess.registers[i];
-        readyQueue.Q.pop();                             //  Removes the Current Running Process        
+        readyQueue.Q.pop();                                         //  Removes the Current Running Process, so the next one will be the new active process                        
+        CPU.registers[i] = readyQueue.getProcess().registers[i];    //  Sets the CPU registers to the new PCB registers                  
         //CPU.CurrentProcess = readyQueue.getProcess(); //  Assigns the new First Process in the Ready Queue to the current Process in the CPU
     }
 }
