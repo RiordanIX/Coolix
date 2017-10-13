@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 		std::cout << argc << " " << argv << std::endl;
 	}
 	else {
-		unsigned long ram_size, disk_size, frame_size;
+		unsigned long ram_size, disk_size;
 		std::ifstream stats("stats.stat");
 		if (stats.is_open()) {
 			// TODO Do some error checking in case stats.stat is messed up.
@@ -21,15 +21,11 @@ int main(int argc, char* argv[]) {
 			disk_size = std::stoul(line);
 
 			getline(stats, line);
-			frame_size = std::stoul(line);
-
-			getline(stats, line);
 			num_cpus = std::stoul(line);
 		}
 		else {
 			ram_size = 4096;
 			disk_size = 8192;
-			frame_size = 128;
 			num_cpus = 1;
 		}
 		stats.close();

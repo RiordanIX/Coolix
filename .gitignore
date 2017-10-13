@@ -1,5 +1,7 @@
 #Object files
 *.o
+*.d
+
 coolix
 # vc project files
 *.vcxproj
@@ -13,4 +15,10 @@ targetver.h
 
 # Swap files
 *.swp
+
+# Codelite information
+*.project
+*.workspace
+*.mk
+.codelite/
 
