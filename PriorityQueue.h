@@ -18,7 +18,7 @@ public:
 	void addProcess(PCB* procc);
 	void removerProcess();
     
+    static PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 };
 
-PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 

@@ -7,8 +7,8 @@ void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, bool wait)
     count_cpu_cycle+;
     if(wait)
     {
-        switchOut(CPU, cProcess);
-        switchIn(CPU);
+        switchOut(CPU, cProcess);   //  Moves current process to WaitingQueue
+        switchIn(CPU);              //  Removes First Process and gives next process to CPU
     }
 }
 
@@ -18,7 +18,7 @@ void Dispatcher::switchIn(cpu* CPU)
     {
         readyQueue.Q.pop();                                         //  Removes the Current Running Process, so the next one will be the new active process                        
         CPU.registers[i] = readyQueue.getProcess().registers[i];    //  Sets the CPU registers to the new PCB registers                  
-        //CPU.CurrentProcess = readyQueue.getProcess(); //  Assigns the new First Process in the Ready Queue to the current Process in the CPU
+        //CPU.CurrentProcess = readyQueue.getProcess();             //  Assigns the new First Process in the Ready Queue to the current Process in the CPU
     }
 }
 
