@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <iostream>
 #include "instruct.hpp"
-#include "cpu_operations.hpp"
+#include "pcb.hpp"
 
 using std::vector;
 using std::size_t;
@@ -23,7 +23,8 @@ public:
 	vector<instruct_t> registers;
 
 	cpu(size_t size=DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
-	void decode_and_execute(instruct_t inst);
+	instruct_t fetch(PCB* pcb);
+	void decode_and_execute(instruct_t inst, PCB* pcb);
 	std::string get_info();
 
 };

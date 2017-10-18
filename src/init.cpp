@@ -1,5 +1,6 @@
 #include <iostream>
 #include "memory_constants.hpp"
+#include "page_table.hpp"
 #include "virt_comp.hpp"
 
 int main(int argc, char* argv[]) {
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
 			DISK_SIZE = 8192;
 			num_cpus = 1;
 		}
+		PageTable::pageDirectory();
 		stats.close();
 
 		virt_comp computer = virt_comp(RAM_SIZE, DISK_SIZE);

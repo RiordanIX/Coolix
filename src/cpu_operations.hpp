@@ -1,5 +1,6 @@
 #pragma once
 #include "instruct.hpp"
+#include "pcb.hpp"
 
 
 /*****************************************************************************
@@ -122,45 +123,69 @@ inline void cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest ) {
 // Immediate instructions {{{
 // When the last 16 bits contain data, the D-reg is always 0000
 ///////////////////////////////////////////////////////////////////////////////
-inline void	cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
 	if (D_reg == 0) {
-		D_reg[Address] = Address;
+		registers[D_reg] = Address;
 	}
 	else {
 		// Address acts as an offset for the Base register
-		registers[D_reg] = ram[B_reg + Address];
+		registers[D_reg] = MMU[B_reg + Address];
 	}
 }
 
-inline void	cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_movi(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_movi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
+	if (B_reg == 0) {
+		registers[D_reg] += Address;
+	}
+
 }
-inline void	cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+
+inline void	cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
+	if (B_reg == 0) {
+		registers[D_reg] *= Address;
+	}
+
 }
-inline void	cpu_divi(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_divi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_ldi(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_ldi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_slti(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_slti(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_hlt(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_hlt(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_jmp(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_jmp(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_bne(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_bne(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_bez(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_bez(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_bnz(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_bnz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_bgz(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_bgz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
-inline void	cpu_blz(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+inline void	cpu_blz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+					instruct_t offset) {
 }
 
 // End of Immediate instructions
@@ -220,60 +245,74 @@ inline void cpu_arithmetic_operation(instruct_t inst, instruct_t opcode) {
 // }}}
 
 
-inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode) {
-	instruct_t B_reg, D_reg, Address;
+inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
+	instruct_t B_reg, D_reg, Address, offset;
 	B_reg   = (inst & 0x00F00000) >> (5*4);
 	D_reg   = (inst & 0x000F0000) >> (4*4);
 	Address =  inst & 0x0000FFFF;
+	offset  = pcb->get_ram_address();
+
 	switch (opcode) {
 		case OP_I_ST:
-			cpu_st(B_reg, D_reg, Address);
+			cpu_st(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_LW:
-			cpu_lw(B_reg, D_reg, Address);
+			cpu_lw(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_MOVI:
-			cpu_movi(B_reg, D_reg, Address);
+			cpu_movi(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_ADDI:
-			cpu_addi(B_reg, D_reg, Address);
+			cpu_addi(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_MULI:
-			cpu_muli(B_reg, D_reg, Address);
+			cpu_muli(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_DIVI:
-			cpu_divi(B_reg, D_reg, Address);
+			cpu_divi(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_LDI:
-			cpu_ldi(B_reg, D_reg, Address);
+			cpu_ldi(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_SLTI:
-			cpu_slti(B_reg, D_reg, Address);
+			cpu_slti(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_JMP:
-			cpu_jmp(B_reg, D_reg, Address);
+			cpu_jmp(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BEQ:
-			cpu_beq(B_reg, D_reg, Address);
+			cpu_beq(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BNE:
-			cpu_bne(B_reg, D_reg, Address);
+			cpu_bne(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BEZ:
-			cpu_bez(B_reg, D_reg, Address);
+			cpu_bez(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BNZ:
-			cpu_bnz(B_reg, D_reg, Address);
+			cpu_bnz(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BGZ:
-			cpu_bgz(B_reg, D_reg, Address);
+			cpu_bgz(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_BLZ:
-			cpu_blz(B_reg, D_reg, Address);
+			cpu_blz(B_reg, D_reg, Address, offset);
 			break;
 		default:
 			throw "Invalid Immediate instruction format";
 	}
 }
+
+inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode) {
+
+}
+
+
+
+inline void cpu_io_operation(instruct_t instruct, instruct_t opcode) {
+
+}
+
+
 
 
