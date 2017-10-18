@@ -68,8 +68,8 @@ public:
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
 	void get_registers (vector<instruct_t> dest);
-	int get_resource_status() { return resource_held; }
-	int get_status() { return currenStatus;}
+	status get_resource_status() { return resource_held; }
+	status get_status() { return currenStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
 
 
