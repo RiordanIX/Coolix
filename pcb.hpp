@@ -30,19 +30,24 @@
 		KEYBOARD,
 		SHMEM
 	};
+	
+	vector<PCB> bootstrap;
 
 class PCB
 {
 
 public:
-	PCB(instruct_t id, std::size_t raddress, std::size_t daddress std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, vector<instruct_t> reg, int p)
+	PCB(instruct_t id, std::size_t raddress, std::size_t daddress std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int wait, int cycle, int p)
 	{
 		pid = id;
 		currentStatus = READY;
-		programCounter = pc; // PC should be a pointer because it points to (i.e. holds the address of) the instruction to be executed.
+		programCounter = pc;
 		
-		diskAddress = daddress;
+		diskAddress = daddress; // ???
 		ramAddress = raddress;	// virtual memory info to be added later
+		
+		wait_time = wait;
+		cycle_time = cycle;
 		
 		sectionSizes[INSTRUCTION] = instruct;
 		sectionSizes[INPUT] = inp;
@@ -59,8 +64,10 @@ public:
 	instruct_t get_disk_address() { return diskAddress; }
 	instruct_t get_inp_address() { return ramAddress + sectionSizes[INSTRUCTION]; }
 	instruct_t get_out_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
-	instruct_t get_temp_address() { return ramAddress + sectionSizes[INTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
-	instruct_t get_end_address() { return ramAddress + sectionSizes[INTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
+	instruct_t get_temp_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
+	instruct_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
+	int get_wait_time() { return wait_time; }
+	int get_cycle_time() { return cycle_time; }
 	void get_registers (vector<instruct_t> dest);
 	int get_resource_status() { return resource_held; }
 	
@@ -71,6 +78,8 @@ public:
 	void stash_registers(vector<instruct_t> source);
 	void acquire_resource(unsigned int code);
 	void set_status(unsigned int code);
+	void set_wait_time(int newtime);
+	void set_cycle_time(int newtime);
 	
 
 private:
@@ -78,6 +87,8 @@ private:
 	status currentStatus;
 	resourceType resource_held = NONE;
 	int priority;
+	int wait_time;
+	int cycle_time;
 	
 	std::size_t diskAddress, ramAddress;
 	

@@ -28,3 +28,11 @@ void PCB::acquire_resource(unsigned int code) {
 void PCB::set_status(unsigned int code) {
 	currentStatus = code;
 }
+
+void PCB::set_wait_time(int newtime) {
+	wait_time = newtime;
+}
+
+void PCB::set_cycle_time(int newtime){
+	cycle_time = newtime;
+}
