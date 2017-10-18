@@ -14,7 +14,7 @@
         WAITING,
         TERMINATED
     };
-	
+
 	enum buffType
 	{
 		INSTRUCTION,
@@ -22,7 +22,7 @@
 		OUTPUT,
 		TEMP
 	};
-	
+
 	enum resourceType {
 		NONE,
 		DISK,
@@ -30,8 +30,7 @@
 		KEYBOARD,
 		SHMEM
 	};
-	
-	vector<PCB> bootstrap;
+
 
 class PCB
 {
@@ -42,21 +41,21 @@ public:
 		pid = id;
 		currentStatus = READY;
 		programCounter = pc;
-		
+
 		diskAddress = daddress; // ???
 		ramAddress = raddress;	// virtual memory info to be added later
-		
+
 		wait_time = wait;
 		cycle_time = cycle;
-		
+
 		sectionSizes[INSTRUCTION] = instruct;
 		sectionSizes[INPUT] = inp;
 		sectionSizes[OUTPUT] = out;
 		sectionSizes[TEMP] = temp;
-		
+
 		priority = p;
 	}
-	
+
 	// GETTERS
 	int get_priority() { return priority; }
 	unsigned int get_pid() { return pid; }
@@ -70,9 +69,9 @@ public:
 	int get_cycle_time() { return cycle_time; }
 	void get_registers (vector<instruct_t> dest);
 	int get_resource_status() { return resource_held; }
-	
-	
-	
+
+
+
 	// SETTERS
 	void set_priority(int priorityIn);
 	void stash_registers(vector<instruct_t> source);
@@ -80,7 +79,7 @@ public:
 	void set_status(unsigned int code);
 	void set_wait_time(int newtime);
 	void set_cycle_time(int newtime);
-	
+
 
 private:
 	unsigned int pid;
@@ -89,13 +88,16 @@ private:
 	int priority;
 	int wait_time;
 	int cycle_time;
-	
+
 	std::size_t diskAddress, ramAddress;
-	
+
     // instruct_t cpuid;
     std::size_t programCounter //code_size;
-	
+
 	vector<instruct_t> registers;
 	vector<instruct_t> sectionSizes;
 };
+
+// Define the PCB List after definition
+vector<PCB> process_list;
 
