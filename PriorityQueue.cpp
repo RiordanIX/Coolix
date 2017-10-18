@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "PriorityQueue.h"
 
-
-
 PriorityQueue::PriorityQueue()//initialize priority queue
 {
 	Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
+    readyQueue = new PriorityQueue();
+    waitingQueue = new PriorityQueue();
+    terminatedQueue = new PriorityQueue();
+    newQueue = new PriorityQueue();
 }
 PriorityQueue::~PriorityQueue()//reinitializing priority queue to point to empty queue
 {
