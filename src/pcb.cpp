@@ -9,6 +9,10 @@ void PCB::get_registers(vector<instruct_t> dest){
 	}
 }
 
+std::size_t PCB::set_program_counter(std::size_t new_pc){
+	programCounter = new_pc;
+}
+
 void PCB::set_priority(int priorityIn){
 	priority = priorityIn;
 }

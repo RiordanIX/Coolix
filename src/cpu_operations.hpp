@@ -283,7 +283,7 @@ inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb
 			cpu_slti(B_reg, D_reg, Address, offset);
 			break;
 		case OP_I_JMP:
-			cpu_jmp(B_reg, D_reg, Address, offset);
+			cpu_jmp(B_reg, D_reg, Address, offset, pcb->programCounter);
 			break;
 		case OP_I_BEQ:
 			cpu_beq(B_reg, D_reg, Address, offset);
@@ -308,7 +308,12 @@ inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb
 	}
 }
 
-inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode) {
+inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode, PCB* pcb) {
+	instruct_t B_reg, D_reg, Address, offset;
+	B_reg   = (inst & 0x00F00000) >> (5*4);
+	D_reg   = (inst & 0x000F0000) >> (4*4);
+	Address =  inst & 0x0000FFFF;
+	offset  = pcb->get_ram_address();
 
 }
 

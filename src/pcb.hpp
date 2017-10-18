@@ -69,6 +69,7 @@ public:
 	int get_cycle_time() { return cycle_time; }
 	void get_registers (vector<instruct_t> dest);
 	int get_resource_status() { return resource_held; }
+	std::size_t get_program_counter()	{ return programCounter; }
 
 
 
@@ -79,6 +80,7 @@ public:
 	void set_status(unsigned int code);
 	void set_wait_time(int newtime);
 	void set_cycle_time(int newtime);
+	std::size_t set_program_counter(std::size_t new_pc);
 
 
 private:
