@@ -135,6 +135,7 @@ inline void	cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instr
 
 inline void	cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
+		registers[D_reg] = registers[B_reg];
 }
 inline void	cpu_movi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
@@ -156,9 +157,11 @@ inline void	cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 }
 inline void	cpu_divi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
+	registers[D_reg] /= Address;
 }
 inline void	cpu_ldi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
+	registers[D_reg] = Address;
 }
 inline void	cpu_slti(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
@@ -168,6 +171,8 @@ inline void	cpu_hlt(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 }
 inline void	cpu_jmp(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
+	PCB->programCounter = Address;	//PCB is a placeholder
+	
 }
 inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
