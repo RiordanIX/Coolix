@@ -25,11 +25,11 @@ void PCB::stash_registers(vector<instruct_t> source){
 	}
 }
 
-void PCB::acquire_resource(unsigned int code) {
+void PCB::acquire_resource(status code) {
 	resource_held = code;
 }
 
-void PCB::set_status(unsigned int code) {
+void PCB::set_status(status code) {
 	currentStatus = code;
 }
 

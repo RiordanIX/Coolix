@@ -76,8 +76,8 @@ public:
 	// SETTERS
 	void set_priority(int priorityIn);
 	void stash_registers(vector<instruct_t> source);
-	void acquire_resource(unsigned int code);
-	void set_status(unsigned int code);
+	void acquire_resource(status code);
+	void set_status(status code);
 	void set_wait_time(int newtime);
 	void set_cycle_time(int newtime);
 	std::size_t set_program_counter(std::size_t new_pc);
