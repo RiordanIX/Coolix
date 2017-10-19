@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 
-    enum status {
+    enum status 
+	{
         READY,
         RUNNING,
         BLOCKED,
@@ -23,7 +24,8 @@
 		TEMP
 	};
 
-	enum resourceType {
+	enum resourceType
+	{
 		NONE,
 		DISK,
 		STDOUT,
@@ -36,7 +38,7 @@ class PCB
 {
 
 public:
-	PCB(instruct_t id, std::size_t raddress, std::size_t daddress std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int wait, int cycle, int p)
+	PCB(instruct_t id, std::size_t raddress, std::size_t daddress, std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int wait, int cycle, int p)
 	{
 		pid = id;
 		currentStatus = READY;
@@ -67,16 +69,16 @@ public:
 	instruct_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
-	void get_registers (vector<instruct_t> dest);
-	status get_resource_status() { return resource_held; }
-	status get_status() { return currenStatus;}
+	void get_registers (std::vector<instruct_t> dest);
+	resourceType get_resource_status() { return resource_held; }
+	status get_status() { return currentStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
 
 
 
 	// SETTERS
 	void set_priority(int priorityIn);
-	void stash_registers(vector<instruct_t> source);
+	void stash_registers(std::vector<instruct_t> source);
 	void acquire_resource(status code);
 	void set_status(status code);
 	void set_wait_time(int newtime);
@@ -95,12 +97,12 @@ private:
 	std::size_t diskAddress, ramAddress;
 
     // instruct_t cpuid;
-    std::size_t programCounter //code_size;
+	std::size_t programCounter; //code_size
 
-	vector<instruct_t> registers;
-	vector<instruct_t> sectionSizes;
+	std::vector<instruct_t> registers;
+	std::vector<instruct_t> sectionSizes;
 };
 
 // Define the PCB List after definition
-vector<PCB> process_list;
+std::vector<PCB> process_list;
 
