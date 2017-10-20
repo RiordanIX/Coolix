@@ -349,6 +349,7 @@ inline void cpu_unconditional_operation(instruct_t inst, instruct_t opcode, PCB*
 			
 		case OP_J_HLT:
 			cpu_hlt(Address, offset, pcb);
+			break;
 	}
 }
 
@@ -365,9 +366,11 @@ inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
 	{
 		case OP_IO_RD:
 			cpu_rd(Reg1, Reg2, Address, offset);
+			break;
 			
 		case OP_IO_WR:
 			cpu_wr(Reg1, Reg2, Address, offset);
+			break;
 	}
 }
 
