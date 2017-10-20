@@ -24,7 +24,7 @@ using std::cout;
 using std::endl;
 
 
-void loader::readFromFile(string filename, Disk& disk) {
+void loader::readFromFile(string filename) {
     string x;
 
     file.open(filename.c_str());
@@ -44,8 +44,8 @@ void loader::readFromFile(string filename, Disk& disk) {
         if(x.compare(0, 3, "JOB") == 0) {
             cout << "Creating process..." << endl;
 
-			address = disk.get_used();
-				
+			address = DISK.get_used();
+
 			//Read process id
             file >> x;
             pid = stoi(x, NULL, 16);
@@ -69,7 +69,7 @@ void loader::readFromFile(string filename, Disk& disk) {
 
 				//Load to disk here
 				//cout << instruction << endl;
-				disk.allocate(instruction);
+				DISK.allocate(instruction);
 			}
 
 			cout << "Instructions loaded for process " << pid << endl;
@@ -100,7 +100,7 @@ void loader::readFromFile(string filename, Disk& disk) {
 
 				//Load to disk here
 				//cout << data << endl;
-				disk.allocate(data);
+				DISK.allocate(data);
 			}
 
 

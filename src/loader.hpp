@@ -9,6 +9,6 @@ private:
 	std::ifstream file;
 
 public:
-	void readFromFile(std::string filename, Disk& disk);
+	void readFromFile(std::string filename);
 };
 
