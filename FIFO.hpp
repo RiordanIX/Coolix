@@ -8,8 +8,10 @@ public:
 	std::deque<PCB*> ready;
 	FIFO();
 	~FIFO();
-	PCB* GetProcess();
-	void AddProcess(PCB* procc);
-	void RemoverProcess();
+
+	PCB* getProcess();
+	void addProcess(PCB* procc);
+	void removeProcess();
+	int Size(){ return ready.size()};
 };
 

@@ -1,24 +1,24 @@
 #include "stdafx.h"
 #include "FIFO.h"
 
-
-FIFO::FIFO()//initialize queue
-{
+//initialize queue
+FIFO::FIFO(){
 	ready = std::deque<PCB*>();
 }
-FIFO::~FIFO()
-{
+
+FIFO::~FIFO() {
 	ready.clear();
 }
-PCB* FIFO::GetProcess() 
-{
+
+PCB* FIFO::getProcess() {
 	return ready.front();
 }
-void FIFO::AddProcess(PCB* procc) 
-{
+
+void FIFO::addProcess(PCB* procc) {
 	ready.push_back(procc);
 }
-void FIFO::RemoverProcess() 
-{
+
+void FIFO::removeProcess() {
 	ready.pop_back();
 }
+
