@@ -63,7 +63,7 @@ std::string Disk::get_info() {
 }
 
 
-std::vector<byte_t> Disk::read_byte_chunk(int pos, int size) {
+std::vector<byte_t> Disk::read_byte_chunk(std::size_t pos, std::size_t size) {
 	std::vector<byte_t> to_send;
 	for ( ; pos < size; ++pos) {
 		to_send.push_back(_disk[pos]);
@@ -72,7 +72,7 @@ std::vector<byte_t> Disk::read_byte_chunk(int pos, int size) {
 }
 
 
-std::vector<instruct_t> Disk::read_instruction_chunk(int pos, int size) {
+std::vector<instruct_t> Disk::read_instruction_chunk(std::size_t pos, std::size_t size) {
 	std::vector<instruct_t> to_send;
 	instruct_t temp;
 	for (; pos < size; ++pos) {

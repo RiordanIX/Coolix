@@ -16,11 +16,13 @@ private:
 public:
 	Ram(long unsigned int size=DEFAULT_RAM);
 	long unsigned int get_ram_size() { return _size;}
-	static void allocate(long unsigned int location, instruct_t data);
-	static void allocate(long unsigned int location, byte_t data);
+	void allocate(long unsigned int location, instruct_t data);
+	void allocate(long unsigned int location, byte_t data);
 	instruct_t get_instruction(std::size_t index);
 
 	std::string get_info();
 
 };
+
+Ram MEM = Ram(DEFAULT_RAM);
 

@@ -44,7 +44,7 @@ std::string Ram::get_info() {
 /** Returns instruction using index to the first byte in the instruction
  *
  */
-instruct_t get_instruction(size_t index) {
+instruct_t Ram::get_instruction(size_t index) {
 	instruct_t instruct = 0;
 	instruct |= (instruct_t)_space[index] << (8 * 3); // Shift 3 bytes
 	instruct |= (instruct_t)_space[index] << (8 * 2);
