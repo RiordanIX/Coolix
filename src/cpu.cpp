@@ -8,7 +8,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	opcode = opcode >> (3*8); // 3 bytes to get to lowest position
 
 	if (format_code == INST_ARITHMETIC) {
-		cpu_arithmetic_operation(inst, opcode, pcb);
+		cpu_arithmetic_operation(inst, opcode);
 	}
 	else if (format_code == INST_CONDTL_AND_IMMEDIATE) {
 		cpu_immediate_operation(inst, opcode, pcb);
@@ -26,7 +26,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
-	return MEM[pcb->programCounter + pcb->get_ram_address()];
+	return MEM.get_instruction(pcb->get_program_counter() + pcb->get_ram_address());
 }
 
 std::string cpu::get_info() {
