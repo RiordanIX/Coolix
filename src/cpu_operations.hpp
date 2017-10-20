@@ -61,7 +61,7 @@
 #define OP_I_SLTI 0x11
 #define OP_J_HLT  0x12
 #define OP_NOP    0x13
-#define OP_I_JMP  0x14
+#define OP_J_JMP  0x14
 #define OP_I_BEQ  0x15
 #define OP_I_BNE  0x16
 #define OP_I_BEZ  0x17
@@ -77,6 +77,21 @@
  * itself.  They should all defined as inline, and they should only have a
  * couple lines at most.
  *****************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//  I/O instructions {{{
+///////////////////////////////////////////////////////////////////////////////
+inline void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM[Address + offset];
+}
+
+inline void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	if(Address == 0)
+		registers[Reg2] = registers[Reg1];
+	else
+		MEM[Address + offset] = registers[Reg1];
+}
+ 
+ 
 ///////////////////////////////////////////////////////////////////////////////
 //  Arithmetic instructions {{{
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,10 +150,11 @@ inline void	cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instr
 
 inline void	cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
-		registers[D_reg] = registers[B_reg];
+	registers[D_reg] = registers[B_reg];
 }
 inline void	cpu_movi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
+	registers[D_reg] = Address;
 }
 inline void	cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
@@ -166,31 +182,45 @@ inline void	cpu_ldi(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 inline void	cpu_slti(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
 					instruct_t offset) {
 }
-inline void	cpu_hlt(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
+inline void	cpu_hlt(instruct_t Address,
 					instruct_t offset) {
+	pcb->set_status(status::TERMINATED);
 }
-inline void	cpu_jmp(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
-	PCB->programCounter = Address;	//PCB is a placeholder
+inline void	cpu_jmp(instruct_t Address,
+					instruct_t offset, PCB* pcb) {
+	pcb->set_program_counter(Address);	//PCB is a placeholder
 	
 }
 inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] == registers[D_reg])
+		pcb->set_program_counter(Address);
+		
 }
 inline void	cpu_bne(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] != registers[D_reg])
+		pcb->set_program_counter(Address);
 }
 inline void	cpu_bez(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] == 0)
+		pcb->set_program_counter(Address);
 }
 inline void	cpu_bnz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] != 0)
+		pcb->set_program_counter(Address);
 }
 inline void	cpu_bgz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] > 0)
+		pcb->set_program_counter(Address);
 }
 inline void	cpu_blz(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
-					instruct_t offset) {
+					instruct_t offset, PCB* pcb) {
+	if(registers[B_reg] < 0)
+		pcb->set_program_counter(Address);
 }
 
 // End of Immediate instructions
@@ -282,26 +312,24 @@ inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb
 		case OP_I_SLTI:
 			cpu_slti(B_reg, D_reg, Address, offset);
 			break;
-		case OP_I_JMP:
-			cpu_jmp(B_reg, D_reg, Address, offset, pcb->programCounter);
-			break;
+		
 		case OP_I_BEQ:
-			cpu_beq(B_reg, D_reg, Address, offset);
+			cpu_beq(B_reg, D_reg, Address, offset, pcb);
 			break;
 		case OP_I_BNE:
-			cpu_bne(B_reg, D_reg, Address, offset);
+			cpu_bne(B_reg, D_reg, Address, offset, pcb);
 			break;
 		case OP_I_BEZ:
-			cpu_bez(B_reg, D_reg, Address, offset);
+			cpu_bez(B_reg, D_reg, Address, offset, pcb);
 			break;
 		case OP_I_BNZ:
-			cpu_bnz(B_reg, D_reg, Address, offset);
+			cpu_bnz(B_reg, D_reg, Address, offset, pcb);
 			break;
 		case OP_I_BGZ:
-			cpu_bgz(B_reg, D_reg, Address, offset);
+			cpu_bgz(B_reg, D_reg, Address, offset, pcb);
 			break;
 		case OP_I_BLZ:
-			cpu_blz(B_reg, D_reg, Address, offset);
+			cpu_blz(B_reg, D_reg, Address, offset, pcb);
 			break;
 		default:
 			throw "Invalid Immediate instruction format";
@@ -309,12 +337,19 @@ inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb
 }
 
 inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode, PCB* pcb) {
-	instruct_t B_reg, D_reg, Address, offset;
-	B_reg   = (inst & 0x00F00000) >> (5*4);
-	D_reg   = (inst & 0x000F0000) >> (4*4);
-	Address =  inst & 0x0000FFFF;
+	instruct_t Address, offset;
+	Address =  inst & 0x00FFFFFF;
 	offset  = pcb->get_ram_address();
 
+	switch(opcode)
+	{
+		case OP_J_JMP:
+			cpu_jmp(Address, offset, pcb);
+			break;
+			
+		case OP_J_HLT:
+			cpu_hlt(Address, offset, pcb);
+	}
 }
 
 

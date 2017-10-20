@@ -26,7 +26,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
-	return MEM[pcb->PC + pcb->get_ram_address()];
+	return MEM[pcb->programCounter + pcb->get_ram_address()];
 }
 
 std::string cpu::get_info() {
