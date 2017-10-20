@@ -4,6 +4,7 @@
 #include <vector>
 #include "pcb.hpp"
 #include "PriorityQueue.h"
+#include "FIFO.h"
 
 
 class LongTerm
@@ -29,8 +30,8 @@ private:
 	};
 	struct Used
 	{
-		int Start;//start address
-		int End;//End address
+		unsigned int Start;//start address
+		unsigned int End;//End address
 		Used(int st, int ed) {
 			Start = st;
 			End = ed;
@@ -38,8 +39,9 @@ private:
 	};
 	std::vector<EmptySpace> GetOpenSpaces();
 	bool CheckEmpty(EmptySpace es, std::vector<Used> used);
+	bool CheckResource(resourceType RT);
 	size_t ReadySize;
 	instruct_t MaxAddress;
 };
 extern std::vector<PCB> process_list;
-
+extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
