@@ -9,10 +9,6 @@ void PCB::get_registers(vector<instruct_t> dest){
 	}
 }
 
-std::size_t PCB::set_program_counter(std::size_t new_pc){
-	programCounter = new_pc;
-}
-
 void PCB::set_priority(int priorityIn){
 	priority = priorityIn;
 }
@@ -40,3 +36,11 @@ void PCB::set_wait_time(int newtime) {
 void PCB::set_cycle_time(int newtime){
 	cycle_time = newtime;
 }
+
+void PCB::set_program_counter(std::size_t new_pc){
+	programCounter = new_pc; 
+}
+
+void PCB::set_ram_addres(std::size_t address){
+	ramAddress = address;
+} 

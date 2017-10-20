@@ -16,7 +16,7 @@ enum status
 	TERMINATED
 };
 
-enum buffType
+enum section
 {
 	INSTRUCTION,
 	INPUT,
@@ -38,35 +38,27 @@ class PCB
 {
 
 public:
-	PCB(instruct_t id, std::size_t raddress, std::size_t daddress, std::size_t pc, instruct_t instruct, instruct_t inp, instruct_t out, instruct_t temp, int wait, int cycle, int p)
-	{
-		pid = id;
-		currentStatus = READY;
-		programCounter = pc;
-
-		diskAddress = daddress; // ???
-		ramAddress = raddress;	// virtual memory info to be added later
-
-		wait_time = wait;
-		cycle_time = cycle;
-
-		sectionSizes[INSTRUCTION] = instruct;
-		sectionSizes[INPUT] = inp;
-		sectionSizes[OUTPUT] = out;
-		sectionSizes[TEMP] = temp;
-
-		priority = p;
-	}
+	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) : 
+		pid(id), 
+		currentStatus(status::NEW), 
+		programCounter(0), 
+		diskAddress(daddress), 
+		ramAddress(0xDEADBEEF), 
+		sectionSizes[section::INSTRUCTION](instruct), 
+		sectionSizes[section::INPUT](inp), 
+		sectionSizes[section::OUTPUT](out),
+		sectionSizes[section::TEMP](temp),
+		priority(p){}
 
 	// GETTERS
 	int get_priority() { return priority; }
 	unsigned int get_pid() { return pid; }
-	instruct_t get_ram_address() { return ramAddress; }
-	instruct_t get_disk_address() { return diskAddress; }
-	instruct_t get_inp_address() { return ramAddress + sectionSizes[INSTRUCTION]; }
-	instruct_t get_out_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
-	instruct_t get_temp_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
-	instruct_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
+	std::size_t get_ram_address() { return ramAddress; }
+	std::size_t get_disk_address() { return diskAddress; }
+	std::size_t get_inp_address() { return ramAddress + sectionSizes[INSTRUCTION]; }
+	std::size_t get_out_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
+	std::size_t get_temp_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
+	std::size_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
 	void get_registers (std::vector<instruct_t> dest);
@@ -83,7 +75,8 @@ public:
 	void set_status(status code);
 	void set_wait_time(int newtime);
 	void set_cycle_time(int newtime);
-	std::size_t set_program_counter(std::size_t new_pc);
+	void set_ram_address(std::size_t address);
+	void set_program_counter(std::size_t new_pc);
 
 
 private:
