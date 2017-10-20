@@ -15,3 +15,4 @@ public:
 	int Size(){ return ready.size()};
 };
 
+FIFO readyQueue, waitingQueue, terminatedQueue, newQueue;
