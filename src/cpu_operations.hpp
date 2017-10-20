@@ -84,7 +84,7 @@ inline void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruc
 	registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM[Address + offset];
 }
 
-inline void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+inline void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	if(Address == 0)
 		registers[Reg2] = registers[Reg1];
 	else
@@ -188,7 +188,7 @@ inline void	cpu_hlt(instruct_t Address,
 }
 inline void	cpu_jmp(instruct_t Address,
 					instruct_t offset, PCB* pcb) {
-	pcb->set_program_counter(Address);	//PCB is a placeholder
+	pcb->set_program_counter(Address);	
 	
 }
 inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address,
@@ -336,7 +336,7 @@ inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb
 	}
 }
 
-inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode, PCB* pcb) {
+inline void cpu_unconditional_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
 	instruct_t Address, offset;
 	Address =  inst & 0x00FFFFFF;
 	offset  = pcb->get_ram_address();
@@ -354,8 +354,21 @@ inline void cpu_unconditional_operation(instruct_t instruct, instruct_t opcode, 
 
 
 
-inline void cpu_io_operation(instruct_t instruct, instruct_t opcode) {
-
+inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
+	instruct_t Reg1, Reg2, Address, offset;
+	Reg1 = (inst & 0x00F00000) >> (5*4);
+	Reg2 = (inst & 0x000F0000) >> (4*4);
+	Address = inst & 0x0000FFFF;
+	offset = pcb->get_ram_address();
+	
+	switch(opcode)
+	{
+		case OP_IO_RD:
+			cpu_rd(Reg1, Reg2, Address, offset);
+			
+		case OP_IO_WR:
+			cpu_wr(Reg1, Reg2, Address, offset);
+	}
 }
 
 
