@@ -15,7 +15,7 @@ LongTerm::~LongTerm()
 
 void LongTerm::DiskToRam()
 {
-	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vectory of addresses and size for memory holes
+	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
 	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
 	if (ReadySize < DEFAULT_RAM)//checks if ram still have space
 	{
@@ -50,15 +50,20 @@ void LongTerm::DiskToRam()
 				}
 				else if (spotNotfound > 0)//if process is not placed in memory hole than place it at the end of max end address in ready state.
 				{
+					spotNotfound = 0;
 					/*insert in ready queue here*/
 					ReadySize += (process_list[x].get_end_address() - process_list[x].get_ram_address());
 					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram 
 					{
 						Ram::allocate(MaxAddress, process_list[x].get_disk_address());
-						MaxAddress = process_list[x].get_end_address();
+						MaxAddress = MaxAddress +(process_list[x].get_end_address()- process_list[x].get_ram_address());//not sure about this
 						/*insert into ready queue here*/
-						PriorityQueue::readyQueue.addProcess(&process_list[x]);
 						process_list[x].set_status(READY);//update pcb
+						PriorityQueue::readyQueue.addProcess(&process_list[x]);
+						if (ReadySize == DEFAULT_RAM)
+						{
+							break;
+						}
 					}
 					else
 					{
@@ -73,11 +78,43 @@ void LongTerm::DiskToRam()
 void LongTerm::ReadyToWait()
 {
 	/*how to pop ready queue pointer if process goes to wait?*/
+	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
+	while (PriorityQueue::readyQueue.Size() > 0)
+	{
+		if (PriorityQueue::readyQueue.getProcess()->acquire_resource)//need a getter for resourse that returns if true or false if resource being held at the moment
+		{//if resource being held then pop this pcb from ready queue and push it into wait queue
+			PriorityQueue::waitingQueue.addProcess(PriorityQueue::readyQueue.getProcess());
+			PriorityQueue::readyQueue.removeProcess();
+		}
+		hold.push_back(PriorityQueue::readyQueue.getProcess());
+		PriorityQueue::readyQueue.removeProcess();
+	}
+	while (hold.empty()==false)//refill ready queue
+	{
+		PriorityQueue::readyQueue.addProcess(hold.back());
+		hold.pop_back();
+	}
 }
 
 void LongTerm::WaitToReady()
 {
 	/*how to pop wait queue pointer if process goes to ready?*/
+	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
+	while (PriorityQueue::waitingQueue.Size() > 0)
+	{
+		if (PriorityQueue::waitingQueue.getProcess()->acquire_resource)//need a getter for resourse that returns if true or false if resource being held at the moment
+		{//if resource not being held then pop this pcb from wait queue and push it into ready queue
+			PriorityQueue::readyQueue.addProcess(PriorityQueue::waitingQueue.getProcess());
+			PriorityQueue::waitingQueue.removeProcess();
+		}
+		hold.push_back(PriorityQueue::waitingQueue.getProcess());
+		PriorityQueue::waitingQueue.removeProcess();
+	}
+	while (hold.empty() == false)//refill wait queue
+	{
+		PriorityQueue::waitingQueue.addProcess(hold.back());
+		hold.pop_back();
+	}
 }
 
 std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
@@ -129,7 +166,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 	}
 	return ess;
 }
-//check if this range is empty within ready queue
+//check if this range is empty within Ram
 bool LongTerm::CheckEmpty(EmptySpace es, std::vector<Used> used)
 {
 	bool there = true;

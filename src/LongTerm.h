@@ -30,7 +30,7 @@ private:
 	struct Used
 	{
 		int Start;//start address
-		int End;//End size address
+		int End;//End address
 		Used(int st, int ed) {
 			Start = st;
 			End = ed;
