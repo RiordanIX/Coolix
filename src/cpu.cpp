@@ -1,5 +1,5 @@
+#include "cpu_defs.hpp"
 #include "cpu.hpp"
-#include "cpu_operations.hpp"
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	std::cout << inst << std::endl;
