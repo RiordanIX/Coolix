@@ -86,6 +86,7 @@ void LongTerm::ReadyToWait()
 			if (CheckResource( readyQueue.getProcess()->get_resource_status ) == false )//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource being held then pop this pcb from ready queue and push it into wait queue
 				waitingQueue.addProcess(readyQueue.getProcess());
+				readyQueue.getProcess()->set_status = WAITING;//update pcb
 				readyQueue.removeProcess();
 			}
 		}
@@ -111,6 +112,7 @@ void LongTerm::WaitToReady()
 			if (CheckResource(waitingQueue.getProcess()->get_resource_status) == true)//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource not being held then pop this pcb from wait queue and push it into ready queue
 				readyQueue.addProcess(waitingQueue.getProcess());
+				waitingQueue.getProcess()->set_status = READY;//update pcb
 				waitingQueue.removeProcess();
 			}
 		}
