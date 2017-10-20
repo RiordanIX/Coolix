@@ -2,15 +2,15 @@
 
 OSDriver::OSDriver()
 {
-    
+
 }
 
 OSDriver::~OSDriver()
 {
-    
+
 }
 
-void OSDriver::RunOS(std::string fileName, Disk& disk)
+void OSDriver::Run(std::string fileName, Disk& disk)
 {
 
     loader.readFromFile("DataFile", disk);
@@ -24,5 +24,5 @@ void OSDriver::RunOS(std::string fileName, Disk& disk)
             Dispatch.dispatch(CPU, readyQueue.getProcess(), wait);
         }
     }
-    
 }
+

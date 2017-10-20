@@ -16,14 +16,14 @@ class OSDriver
 public:
     OSDriver();
     ~OSDriver();
-    
+
     bool wait;
     int cpu_cycle = DEFAULT_CPU_CYCLE_TIME;
-    
-    loader Loader;  
+
+    loader Loader;
     Dispatcher Dispatch;
     cpu CPU;
-    
+
     void Run();  // Runs the OS
-    
-}
+
+};
