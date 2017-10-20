@@ -77,10 +77,10 @@ std::vector<instruct_t> Disk::read_instruction_chunk(std::size_t pos, std::size_
 	instruct_t temp;
 	for (; pos < size; ++pos) {
 		temp = 0;
-		temp |= (instruct_t)_disk[pos + 0] << (8*3);
-		temp |= (instruct_t)_disk[pos + 1] << (8*2);
-		temp |= (instruct_t)_disk[pos + 2] << (8*1);
-		temp |= (instruct_t)_disk[pos + 3] << (8*0);
+		temp |= ((instruct_t)_disk[pos + 0]) << (8*3);
+		temp |= ((instruct_t)_disk[pos + 1]) << (8*2);
+		temp |= ((instruct_t)_disk[pos + 2]) << (8*1);
+		temp |= ((instruct_t)_disk[pos + 3]) << (8*0);
 		to_send.push_back(temp);
 	}
 	return to_send;

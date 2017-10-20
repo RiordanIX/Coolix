@@ -29,3 +29,5 @@ public:
 
 };
 
+Disk DISK = Disk();
+

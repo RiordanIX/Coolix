@@ -24,6 +24,7 @@ public:
     Dispatcher Dispatch;
     cpu CPU;
 
-    void Run();  // Runs the OS
+    void run(std::string fileName);  // Runs the OS
 
 };
+

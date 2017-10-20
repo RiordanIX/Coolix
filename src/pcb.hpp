@@ -6,32 +6,32 @@
 #include <string>
 #include <vector>
 
-    enum status 
-	{
-        READY,
-        RUNNING,
-        BLOCKED,
-        NEW,
-        WAITING,
-        TERMINATED
-    };
+enum status
+{
+	READY,
+	RUNNING,
+	BLOCKED,
+	NEW,
+	WAITING,
+	TERMINATED
+};
 
-	enum buffType
-	{
-		INSTRUCTION,
-		INPUT,
-		OUTPUT,
-		TEMP
-	};
+enum buffType
+{
+	INSTRUCTION,
+	INPUT,
+	OUTPUT,
+	TEMP
+};
 
-	enum resourceType
-	{
-		NONE,
-		DISK,
-		STDOUT,
-		KEYBOARD,
-		SHMEM
-	};
+enum resourceType
+{
+	NONE,
+	DISK,
+	STDOUT,
+	KEYBOARD,
+	SHMEM
+};
 
 
 class PCB

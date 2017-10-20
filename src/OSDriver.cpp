@@ -10,10 +10,10 @@ OSDriver::~OSDriver()
 
 }
 
-void OSDriver::Run(std::string fileName, Disk& disk)
+void OSDriver::run(std::string fileName)
 {
 
-    loader.readFromFile("DataFile", disk);
+    loader.readFromFile(fileName);
     while(readyQueue.Q.size() > 0)
     {
         //  Call Long Term Scheduler
