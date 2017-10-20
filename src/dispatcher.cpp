@@ -4,7 +4,7 @@
 
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, bool wait)
 {
-    count_cpu_cycle+;
+    count_cpu_cycle++;
     if(wait)
     {
         switchOut(CPU, cProcess);   //  Moves current process to WaitingQueue

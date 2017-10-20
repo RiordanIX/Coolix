@@ -5,6 +5,7 @@
 //#include "FIFO.h"
 #include "loader.hpp"
 #include "cpu.hpp"
+#include "dispatcher.hpp"
 //#include short term scheduler
 //#include long term scheduler
 
