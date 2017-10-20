@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>  
-#include "PCB.h"
+#include "pcb.hpp"
+
 class PriorityQueue
 {
 public:
@@ -8,7 +9,7 @@ public:
 	{
 		bool operator()(const PCB * lhs, const PCB * rhs) const
 		{
-			return lhs->P > rhs->P;
+			return lhs->get_priority > rhs->get_priority;
 		}
 	};
 	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
@@ -16,7 +17,8 @@ public:
 	~PriorityQueue();
 	PCB* getProcess();
 	void addProcess(PCB* procc);
-	void removerProcess();
+	void removeProcess();
+	int Size();
     
     static PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 };

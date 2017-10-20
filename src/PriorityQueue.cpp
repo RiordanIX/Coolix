@@ -4,14 +4,13 @@
 PriorityQueue::PriorityQueue()//initialize priority queue
 {
 	Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
-    readyQueue = new PriorityQueue();
-    waitingQueue = new PriorityQueue();
-    terminatedQueue = new PriorityQueue();
-    newQueue = new PriorityQueue();
 }
-PriorityQueue::~PriorityQueue()//reinitializing priority queue to point to empty queue
+PriorityQueue::~PriorityQueue()
 {
-	Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
+	while (Q.empty == false)
+	{
+		Q.pop();
+	}
 }
 PCB* PriorityQueue::getProcess()
 {
@@ -21,8 +20,12 @@ void PriorityQueue::addProcess(PCB* procc)
 {
 	Q.push(procc);
 }
-void PriorityQueue::removerProcess()
+void PriorityQueue::removeProcess()
 {
 	Q.pop();
+}
+int PriorityQueue::Size()
+{
+	return Q.size;
 }
 
