@@ -53,5 +53,5 @@ void PCB::set_ram_address(size_t address){
 
 // GLOBAL VARIABLE
 // Define the PCB List after definition
-extern std::vector<PCB> process_list;
+std::vector<PCB> process_list;
 
