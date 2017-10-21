@@ -27,7 +27,7 @@ enum section
 enum resourceType
 {
 	NONE,
-	DISK,
+	DISK_IO,
 	STDOUT,
 	KEYBOARD,
 	SHMEM
@@ -38,17 +38,24 @@ class PCB
 {
 
 public:
-	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) : 
-		pid(id), 
-		currentStatus(status::NEW), 
-		programCounter(0), 
-		diskAddress(daddress), 
-		ramAddress(0xDEADBEEF), 
-		sectionSizes[section::INSTRUCTION](instruct), 
-		sectionSizes[section::INPUT](inp), 
-		sectionSizes[section::OUTPUT](out),
-		sectionSizes[section::TEMP](temp),
-		priority(p){}
+	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
+			pid(id),
+			currentStatus(status::NEW),
+			resource_held(resourceType::NONE),
+			priority(p),
+			wait_time(0),
+			cycle_time(0),
+			diskAddress(daddress),
+			ramAddress(0xDEADBEEF),
+			programCounter(0),
+			registers(16, 0),
+			sectionSizes(4,0)
+		{
+		sectionSizes[section::INSTRUCTION] = instruct;
+		sectionSizes[section::INPUT] = inp;
+		sectionSizes[section::OUTPUT] = out;
+		sectionSizes[section::TEMP] = temp;
+	}
 
 	// GETTERS
 	int get_priority() { return priority; }
@@ -61,7 +68,7 @@ public:
 	std::size_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
-	void get_registers (std::vector<instruct_t> dest);
+	void get_registers (std::vector<instruct_t>& dest);
 	resourceType get_resource_status() { return resource_held; }
 	status get_status() { return currentStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
@@ -82,7 +89,7 @@ public:
 private:
 	unsigned int pid;
 	status currentStatus;
-	resourceType resource_held = NONE;
+	resourceType resource_held;
 	int priority;
 	int wait_time;
 	int cycle_time;

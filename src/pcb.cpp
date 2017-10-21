@@ -1,7 +1,7 @@
 #include "pcb.hpp"
 
 
-void PCB::get_registers(vector<instruct_t> dest){
+void PCB::get_registers(vector<instruct_t>& dest){
 	int i = 0;
 	for (auto it = registers.begin(); it != registers.end(); it++) {
 		dest[i] = *it;
@@ -38,9 +38,9 @@ void PCB::set_cycle_time(int newtime){
 }
 
 void PCB::set_program_counter(std::size_t new_pc){
-	programCounter = new_pc; 
+	programCounter = new_pc;
 }
 
 void PCB::set_ram_addres(std::size_t address){
 	ramAddress = address;
-} 
+}
