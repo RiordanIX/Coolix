@@ -62,10 +62,10 @@ public:
 	unsigned int get_pid() { return pid; }
 	std::size_t get_ram_address() { return ramAddress; }
 	std::size_t get_disk_address() { return diskAddress; }
-	std::size_t get_inp_address() { return ramAddress + sectionSizes[INSTRUCTION]; }
-	std::size_t get_out_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
-	std::size_t get_temp_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
-	std::size_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
+	std::size_t get_inp_address() { return sectionSizes[INSTRUCTION]; }
+	std::size_t get_out_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
+	std::size_t get_temp_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
+	std::size_t get_end_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
 	std::vector<instruct_t> get_registers ();
