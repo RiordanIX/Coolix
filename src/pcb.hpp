@@ -44,7 +44,6 @@ public:
 			resource_held(resourceType::NONE),
 			priority(p),
 			wait_time(0),
-			cycle_time(0),
 			diskAddress(daddress),
 			ramAddress(0xDEADBEEF),
 			programCounter(0),
