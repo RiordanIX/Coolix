@@ -7,9 +7,9 @@ class PriorityQueue
 public:
 	struct LessThanByP
 	{
-		bool operator()(const PCB * lhs, const PCB * rhs) const
+		bool operator()(PCB *const lhs, PCB * const rhs) const
 		{
-			return lhs->get_priority > rhs->get_priority;
+			return lhs->get_priority() > rhs->get_priority();
 		}
 	};
 	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
@@ -19,8 +19,7 @@ public:
 	PCB* getProcess();
 	void addProcess(PCB* procc);
 	void removeProcess();
-	int Size();
+	int size();
 };
 
-PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 

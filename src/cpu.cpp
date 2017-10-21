@@ -1,6 +1,8 @@
 #include "cpu_defs.hpp"
 #include "cpu.hpp"
 
+extern Ram MEM;
+
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	std::cout << inst << std::endl;
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
@@ -35,5 +37,37 @@ std::string cpu::get_info() {
 		info += std::to_string(i) + '\n';
 	}
 	return info;
+}
+
+void cpu::set_registers(std::vector<instruct_t> source) {
+	int i = 0;
+	for (auto it = source.begin(); it != source.end(); it++){
+		registers[i] = *it;
+		i++;
+	}
+}
+
+
+void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
+}
+
+
+void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	if(Address == 0)
+		registers[Reg2] = registers[Reg1];
+	else
+		MEM.allocate(Address + offset, registers[Reg1]);
+}
+
+
+void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
+	if (B_reg == 0) {
+		registers[D_reg] = Address;
+	}
+	else {
+		// Address acts as an offset for the Base register
+		registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address + offset);
+	}
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#define DEFAULT_CPU_CYCLE_TIME  5;
+#define DEFAULT_CPU_CYCLE_TIME  5
 
 //#include "FIFO.h"
 #include "loader.hpp"
@@ -8,11 +8,12 @@
 #include "dispatcher.hpp"
 #include "pcb.hpp"
 #include "PriorityQueue.h"
+#include "LongTerm.h"
 //#include short term scheduler
 //#include long term scheduler
 
-extern PCB process_list;
-extern PriorityQueue readyQueue;
+//extern PCB process_list;
+//extern PriorityQueue readyQueue;
 
 class OSDriver
 {
@@ -20,17 +21,16 @@ public:
     OSDriver();
     ~OSDriver();
 
-    status currentState;
-    int cpu_cycle = DEFAULT_CPU_CYCLE_TIME;
-    int current_cycle = 0;
-    
-    loader Loader = loader();
-    Dispatcher Dispatch = Dispatcher();;
-    cpu CPU = cpu();
-    LongTerm ltSched = LongTerm();
+    int cpu_cycle;
+    int current_cycle;
+
+    loader ldr;
+    Dispatcher Dispatch;
+    cpu CPU;
+    LongTerm ltSched;
 
     void run(std::string fileName);  // Runs the OS
-    void run_cpu(); 
+    void run_cpu();
     void run_shortts();
     void run_longts();
 };

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "FIFO.h"
 
 //initialize queue
@@ -19,6 +18,9 @@ void FIFO::addProcess(PCB* procc) {
 }
 
 void FIFO::removeProcess() {
-	ready.pop_back();
+	ready.pop_front();
 }
-
+int FIFO::Size()
+{
+	return ready.size();
+}

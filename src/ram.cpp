@@ -4,6 +4,7 @@
 using std::string;
 using std::to_string;
 using std::vector;
+using std::deque;
 using std::size_t;
 
 Ram::Ram(long unsigned int size) : _size(size), _space(size, 0) { }
@@ -62,8 +63,11 @@ instruct_t Ram::get_instruction(size_t index) {
 void Ram::allocate_chunk(long unsigned int location, deque<instruct_t> instructions) {
 	size_t i = location;
 	while(instructions.size()) {
-		allocate(i, instructions.pop_front());
+		allocate(i, instructions.front());
 		i += 4;
+		instructions.pop_front();
 	}
 }
 
+// GLOBAL VARIABLES
+Ram MEM = Ram(DEFAULT_RAM);

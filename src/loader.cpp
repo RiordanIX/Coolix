@@ -14,7 +14,7 @@ process into memory.
 #include <cstdint>
 #include "loader.hpp"
 #include "instruct.hpp"
-#inclue "PriorityQueue.h"
+#include "PriorityQueue.h"
 
 using std::size_t;
 using std::string;
@@ -25,6 +25,8 @@ using std::stoul;
 using std::cout;
 using std::endl;
 
+extern Disk DISK;
+extern std::vector<PCB> process_list;
 
 void loader::readFromFile(string filename) {
     string x;
@@ -32,8 +34,8 @@ void loader::readFromFile(string filename) {
     file.open(filename.c_str());
 
 	//Properties of a loaded process
-    int pid = -1
-	size_t numInstructs, address priority, inpBuffer, outBuffer, tmpBuffer;
+    int pid = -1;
+	size_t numInstructs=0, address=0xDEADBEEF, priority=0, inpBuffer, outBuffer, tmpBuffer;
 
     if(!file) {
         cout << "Unable to read file." << endl;
@@ -51,22 +53,22 @@ void loader::readFromFile(string filename) {
 
 			//Read process id
             file >> x;
-            pid = stoi(x, NULL, 16);
+            pid = stoul(x, NULL, 16);
 
 			//Read number of instructions
 			file >> x;
-			numInstructs = stoi(x, NULL, 16);
+			numInstructs = stoul(x, NULL, 16);
 
 			//Read process' priority
 			file >> x;
-			priority = stoi(x, NULL, 16);
+			priority = stoul(x, NULL, 16);
 
 			cout << "Process " << pid << " created." << endl
 				 << "Priority: " << priority << endl
 				 << "Loading instructions..." << endl;
 
-			//"Load" the process' instructions to memory
-			for(int i = 0; i < instructs; i++) {
+			//"Load" the process' instructions to disk
+			for(unsigned int i = 0; i < numInstructs; i++) {
 				file >> x;
 				instruct_t instruction = stoul(x, NULL, 16);
 
@@ -97,7 +99,7 @@ void loader::readFromFile(string filename) {
 			tmpBuffer = stoi(x, NULL, 16);
 
 			//Load all of the given data to memory
-			for(int i = 0; i < inpBuffer + outBuffer + tmpBuffer; i++) {
+			for(unsigned int i = 0; i < inpBuffer + outBuffer + tmpBuffer; i++) {
 				file >> x;
 				instruct_t data = stoul(x, NULL, 16);
 
@@ -110,8 +112,8 @@ void loader::readFromFile(string filename) {
 			//process p(pid, instructs, priority, ...
 			if(pid != -1)
 			{
-				PCB p(pid, address, numInstructs, inpBuffer, outBuffer, tempBuffer, priority);
-				process_list.add(p);
+				PCB p(pid, address, numInstructs, inpBuffer, outBuffer, tmpBuffer, priority);
+				process_list.push_back(p);
 			}
 		}
 		// pid may not be initialized at this point

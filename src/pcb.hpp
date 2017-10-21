@@ -68,7 +68,7 @@ public:
 	std::size_t get_end_address() { return ramAddress + sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
 	int get_cycle_time() { return cycle_time; }
-	void get_registers (std::vector<instruct_t>& dest);
+	std::vector<instruct_t> get_registers ();
 	resourceType get_resource_status() { return resource_held; }
 	status get_status() { return currentStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
@@ -77,8 +77,8 @@ public:
 
 	// SETTERS
 	void set_priority(int priorityIn);
-	void stash_registers(std::vector<instruct_t> source);
-	void acquire_resource(status code);
+	void set_registers(std::vector<instruct_t> source);
+	//void acquire_resource(status code);
 	void set_status(status code);
 	void set_wait_time(int newtime);
 	void set_cycle_time(int newtime);
@@ -103,6 +103,4 @@ private:
 	std::vector<instruct_t> sectionSizes;
 };
 
-// Define the PCB List after definition
-std::vector<PCB> process_list;
 

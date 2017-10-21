@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "PriorityQueue.h"
 
 PriorityQueue::PriorityQueue()//initialize priority queue
@@ -7,7 +6,7 @@ PriorityQueue::PriorityQueue()//initialize priority queue
 }
 PriorityQueue::~PriorityQueue()
 {
-	while (Q.empty == false)
+	while (Q.empty() == false)
 	{
 		Q.pop();
 	}
@@ -24,8 +23,11 @@ void PriorityQueue::removeProcess()
 {
 	Q.pop();
 }
-int PriorityQueue::Size()
+int PriorityQueue::size()
 {
-	return Q.size;
+	return Q.size();
 }
+
+// GLOBAL VARIABLES
+PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 

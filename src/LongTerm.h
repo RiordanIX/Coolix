@@ -4,13 +4,13 @@
 #include <vector>
 #include "pcb.hpp"
 #include "PriorityQueue.h"
-#include "FIFO.h"
+//#include "FIFO.h"
 
 
 class LongTerm
 {
 public:
-	LongTerm();//contructor 
+	LongTerm();//contructor
 	~LongTerm();//distructor
 	//Move  processes from disk to ram
 	void DiskToRam();
@@ -43,6 +43,4 @@ private:
 	size_t ReadySize;
 	instruct_t MaxAddress;
 };
-extern std::vector<PCB> process_list;
-extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
-extern Disk DISK;
+

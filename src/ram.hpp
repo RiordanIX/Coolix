@@ -28,5 +28,4 @@ public:
 
 };
 
-Ram MEM = Ram(DEFAULT_RAM);
 

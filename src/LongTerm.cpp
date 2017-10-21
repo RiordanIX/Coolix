@@ -1,6 +1,10 @@
-#include "stdafx.h"
 #include "LongTerm.h"
 
+// GLOBAL VARIABLES!!!
+extern std::vector<PCB> process_list;
+extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
+extern Disk DISK;
+extern Ram MEM;
 
 LongTerm::LongTerm()
 {
@@ -19,18 +23,18 @@ void LongTerm::DiskToRam()
 	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
 	if (ReadySize < DEFAULT_RAM)//checks if ram still have space
 	{
-		for (int x = 0; x < process_list.size(); x++)
+		for (unsigned int x = 0; x < process_list.size(); x++)
 		{
-			//store process with a status of NEW 
-			if (process_list[x].get_resource_status() == status::NEW)
+			//store process with a status of NEW
+			if (process_list[x].get_status() == status::NEW)
 			{
 				spotNotfound++;
-				for (int i = 0; i < ess1.size(); i++)//loop through empty spaces to see if anything fits
+				for (unsigned int i = 0; i < ess1.size(); i++)//loop through empty spaces to see if anything fits
 				{
 					if ((ess1[i].Isize - ess1[i].Sadd) >= (process_list[x].get_end_address() - process_list[x].get_ram_address()))
 					{
 						ReadySize += (process_list[x].get_end_address() - process_list[x].get_ram_address());
-						if (ReadySize >= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram 
+						if (ReadySize >= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 						{
 							break;
 						}
@@ -39,7 +43,7 @@ void LongTerm::DiskToRam()
 						/*insert into ready queue here*/
 						readyQueue.addProcess(&process_list[x]);
 						process_list[x].set_status(READY);//update pcb
-						
+
 						spotNotfound--;
 						break;
 					}
@@ -54,7 +58,7 @@ void LongTerm::DiskToRam()
 					spotNotfound = 0;
 					/*insert in ready queue here*/
 					ReadySize += (process_list[x].get_end_address() - process_list[x].get_ram_address());
-					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram 
+					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 					{
 						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_end_address()));
 						process_list[x].set_ram_address(MaxAddress);
@@ -81,20 +85,20 @@ void LongTerm::ReadyToWait()
 {
 	/*how to pop ready queue pointer if process goes to wait?*/
 	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
-	while (readyQueue.Size() > 0)
+	while (readyQueue.size() > 0)
 	{
 		if (readyQueue.getProcess()->get_resource_status() != resourceType::NONE)
 		{
-			if (CheckResource( readyQueue.getProcess()->get_resource_status ) == false )//need a getter for resourse that returns if true or false if resource being held at the moment
+			if (CheckResource( readyQueue.getProcess()->get_resource_status() ) == false )//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource being held then pop this pcb from ready queue and push it into wait queue
 				waitingQueue.addProcess(readyQueue.getProcess());
-				readyQueue.getProcess()->set_status = status::WAITING;//update pcb
+				readyQueue.getProcess()->set_status(status::WAITING);//update pcb
 				readyQueue.removeProcess();
 			}
 		}
 			hold.push_back(readyQueue.getProcess());
 			readyQueue.removeProcess();
-		
+
 	}
 	while (hold.empty()==false)//refill ready queue
 	{
@@ -107,14 +111,14 @@ void LongTerm::WaitToReady()
 {
 	/*how to pop wait queue pointer if process goes to ready?*/
 	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
-	while (waitingQueue.Size() > 0)
+	while (waitingQueue.size() > 0)
 	{
 		if (waitingQueue.getProcess()->get_resource_status() != resourceType::NONE)
 		{
 			if (CheckResource(waitingQueue.getProcess()->get_resource_status()) == true)//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource not being held then pop this pcb from wait queue and push it into ready queue
 				readyQueue.addProcess(waitingQueue.getProcess());
-				waitingQueue.getProcess()->set_status = status::READY;//update pcb
+				waitingQueue.getProcess()->set_status(status::READY);//update pcb
 				waitingQueue.removeProcess();
 			}
 		}
@@ -132,18 +136,18 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 {
 	std::vector<EmptySpace> ess;
 	std::vector<Used> used;
-	int prestart = 0;
-	int preend = 0;
+	// unsigned int prestart = 0;
+	unsigned int preend = 0;
 	ReadySize = 0;
 	MaxAddress = 0;
-	if(readyQueue.Size() > 0)//check if ready queue has any processes loaded
-	{ 
-		//since we cannot iterate through a priority_queue, therefore, we go through a process list to 
+	if(readyQueue.size() > 0)//check if ready queue has any processes loaded
+	{
+		//since we cannot iterate through a priority_queue, therefore, we go through a process list to
 		//determine which process is in ready queue
-		for (int x = 0; x < process_list.size(); x++)
+		for (unsigned int x = 0; x < process_list.size(); x++)
 		{
-			//process in ready queue have a status of READY 
-			if (process_list[x].get_resource_status() == status::READY)
+			//process in ready queue have a status of READY
+			if (process_list[x].get_status() == status::READY)
 			{
 				if (MaxAddress < process_list[x].get_end_address())
 				{
@@ -155,7 +159,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 		}
 		if (used.size() > 0)
 		{
-			for (int x = 0; x < used.size(); x++)
+			for (unsigned int x = 0; x < used.size(); x++)
 			{
 				//compare next process in ready status to see if there is a memory hole
 				if (preend != 0)
@@ -170,7 +174,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 						}
 					}
 				}
-				prestart = used[x].Start;
+				//prestart = used[x].Start;
 				preend = used[x].End;
 			}
 		}
@@ -181,7 +185,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 bool LongTerm::CheckEmpty(EmptySpace es, std::vector<Used> used)
 {
 	bool there = true;
-	for (int x = 0; x < used.size(); x++)
+	for (unsigned int x = 0; x < used.size(); x++)
 	{
 		if (es.Sadd >= used[x].Start && used[x].End >= es.Isize)
 		{
@@ -202,12 +206,12 @@ bool LongTerm::CheckEmpty(EmptySpace es, std::vector<Used> used)
 bool LongTerm::CheckResource(resourceType RT)
 {
 	bool there = true;
-	for (int x = 0; x < process_list.size(); x++)
+	for (unsigned int x = 0; x < process_list.size(); x++)
 	{
-		//process in ready queue have a status of READY 
-		if (process_list[x].get_resource_status() == status::RUNNING)
+		//process in ready queue have a status of READY
+		if (process_list[x].get_status() == status::RUNNING)
 		{
-			if (process_list[x].get_resource_status == RT)
+			if (process_list[x].get_resource_status() == RT)
 			{
 				there = false; break;
 			}

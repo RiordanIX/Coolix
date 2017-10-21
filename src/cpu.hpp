@@ -7,8 +7,6 @@
 #include "ram.hpp"
 #include "cpu_defs.hpp"
 
-using std::vector;
-using std::size_t;
 // Default Register size is 16.  May change if requirements change.
 #define DEFAULT_REG_SIZE 16
 
@@ -21,11 +19,12 @@ using std::size_t;
 class cpu {
 public:
 	// Public because the dispatcher needs to access it.
-	size_t num_registers;
-	vector<instruct_t> registers;
+	std::size_t num_registers;
+	std::vector<instruct_t> registers;
 
-	cpu(size_t size=DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
+	cpu(std::size_t size=DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
 	instruct_t fetch(PCB* pcb);
+	void set_registers(std::vector<instruct_t> to_switch);
 	void decode_and_execute(instruct_t inst, PCB* pcb);
 	std::string get_info();
 
@@ -39,16 +38,10 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 //  I/O instructions {{{
 ///////////////////////////////////////////////////////////////////////////////
-inline void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
-}
+void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 
-inline void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	if(Address == 0)
-		registers[Reg2] = registers[Reg1];
-	else
-		MEM.allocate(Address + offset, registers[Reg1]);
-}
+
+void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 // }}}
 
 
@@ -98,15 +91,7 @@ inline void cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest ) {
 // Immediate instructions {{{
 // When the last 16 bits contain data, the D-reg is always 0000
 ///////////////////////////////////////////////////////////////////////////////
-inline void	cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
-	if (B_reg == 0) {
-		registers[D_reg] = Address;
-	}
-	else {
-		// Address acts as an offset for the Base register
-		registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address + offset);
-	}
-}
+void cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset);
 
 inline void	cpu_lw(instruct_t B_reg, instruct_t D_reg) {
 	registers[D_reg] = registers[B_reg];

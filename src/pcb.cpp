@@ -1,19 +1,19 @@
 #include "pcb.hpp"
 
+using std::vector;
+using std::size_t;
 
-void PCB::get_registers(vector<instruct_t>& dest){
-	int i = 0;
-	for (auto it = registers.begin(); it != registers.end(); it++) {
-		dest[i] = *it;
-		i++;
-	}
+
+vector<instruct_t> PCB::get_registers(){
+	auto to_return = registers;
+	return to_return;
 }
 
 void PCB::set_priority(int priorityIn){
 	priority = priorityIn;
 }
 
-void PCB::stash_registers(vector<instruct_t> source){
+void PCB::set_registers(vector<instruct_t> source){
 	int i = 0;
 	for (auto it = source.begin(); it != source.end(); it++){
 		registers[i] = *it;
@@ -21,9 +21,9 @@ void PCB::stash_registers(vector<instruct_t> source){
 	}
 }
 
-void PCB::acquire_resource(status code) {
-	resource_held = code;
-}
+//void PCB::acquire_resource(status code) {
+//	resource_held = code;
+//}
 
 void PCB::set_status(status code) {
 	currentStatus = code;
@@ -37,10 +37,15 @@ void PCB::set_cycle_time(int newtime){
 	cycle_time = newtime;
 }
 
-void PCB::set_program_counter(std::size_t new_pc){
+void PCB::set_program_counter(size_t new_pc){
 	programCounter = new_pc;
 }
 
-void PCB::set_ram_addres(std::size_t address){
+void PCB::set_ram_address(size_t address){
 	ramAddress = address;
 }
+
+// GLOBAL VARIABLE
+// Define the PCB List after definition
+std::vector<PCB> process_list;
+

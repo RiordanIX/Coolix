@@ -93,3 +93,5 @@ deque<instruct_t> Disk::read_instruction_chunk(size_t pos, size_t size) {
 	return to_send;
 }
 
+Disk DISK;
+

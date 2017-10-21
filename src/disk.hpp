@@ -26,9 +26,9 @@ public:
 	std::deque<instruct_t> read_instruction_chunk(std::size_t pos, std::size_t size);
 
 	bool is_full() { return _used == _size;}
+	std::size_t get_used() { return _used;}
 	std::string get_info();
 
 };
 
-Disk DISK = Disk();
 

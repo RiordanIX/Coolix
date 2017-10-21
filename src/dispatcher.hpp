@@ -3,6 +3,7 @@
 #include "instruct.hpp"
 #include "pcb.hpp"
 #include "PriorityQueue.h"
+#include "cpu.hpp"
 
 //  THINGS THAT I DID NOT IMPLEMENT YET
 //  - Counting CPU Cycle
@@ -17,7 +18,7 @@ public:
 
 private:
     void switchOut(cpu* CPU, PCB* cProcess);    //  Copies CPU Register Values to PCB Register Values. Record Keeping Variables. Move Process to Waiting Queue
-    void switchIn(cpu* CPU, PCB* nProcess);     //  Copies PCB Register Values to CPU Register Values. Record Keeping Variables. Move Process into CPU.
+    void switchIn(cpu* CPU);     //  Copies PCB Register Values to CPU Register Values. Record Keeping Variables. Move Process into CPU.
 
 };
 
