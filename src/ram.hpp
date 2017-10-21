@@ -17,7 +17,7 @@ private:
 
 public:
 	Ram(long unsigned int size=DEFAULT_RAM);
-	long unsigned int get_ram_size() { return _size;}
+	long unsigned int size() { return _size;}
 	void allocate(long unsigned int location, instruct_t data);
 	void allocate(long unsigned int location, byte_t data);
 	// location must be BYTE addressable

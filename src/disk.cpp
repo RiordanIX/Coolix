@@ -2,6 +2,10 @@
 #include "disk.hpp"
 #include "instruct.hpp"
 
+#ifdef DEBUG
+#include <cstdio>
+#endif
+
 using std::size_t;
 using std::deque;
 using std::string;
@@ -36,6 +40,9 @@ void Disk::allocate(instruct_t data) {
 
 	local = byte_t((data & 0x000000FF) >> (8*0));
 	allocate(local);
+#ifdef DEBUG
+	printf("Allocated: %#08X\n",this->read_instruction(this->_used - 4));
+#endif //DEBUG
 }
 
 
