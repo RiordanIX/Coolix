@@ -17,6 +17,7 @@ OSDriver::~OSDriver()
 void OSDriver::run(std::string fileName)
 {
     ldr.readFromFile(fileName);  //  Load to Disk
+    run_longts();
     while(readyQueue.size() > 0)
     {
         run_longts();
