@@ -1,6 +1,11 @@
 #include <string>
 #include "ram.hpp"
 
+using std::string;
+using std::to_string;
+using std::vector;
+using std::size_t;
+
 Ram::Ram(long unsigned int size) : _size(size), _space(size, 0) { }
 
 
@@ -29,15 +34,15 @@ void Ram::allocate(long unsigned int location, byte_t data) {
 		_space.at(location) = data;
 	}
 	else {
-		throw "Illegal allocation at: " + std::to_string(location) + ".";
+		throw "Illegal allocation at: " + to_string(location) + ".";
 	}
 }
 
 /** Returns info about ram state
  *
  */
-std::string Ram::get_info() {
-	return "Ram size: " + std::to_string(_size);
+string Ram::get_info() {
+	return "Ram size: " + to_string(_size);
 }
 
 
@@ -52,5 +57,13 @@ instruct_t Ram::get_instruction(size_t index) {
 	instruct |= (instruct_t)_space[index] << (8 * 0);
 
 	return instruct;
+}
+
+void Ram::allocate_chunk(long unsigned int location, deque<instruct_t> instructions) {
+	size_t i = location;
+	while(instructions.size()) {
+		allocate(i, instructions.pop_front());
+		i += 4;
+	}
 }
 

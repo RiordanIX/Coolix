@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <deque>
 #include <string>
 #include "instruct.hpp"
 
@@ -20,9 +21,9 @@ public:
 	instruct_t read_instruction(std::size_t pos);
 	byte_t     read_byte(std::size_t pos);
 	// pos must be byte indexible and size is the number of bytes
-	std::vector<byte_t> read_byte_chunk(std::size_t pos, std::size_t size);
+	std::deque<byte_t> read_byte_chunk(std::size_t pos, std::size_t size);
 	// pos must be byte indexible and size is the number of INSTRUCTIONS
-	std::vector<instruct_t> read_instruction_chunk(std::size_t pos, std::size_t size);
+	std::deque<instruct_t> read_instruction_chunk(std::size_t pos, std::size_t size);
 
 	bool is_full() { return _used == _size;}
 	std::string get_info();

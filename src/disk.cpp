@@ -2,6 +2,11 @@
 #include "disk.hpp"
 #include "instruct.hpp"
 
+using std::size_t;
+using std::deque;
+using std::string;
+using std::to_string;
+
 void Disk::allocate(byte_t data) {
 	if (is_full()) {
 		throw "Illegal allocation. Disk is full";
@@ -39,10 +44,10 @@ void Disk::allocate(instruct_t data) {
  * Because everything is byte-indexed in the disk, we need to convert
  * everything to an instruction
  */
-instruct_t Disk::read_instruction(std::size_t pos) {
-	if (pos % 4 != 0) {
+instruct_t Disk::read_instruction(size_t pos) {
+	if (pos % 4) {
 		throw "Improper index of an instruction in disk at " +
-				std::to_string(pos);
+				to_string(pos);
 	}
 	//0000 0000 0000 0000 0000 0000 1010 1010  << (8*3) =
 	//1010 1010 0000 0000 0000 0000 0000 0000
@@ -57,15 +62,15 @@ instruct_t Disk::read_instruction(std::size_t pos) {
 }
 
 
-std::string Disk::get_info() {
-	return "Disk size: " + std::to_string(_size) + "\nDisk used: " +
-			std::to_string(_used);
+string Disk::get_info() {
+	return "Disk size: " + to_string(_size) + "\nDisk used: " +
+			to_string(_used);
 }
 
 
-std::vector<byte_t> Disk::read_byte_chunk(std::size_t pos, std::size_t size) {
-	std::vector<byte_t> to_send;
-	std::size_t pos_copy = pos;
+deque<byte_t> Disk::read_byte_chunk(size_t pos, size_t size) {
+	deque<byte_t> to_send;
+	size_t pos_copy = pos;
 	for (; pos < pos_copy + size; ++pos) {
 		to_send.push_back(_disk[pos]);
 	}
@@ -73,10 +78,10 @@ std::vector<byte_t> Disk::read_byte_chunk(std::size_t pos, std::size_t size) {
 }
 
 
-std::vector<instruct_t> Disk::read_instruction_chunk(std::size_t pos, std::size_t size) {
-	std::vector<instruct_t> to_send;
+deque<instruct_t> Disk::read_instruction_chunk(size_t pos, size_t size) {
+	deque<instruct_t> to_send;
 	instruct_t temp;
-	std::size_t pos_copy = pos;
+	size_t pos_copy = pos;
 	for (; pos < pos_copy + size; pos += 4) {
 		temp = 0;
 		temp |= ((instruct_t)_disk[pos + 0]) << (8*3);
