@@ -22,7 +22,7 @@ void LongTerm::DiskToRam()
 		for (int x = 0; x < process_list.size(); x++)
 		{
 			//store process with a status of NEW 
-			if (process_list[x].get_resource_status() == NEW)
+			if (process_list[x].get_resource_status() == status::NEW)
 			{
 				spotNotfound++;
 				for (int i = 0; i < ess1.size(); i++)//loop through empty spaces to see if anything fits
@@ -34,7 +34,8 @@ void LongTerm::DiskToRam()
 						{
 							break;
 						}
-						MEM.allocate(ess1[i].Sadd, process_list[x].get_disk_address());
+						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_end_address()));
+						process_list[x].set_ram_address(ess1[i].Sadd);
 						/*insert into ready queue here*/
 						readyQueue.addProcess(&process_list[x]);
 						process_list[x].set_status(READY);//update pcb
@@ -55,7 +56,8 @@ void LongTerm::DiskToRam()
 					ReadySize += (process_list[x].get_end_address() - process_list[x].get_ram_address());
 					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram 
 					{
-						MEM.allocate(MaxAddress, process_list[x].get_disk_address());
+						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_end_address()));
+						process_list[x].set_ram_address(MaxAddress);
 						MaxAddress = MaxAddress +(process_list[x].get_end_address()- process_list[x].get_ram_address());//not sure about this
 						/*insert into ready queue here*/
 						process_list[x].set_status(READY);//update pcb
@@ -81,12 +83,12 @@ void LongTerm::ReadyToWait()
 	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
 	while (readyQueue.Size() > 0)
 	{
-		if (readyQueue.getProcess()->get_resource_status != resourceType::NONE)
+		if (readyQueue.getProcess()->get_resource_status() != resourceType::NONE)
 		{
 			if (CheckResource( readyQueue.getProcess()->get_resource_status ) == false )//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource being held then pop this pcb from ready queue and push it into wait queue
 				waitingQueue.addProcess(readyQueue.getProcess());
-				readyQueue.getProcess()->set_status = WAITING;//update pcb
+				readyQueue.getProcess()->set_status = status::WAITING;//update pcb
 				readyQueue.removeProcess();
 			}
 		}
@@ -107,12 +109,12 @@ void LongTerm::WaitToReady()
 	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
 	while (waitingQueue.Size() > 0)
 	{
-		if (waitingQueue.getProcess()->get_resource_status != resourceType::NONE)
+		if (waitingQueue.getProcess()->get_resource_status() != resourceType::NONE)
 		{
-			if (CheckResource(waitingQueue.getProcess()->get_resource_status) == true)//need a getter for resourse that returns if true or false if resource being held at the moment
+			if (CheckResource(waitingQueue.getProcess()->get_resource_status()) == true)//need a getter for resourse that returns if true or false if resource being held at the moment
 			{//if resource not being held then pop this pcb from wait queue and push it into ready queue
 				readyQueue.addProcess(waitingQueue.getProcess());
-				waitingQueue.getProcess()->set_status = READY;//update pcb
+				waitingQueue.getProcess()->set_status = status::READY;//update pcb
 				waitingQueue.removeProcess();
 			}
 		}
@@ -141,7 +143,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 		for (int x = 0; x < process_list.size(); x++)
 		{
 			//process in ready queue have a status of READY 
-			if (process_list[x].get_resource_status() == READY)
+			if (process_list[x].get_resource_status() == status::READY)
 			{
 				if (MaxAddress < process_list[x].get_end_address())
 				{
@@ -203,7 +205,7 @@ bool LongTerm::CheckResource(resourceType RT)
 	for (int x = 0; x < process_list.size(); x++)
 	{
 		//process in ready queue have a status of READY 
-		if (process_list[x].get_resource_status() == RUNNING)
+		if (process_list[x].get_resource_status() == status::RUNNING)
 		{
 			if (process_list[x].get_resource_status == RT)
 			{

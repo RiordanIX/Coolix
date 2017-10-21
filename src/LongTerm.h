@@ -21,18 +21,18 @@ public:
 private:
 	struct EmptySpace
 	{
-		int Sadd;//start address
-		int Isize;//instruction size
-		EmptySpace(int sadd, int isize){
+		size_t Sadd;//start address
+		size_t Isize;//instruction size
+		EmptySpace(size_t sadd, size_t isize){
 			Sadd = sadd;
 			Isize = isize;
 		}
 	};
 	struct Used
 	{
-		unsigned int Start;//start address
-		unsigned int End;//End address
-		Used(int st, int ed) {
+		size_t Start;//start address
+		size_t End;//End address
+		Used(size_t st, size_t ed) {
 			Start = st;
 			End = ed;
 		}
@@ -45,3 +45,4 @@ private:
 };
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
+extern Disk DISK;
