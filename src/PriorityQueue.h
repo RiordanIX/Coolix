@@ -20,6 +20,7 @@ public:
 	void addProcess(PCB* procc);
 	void removeProcess();
 	int size();
+	bool empty() { return Q.empty(); };
 };
 
 

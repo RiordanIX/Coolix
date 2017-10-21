@@ -31,6 +31,8 @@ void OSDriver::run_cpu()
 {
 	instruct_t instruct = CPU.fetch(readyQueue.getProcess());
     CPU.decode_and_execute(instruct, readyQueue.getProcess());
+	// Increment Program counter
+	readyQueue.getProcess().increment_PC();
     current_cycle++;
 }
 
@@ -44,6 +46,7 @@ void OSDriver::run_longts()
 
 void OSDriver::run_shortts()
 {
+	// Only
     Dispatch.dispatch(&CPU, readyQueue.getProcess(), current_cycle, cpu_cycle);
     if(current_cycle >= cpu_cycle)
         current_cycle = 0;
