@@ -67,7 +67,11 @@ public:
 	std::size_t get_temp_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
 	std::size_t get_end_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
 	int get_wait_time() { return wait_time; }
-	int get_cycle_time() { return cycle_time; }
+	int get_start_time() { return start_time; }
+	int get_end_time() { return end_time; }
+	int get_run_time() { return (start_time - end_time); }
+
+    
 	std::vector<instruct_t> get_registers ();
 	resourceType get_resource_status() { return resource_held; }
 	status get_status() { return currentStatus;}
@@ -81,7 +85,9 @@ public:
 	//void acquire_resource(status code);
 	void set_status(status code);
 	void set_wait_time(int newtime);
-	void set_cycle_time(int newtime);
+	void set_start_time(int startIn);
+	void set_end_time(int endIn);
+
 	void set_ram_address(std::size_t address);
 	void set_program_counter(std::size_t new_pc);
 	void increment_PC() { programCounter += 4; }
@@ -93,7 +99,10 @@ private:
 	resourceType resource_held;
 	int priority;
 	int wait_time;
-	int cycle_time;
+	int start_time;
+	int end_time;
+	int run_time;
+
 
 	std::size_t diskAddress, ramAddress;
 

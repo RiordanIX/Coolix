@@ -33,8 +33,14 @@ void PCB::set_wait_time(int newtime) {
 	wait_time = newtime;
 }
 
-void PCB::set_cycle_time(int newtime){
-	cycle_time = newtime;
+void PCB::set_end_time(int endIn)
+{
+	end_time = endIn;
+}
+
+void PCB::set_start_time(int startIn)
+{
+	start_time = startIn;
 }
 
 void PCB::set_program_counter(size_t new_pc){
