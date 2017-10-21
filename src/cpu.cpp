@@ -25,6 +25,9 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		std::cout << get_info() << std::endl;
 		throw "Error while decoding instruction";
 	}
+#ifdef DEBUG
+	std::cout << get_info();
+#endif
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
