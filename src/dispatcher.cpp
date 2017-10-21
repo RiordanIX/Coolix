@@ -3,7 +3,8 @@
 
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
 	// If the readyQueue is not empty
-	if(!readyQueue.empty() && (cProcess->get_status() == status::WAITING) || (cCycle >= maxCycle))
+	if(!readyQueue.empty()
+		&& ((cProcess->get_status() == status::WAITING) || (cCycle >= maxCycle)))
 	{
 		switchOut(CPU, cProcess);   //  Moves current process to WaitingQueue
 		switchIn(CPU);			  //  Removes First Process and gives next process to CPU

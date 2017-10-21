@@ -84,7 +84,7 @@ public:
 	void set_cycle_time(int newtime);
 	void set_ram_address(std::size_t address);
 	void set_program_counter(std::size_t new_pc);
-	void increment_PC() { programCounter += 1; }
+	void increment_PC() { programCounter += 4; }
 
 
 private:
