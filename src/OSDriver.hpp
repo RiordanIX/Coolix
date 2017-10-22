@@ -15,12 +15,11 @@
 //extern PCB process_list;
 //extern PriorityQueue readyQueue;
 
-class OSDriver
-{
+class OSDriver {
 public:
     OSDriver();
     ~OSDriver();
-    
+
     int cpu_cycle;
     int current_cycle;
 
@@ -35,4 +34,3 @@ public:
     void run_longts();
 };
 
-int total_cycles = 0;

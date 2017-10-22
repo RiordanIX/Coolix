@@ -1,7 +1,6 @@
 #include "OSDriver.hpp"
 #include "PriorityQueue.h"
 
-extern OSDriver total_cycles;
 extern PriorityQueue terminatedQueue;
 
 OSDriver::OSDriver() :
@@ -27,14 +26,13 @@ void OSDriver::run(std::string fileName)
         run_longts();
         run_cpu();
         run_shortts();
-        total_cycles++;
     }
-    
+
     int averageCycleRunTime;
     for(int i = 0; i < terminatedQueue.size(); i++)
     {
-        averageCycleRunTime += (total_cycles - terminatedQueue.getProcess()->get_cycle_start_time());
-        terminatedQueue->removeProcess();
+        averageCycleRunTime += (terminatedQueue.getProcess()->get_cycle_start_time());
+        terminatedQueue.removeProcess();
     }
 }
 

@@ -3,6 +3,7 @@
 #include "OSDriver.hpp"
 
 extern PriorityQueue terminatedQueue;
+//extern int total_cycles;
 
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
 	// If the readyQueue is not empty

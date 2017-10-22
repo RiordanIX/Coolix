@@ -4,17 +4,14 @@
 #include "pcb.hpp"
 #include "PriorityQueue.h"
 #include "cpu.hpp"
-#include "OSDriver.hpp"
 
 //  THINGS THAT I DID NOT IMPLEMENT YET
 //  - Counting CPU Cycle
 //  - Record Keeping
 
 extern PriorityQueue readyQueue;
-extern OSDriver total_cycles;
 
-class Dispatcher
-{
+class Dispatcher {
 public:
     void dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle);    //  Context Switches. Current process goes out AND new process goes in                                                              // CPU = Which CPU.   cProcess = Current Process.     nProcess = The Next Process
 
