@@ -12,13 +12,21 @@ void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
 
 
 void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
+    //  Assign's current CPU registers to PCB registers. Context Switches.
 	cProcess->set_registers(CPU->registers);
-	//PCB* exitingProcess = readyQueue.getProcess();  //  Creates a pointer to the Current Running Process, calling it "exitingProcess"
-	//waitingQueue.Q.push(exitingProcess);			//  Moves the exiting process into the Waiting Queue
+
 }
 
 
 void Dispatcher::switchIn(cpu* CPU) {
+    //	If process is terminated. Throw it into the Terminated Queue
+    if(readyQueue.getProcess()->get_status() == status::TERMINATED)
+    {
+        PCB* exitingProcess = readyQueue.getProcess();
+        exitingProcess->set_end_time((int))
+        terminatedQueue.addProcess(exitingProcess);
+    }
+    
 	// Removes the Current Running Process, so the next one will be the new active process
 	readyQueue.removeProcess();
 	// Sets the CPU registers to the new PCB registers
@@ -26,7 +34,4 @@ void Dispatcher::switchIn(cpu* CPU) {
 	{
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
 	}
-	//  Assigns the new First Process in the Ready Queue to the current Process
-	//  in the CPU
-	//CPU.CurrentProcess = readyQueue.getProcess();
 }
