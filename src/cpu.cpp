@@ -73,7 +73,11 @@ void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_
 	if(Address == 0)
 		registers[Reg2] = registers[Reg1];
 	else
+		#ifdef DEBUG
+		printf("Writing: %#010X (%d in decimal), write location: %#010X\n", registers[Reg1], registers[Reg1], Address + offset);
+		#else
 		MEM.allocate(Address + offset, registers[Reg1]);
+		#endif
 }
 
 
