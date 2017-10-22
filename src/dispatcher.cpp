@@ -32,7 +32,7 @@ void Dispatcher::switchIn(cpu* CPU) {
     }
 
 	// Removes the Current Running Process, so the next one will be the new active process
-	//readyQueue.removeProcess();
+	readyQueue.removeProcess();
 	// Sets the CPU registers to the new PCB registers
 	if (!readyQueue.empty())
 	{
