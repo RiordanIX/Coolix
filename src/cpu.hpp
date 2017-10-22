@@ -38,7 +38,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 //  I/O instructions {{{
 ///////////////////////////////////////////////////////////////////////////////
-void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+void cpu_rd(instruct_t Reg1/*, instruct_t Reg2*/, instruct_t Address/*, instruct_t offset*/);
 
 
 void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
@@ -299,7 +299,7 @@ inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
 	switch(opcode)
 	{
 		case OP_IO_RD:
-			cpu_rd(Reg1, Reg2, Address, offset);
+			cpu_rd(Reg1/*, Reg2*/, Address/*, offset*/);
 			break;
 
 		case OP_IO_WR:

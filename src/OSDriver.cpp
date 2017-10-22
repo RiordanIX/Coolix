@@ -39,19 +39,19 @@ void OSDriver::run(std::string fileName)
 
 void OSDriver::run_cpu()
 {
-    instruct_t instruct = CPU.fetch(readyQueue.getProcess());
     while(readyQueue.getProcess()->get_status() != status::TERMINATED)
     {
+		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
         CPU.decode_and_execute(instruct, readyQueue.getProcess());
-        
+
         // Increment Program counter
         readyQueue.getProcess()->increment_PC();
         current_cycle++;
     }
-    
+
 	terminatedQueue.addProcess(readyQueue.getProcess());
 	readyQueue.removeProcess();
-	
+
 }
 
 

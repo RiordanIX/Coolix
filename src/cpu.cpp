@@ -1,10 +1,17 @@
 #include "cpu_defs.hpp"
 #include "cpu.hpp"
 
+#ifdef DEBUG
+#include <cstdio>
+#endif
+
 extern Ram MEM;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
-	std::cout << inst << std::endl;
+#ifdef DEBUG
+	printf("This Instruction: %#08X\n",inst);
+#endif //DEBUG
+
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
 	instruct_t opcode = inst & OPCODE_MASK;
 	opcode = opcode >> (3*8); // 3 bytes to get to lowest position
@@ -51,8 +58,9 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 }
 
 
-void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
+void cpu::cpu_rd(instruct_t Reg1/*, instruct_t Reg2*/, instruct_t Address/*, instruct_t offset*/) {
+	//registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
+	registers[Reg1] = Address;
 }
 
 
