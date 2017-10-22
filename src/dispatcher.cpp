@@ -1,6 +1,8 @@
 #include "dispatcher.hpp"
 #include "PriorityQueue.h"
 
+extern PriorityQueue terminatedQueue;
+
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
 	// If the readyQueue is not empty
 	if (!readyQueue.empty() &&( (cProcess->get_status() == status::WAITING) || (cCycle >= maxCycle)))
@@ -23,10 +25,10 @@ void Dispatcher::switchIn(cpu* CPU) {
     if(readyQueue.getProcess()->get_status() == status::TERMINATED)
     {
         PCB* exitingProcess = readyQueue.getProcess();
-        exitingProcess->set_end_time((int))
+        //exitingProcess->set_end_time();
         terminatedQueue.addProcess(exitingProcess);
     }
-    
+
 	// Removes the Current Running Process, so the next one will be the new active process
 	readyQueue.removeProcess();
 	// Sets the CPU registers to the new PCB registers
@@ -35,3 +37,4 @@ void Dispatcher::switchIn(cpu* CPU) {
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
 	}
 }
+

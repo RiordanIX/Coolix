@@ -1,6 +1,6 @@
 #pragma once
 
-#define DEFAULT_CPU_CYCLE_TIME  5
+#define DEFAULT_CPU_CYCLE_TIME  50
 
 //#include "FIFO.h"
 #include "loader.hpp"
