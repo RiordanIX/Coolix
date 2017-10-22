@@ -69,7 +69,7 @@ public:
 	int get_start_time() { return start_time; }
 	int get_end_time() { return end_time; }
 	int get_run_time() { return (start_time - end_time); }
-
+	int get_cycle_start_time() { return cycle_start_time; }
     
 	std::vector<instruct_t> get_registers ();
 	resourceType get_resource_status() { return resource_held; }
@@ -86,7 +86,8 @@ public:
 	void set_wait_time(int newtime);
 	void set_start_time(int startIn);
 	void set_end_time(int endIn);
-
+	void set_cycle_start_time(int cycleIn);
+    
 	void set_ram_address(std::size_t address);
 	void set_program_counter(std::size_t new_pc);
 	void increment_PC() { programCounter += 4; }
@@ -101,6 +102,7 @@ private:
 	int start_time;
 	int end_time;
 	int run_time;
+	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
 
 
 	std::size_t diskAddress, ramAddress;

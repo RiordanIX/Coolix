@@ -43,6 +43,11 @@ void PCB::set_start_time(int startIn)
 	start_time = startIn;
 }
 
+void PCB::set_cycle_start_time(int cycleIn)
+{
+	cycle_start_time = cycleIn;
+}   
+ 
 void PCB::set_program_counter(size_t new_pc){
 	programCounter = new_pc;
 }

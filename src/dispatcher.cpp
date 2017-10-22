@@ -1,5 +1,6 @@
 #include "dispatcher.hpp"
 #include "PriorityQueue.h"
+#include "OSDriver.hpp"
 
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
 	// If the readyQueue is not empty

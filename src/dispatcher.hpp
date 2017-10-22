@@ -4,12 +4,14 @@
 #include "pcb.hpp"
 #include "PriorityQueue.h"
 #include "cpu.hpp"
+#include "OSDriver.hpp"
 
 //  THINGS THAT I DID NOT IMPLEMENT YET
 //  - Counting CPU Cycle
 //  - Record Keeping
 
 extern PriorityQueue readyQueue;
+extern OSDriver total_cycles;
 
 class Dispatcher
 {
