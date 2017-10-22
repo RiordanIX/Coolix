@@ -78,7 +78,8 @@ void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruc
 	}
 	else {
 		// Address acts as an offset for the Base register
-		registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address + offset);
+		instruct_t temp = MEM.get_instruction(offset + registers[D_reg]);
+		MEM.allocate(offset + registers[B_reg], temp);
 	}
 }
 

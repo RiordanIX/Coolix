@@ -140,6 +140,7 @@ inline void	cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address, PCB*
 
 inline void	cpu_bne(instruct_t B_reg, instruct_t D_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] != registers[D_reg])
+	//printf("%d%d",B_reg, D_reg);
 		pcb->set_program_counter(Address);
 }
 
