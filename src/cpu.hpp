@@ -38,7 +38,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 //  I/O instructions {{{
 ///////////////////////////////////////////////////////////////////////////////
-void cpu_rd(instruct_t Reg1/*, instruct_t Reg2*/, instruct_t Address/*, instruct_t offset*/);
+void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 
 
 void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
@@ -78,11 +78,9 @@ inline void cpu_or(instruct_t s1, instruct_t s2, instruct_t dest ) {
 	registers[dest] = registers[s1] || registers[s2];
 }
 
-// Sets the D-reg to 1 if first S-reg is less than the B-reg; 0 otherwise
-// Different than the other Arithmetic instructions, s1 is the register that
-// gets changed.
+// Set value to 1 if s1 < s2, 0 otherwise
 inline void cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest ) {
-	registers[s1] = registers[s2] < registers[dest] ? 1 : 0;
+	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
 // }}}
@@ -101,13 +99,13 @@ inline void	cpu_movi(instruct_t D_reg, instruct_t Address) {
 	registers[D_reg] = Address;
 }
 inline void	cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
-	if (registers[B_reg] == 0) {
+	if (B_reg == 0) {
 		registers[D_reg] += Address;
 	}
 }
 
 inline void	cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
-	if (registers[B_reg] == 0) {
+	if (B_reg == 0) {
 		registers[D_reg] *= Address;
 	}
 }
@@ -300,7 +298,7 @@ inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
 	switch(opcode)
 	{
 		case OP_IO_RD:
-			cpu_rd(Reg1/*, Reg2*/, Address/*, offset*/);
+			cpu_rd(Reg1, Reg2, Address, offset);
 			break;
 
 		case OP_IO_WR:

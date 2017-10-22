@@ -3,6 +3,10 @@
 
 extern PriorityQueue terminatedQueue;
 
+#ifdef DEBUG
+extern Ram MEM;
+#endif
+
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
 		current_cycle(0),
@@ -48,6 +52,15 @@ void OSDriver::run_cpu()
         readyQueue.getProcess()->increment_PC();
         current_cycle++;
     }
+#ifdef DEBUG
+	PCB* p = readyQueue.getProcess();
+	printf("Ram Address:\t%lu\n", p->get_ram_address());
+	for (unsigned int i = p->get_ram_address() + p->get_out_address();
+			i < p->get_ram_address() + p->get_end_address();
+			i+=4) {
+		printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
+	}
+#endif // DEBUG
 
 	terminatedQueue.addProcess(readyQueue.getProcess());
 	readyQueue.removeProcess();

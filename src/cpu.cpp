@@ -58,9 +58,14 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 }
 
 
-void cpu::cpu_rd(instruct_t Reg1/*, instruct_t Reg2*/, instruct_t Address/*, instruct_t offset*/) {
+void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	//registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
-	registers[Reg1] = Address;
+	if (Address == 0) {
+		registers[Reg1] = MEM.get_instruction(registers[Reg2]+offset);
+	}
+	else {
+		registers[Reg1] = MEM.get_instruction(Address + offset);
+		}
 }
 
 

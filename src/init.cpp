@@ -2,13 +2,13 @@
 #include "OSDriver.hpp"
 
 int main(int argc, char* argv[]) {
-#ifdef _Win32
+#ifdef _WIN32
 	std::cout << argc << '\n' << argv << std::endl;
 	OSDriver driver;
 	driver.run("test_job");
 }
-#endif
-#ifndef _Win32
+#endif // _WIN32
+#ifndef _WIN32
 #ifndef DEBUG
 	if (argc == 1) {
 		std::cout << "Usage:  coolix <run_file>" << std::endl;
@@ -23,5 +23,5 @@ int main(int argc, char* argv[]) {
 	driver.run("test_job");
 #endif // DEBUG
 }
-#endif // _Win32
+#endif // _WIN32
 
