@@ -9,7 +9,7 @@ extern Ram MEM;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 #ifdef DEBUG
-	printf("This Instruction: %#08X\n",inst);
+	printf("This Instruction: %#010X\n",inst);
 #endif //DEBUG
 
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
