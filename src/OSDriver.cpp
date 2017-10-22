@@ -28,7 +28,13 @@ void OSDriver::run(std::string fileName)
 	while(readyQueue.size() > 0)
 	{
 		run_longts();
-		run_cpu();
+		try {
+			run_cpu();
+		}
+		catch (const char* e) {
+			printf("%s\n",e);
+			readyQueue.removeProcess();
+		}
 		run_shortts();
 	}
 
