@@ -5,10 +5,16 @@
 extern PriorityQueue terminatedQueue;
 //extern int total_cycles;
 
-void Dispatcher::dispatch(cpu* CPU, PCB* cProcess, int cCycle, int maxCycle) {
+void Dispatcher::dispatch(cpu* CPU, PCB* cProcess) {
 	// If the readyQueue is not empty
-	if (!readyQueue.empty() &&( (cProcess->get_status() == status::WAITING) || (cCycle >= maxCycle)))
+#ifdef DEBUG
+	printf("I am trying to dispatch\n");
+#endif
+	if (!readyQueue.empty())
 	{
+#ifdef DEBUG
+		printf("I am dipatching !!!!!!!!!!!!!!!!!!!!!!!!!\n");
+#endif
 		switchOut(CPU, cProcess);   //  Moves current process to WaitingQueue
 		switchIn(CPU);			  //  Removes First Process and gives next process to CPU
 	}
@@ -32,11 +38,14 @@ void Dispatcher::switchIn(cpu* CPU) {
     }
 
 	// Removes the Current Running Process, so the next one will be the new active process
-	readyQueue.removeProcess();
+	//readyQueue.removeProcess();
 	// Sets the CPU registers to the new PCB registers
 	if (!readyQueue.empty())
 	{
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
+#ifdef DEBUG
+		printf("Correctly swapped processes!!!!\n");
+#endif // DEBUG
 	}
 }
 
