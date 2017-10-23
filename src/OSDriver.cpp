@@ -38,6 +38,17 @@ void OSDriver::run(std::string fileName)
 		run_shortts();
 	}
 
+#ifdef DEBUG
+	for (unsigned int i = 0; i < MEM.size(); i +=6*4) {
+		for (unsigned int j = i; j < i + 6*4 && j < MEM.size(); j+=4) {
+			std::cout << j << ":\t" << MEM.get_instruction(j) << "\t";
+		}
+		printf("\n");
+	}
+	// To flush the stream
+	std::cout << std::endl;
+#endif
+
 	int averageCycleRunTime;
 	for(int i = 0; i < terminatedQueue.size(); i++)
 	{
@@ -52,6 +63,19 @@ void OSDriver::run_cpu()
 	while(readyQueue.getProcess()->get_status() != status::TERMINATED)
 	{
 		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
+#ifdef DEBUG
+		if (instruct == 0) {
+			auto p = readyQueue.getProcess();
+			auto note = p->get_ram_address() + p->get_program_counter();
+			std::cout << "Instruction at "
+					<< note << " is 0\n"
+					<< "Process Ram address is "
+					<< p->get_ram_address()
+					<< "\nProgram Counter is "
+					<< p->get_program_counter()
+					<< '\n';
+		}
+#endif
 		CPU.decode_and_execute(instruct, readyQueue.getProcess());
 
 		// Increment Program counter
