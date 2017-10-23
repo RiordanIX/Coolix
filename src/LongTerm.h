@@ -45,5 +45,6 @@ private:
 	bool CheckResource(resourceType RT);
 	size_t ReadySize;
 	instruct_t MaxAddress;
+	std::vector<Used> used;
 };
 
