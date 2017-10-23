@@ -23,18 +23,25 @@ OSDriver::~OSDriver()
 
 void OSDriver::run(std::string fileName)
 {
-	ldr.readFromFile(fileName);  //  Load to Disk
+    //  Load to Disk
+	ldr.readFromFile(fileName);  
+    //  Does an initial load from Disk to RAM and ReadyQueue
 	run_longts();
+    //  Runs as long as the ReadyQueue is populated / as long as there are processes to be ran
 	while(readyQueue.size() > 0)
 	{
+        //  Load and Move Processes accordingly
 		run_longts();
 		try {
+            //  Runs the CPU
 			run_cpu();
 		}
 		catch (const char* e) {
+            //  Remove the process if it malfunctions
 			printf("%s\n",e);
 			readyQueue.removeProcess();
 		}
+        //  Context Switches for the next process  
 		run_shortts();
 	}
 
@@ -48,13 +55,16 @@ void OSDriver::run(std::string fileName)
 	// To flush the stream
 	std::cout << std::endl;
 #endif
-
+    
+    //  Calcualtes the AverageCycleRunTime
+    /*
 	int averageCycleRunTime = 0;
 	for(int i = 0; i < terminatedQueue.size(); i++)
 	{
 		averageCycleRunTime += (terminatedQueue.getProcess()->get_cycle_start_time());
 		terminatedQueue.removeProcess();
 	}
+    */
 }
 
 
@@ -62,6 +72,7 @@ void OSDriver::run_cpu()
 {
 	while(readyQueue.getProcess()->get_status() != status::TERMINATED)
 	{
+        //  Fetches instruction
 		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
 #ifdef DEBUG
 		if (instruct == 0) {
@@ -76,6 +87,7 @@ void OSDriver::run_cpu()
 					<< '\n';
 		}
 #endif
+        //  Decodes and Executes Instruction
 		CPU.decode_and_execute(instruct, readyQueue.getProcess());
 
 		// Increment Program counter
@@ -92,6 +104,7 @@ void OSDriver::run_cpu()
 	}
 #endif // DEBUG
 
+    //  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
 	terminatedQueue.addProcess(readyQueue.getProcess());
 	readyQueue.removeProcess();
 
@@ -107,7 +120,7 @@ void OSDriver::run_longts()
 
 void OSDriver::run_shortts()
 {
-	// Only
+    // Dispatches the current Processes. Context Switches In AND Out
 	if (!readyQueue.empty()) {
 		Dispatch.dispatch(&CPU, readyQueue.getProcess());
 		if(current_cycle >= cpu_cycle)
