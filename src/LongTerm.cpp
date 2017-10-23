@@ -39,9 +39,9 @@ void LongTerm::DiskToRam()
 						{
 							break;
 						}
-						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(process_list[x].get_disk_address(), (process_list[x].get_end_address())));
+						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_disk_address() + (process_list[x].get_end_address())));
 						
-						std::printf("Allocated to RAM Process id:%u", process_list[x].get_pid());
+						std::printf("Allocated to RAM Process id:%u Empty spot", process_list[x].get_pid());
 						process_list[x].set_ram_address(ess1[i].Sadd);
 						/*insert into ready queue here*/
 						readyQueue.addProcess(&process_list[x]);
@@ -65,9 +65,10 @@ void LongTerm::DiskToRam()
 					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 					{
 						process_list[x].set_ram_address(MaxAddress);
-						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_end_address()));
+						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_disk_address() + process_list[x].get_end_address()));
 						MaxAddress = MaxAddress + (process_list[x].get_end_address());//not sure about this
 						/*insert into ready queue here*/
+						std::printf("Allocated to RAM Process id:%u End of Ram", process_list[x].get_pid());
 						process_list[x].set_status(status::READY);//update pcb
 						readyQueue.addProcess(&process_list[x]);
 						if (ReadySize == DEFAULT_RAM)
