@@ -37,6 +37,9 @@ private:
 			End = ed;
 		}
 	};
+	struct SortUsedSpace {
+		bool operator() (Used i, Used j) { return ((i.Start+i.End)<(j.Start+i.End)); }
+	} SortUsed;
 	std::vector<EmptySpace> GetOpenSpaces();
 	bool CheckEmpty(EmptySpace es, std::vector<Used> used);
 	bool CheckResource(resourceType RT);

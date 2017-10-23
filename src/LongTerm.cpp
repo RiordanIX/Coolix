@@ -34,19 +34,19 @@ void LongTerm::DiskToRam()
 				{
 					if ((ess1[i].Isize - ess1[i].Sadd) >= (process_list[x].get_end_address()))
 					{
-						ReadySize += ((process_list[x].get_disk_address() + process_list[x].get_end_address()));
+						ReadySize += ((process_list[x].get_end_address()));
 						if (ReadySize >= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 						{
 							break;
 						}
-						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_disk_address() + (process_list[x].get_end_address())));
-						
-						std::printf("Allocated to RAM Process id:%u Empty spot", process_list[x].get_pid());
+						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_end_address()));
+						std::printf("Allocated to RAM Process id:%u", process_list[x].get_pid());
+						ess1[i].Sadd = ess1[i].Sadd + process_list[x].get_end_address();
 						process_list[x].set_ram_address(ess1[i].Sadd);
 						/*insert into ready queue here*/
 						readyQueue.addProcess(&process_list[x]);
 						process_list[x].set_status(READY);//update pcb
-
+						
 						spotNotfound--;
 						break;
 					}
@@ -61,24 +61,25 @@ void LongTerm::DiskToRam()
 					spotNotfound = 0;
 					/*insert in ready queue here*/
 					
-					ReadySize += (process_list[x].get_disk_address() + process_list[x].get_end_address());
+					ReadySize += (process_list[x].get_end_address());
 					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 					{
 						process_list[x].set_ram_address(MaxAddress);
-						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(), process_list[x].get_disk_address() + process_list[x].get_end_address()));
+						MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(process_list[x].get_disk_address(),process_list[x].get_end_address()));
 						MaxAddress = MaxAddress + (process_list[x].get_end_address());//not sure about this
 						/*insert into ready queue here*/
-						std::printf("Allocated to RAM Process id:%u End of Ram", process_list[x].get_pid());
+						std::printf("Allocated to RAM Process id:%u\n", process_list[x].get_pid());
 						process_list[x].set_status(status::READY);//update pcb
 						readyQueue.addProcess(&process_list[x]);
 						if (ReadySize == DEFAULT_RAM)
 						{
+							ReadySize = ReadySize - ((process_list[x].get_end_address()));
 							break;
 						}
 					}
 					else
 					{
-						ReadySize = ReadySize - (process_list[x].get_inp_address() * 4);
+						ReadySize = ReadySize - ((process_list[x].get_end_address()));
 					}
 
 				}
@@ -154,32 +155,27 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 			//process in ready queue have a status of READY
 			if (process_list[x].get_status() == status::READY)
 			{
-				if (MaxAddress < process_list[x].get_end_address())
-				{
-					MaxAddress = process_list[x].get_end_address();
-				}
-				used.push_back(Used(process_list[x].get_ram_address(), (process_list[x].get_end_address())));
+				used.push_back(Used(process_list[x].get_ram_address(), process_list[x].get_ram_address()+(process_list[x].get_end_address())));
 				ReadySize += (process_list[x].get_end_address());
+				MaxAddress = ReadySize;
 			}
 		}
 		if (used.size() > 0)
-		{
+		{ 
+			std::sort(used.begin(), used.end(), SortUsed);
+			preend = 0;
 			for (unsigned int x = 0; x < used.size(); x++)
 			{
 				//compare next process in ready status to see if there is a memory hole
-				if (preend != 0)
+				if (preend < (used[x].Start))
 				{
-					if (preend < (used[x].Start))
+					//check to see if this space is really empty
+					if (CheckEmpty(EmptySpace(preend, used[x].Start), used))
 					{
-						//check to see if this space is really empty
-						if (CheckEmpty(EmptySpace(preend, used[x].Start), used))
-						{
-							//if there is a memory hole than it stores its start and end address into a vector
-							ess.push_back(EmptySpace(preend, used[x].Start));
-						}
+						//if there is a memory hole than it stores its start and end address into a vector
+						ess.push_back(EmptySpace(preend, used[x].Start));
 					}
 				}
-				//prestart = used[x].Start;
 				preend = used[x].End;
 			}
 		}
