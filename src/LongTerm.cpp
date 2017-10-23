@@ -34,7 +34,7 @@ void LongTerm::DiskToRam()
 				{
 					if ((ess1[i].Isize - ess1[i].Sadd) >= (process_list[x].get_end_address()))
 					{
-						ReadySize += ((process_list[x].get_end_address()));
+						ReadySize += ((process_list[x].get_disk_address() + process_list[x].get_end_address()));
 						if (ReadySize >= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 						{
 							break;
@@ -61,7 +61,7 @@ void LongTerm::DiskToRam()
 					spotNotfound = 0;
 					/*insert in ready queue here*/
 					
-					ReadySize += (process_list[x].get_end_address());
+					ReadySize += (process_list[x].get_disk_address() + process_list[x].get_end_address());
 					if (ReadySize <= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
 					{
 						process_list[x].set_ram_address(MaxAddress);
