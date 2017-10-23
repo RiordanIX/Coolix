@@ -49,7 +49,7 @@ void OSDriver::run(std::string fileName)
 	std::cout << std::endl;
 #endif
 
-	int averageCycleRunTime;
+	int averageCycleRunTime = 0;
 	for(int i = 0; i < terminatedQueue.size(); i++)
 	{
 		averageCycleRunTime += (terminatedQueue.getProcess()->get_cycle_start_time());
@@ -108,8 +108,10 @@ void OSDriver::run_longts()
 void OSDriver::run_shortts()
 {
 	// Only
-	Dispatch.dispatch(&CPU, readyQueue.getProcess());
-	if(current_cycle >= cpu_cycle)
-		current_cycle = 0;
+	if (!readyQueue.empty()) {
+		Dispatch.dispatch(&CPU, readyQueue.getProcess());
+		if(current_cycle >= cpu_cycle)
+			current_cycle = 0;
+	}
 }
 

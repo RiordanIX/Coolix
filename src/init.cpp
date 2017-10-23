@@ -6,6 +6,7 @@ int main(int argc, char* argv[]) {
 	std::cout << argc << '\n' << argv << std::endl;
 	OSDriver driver;
 	driver.run("test_job");
+	return 0;
 }
 #endif // _WIN32
 #ifndef _WIN32
@@ -22,6 +23,7 @@ int main(int argc, char* argv[]) {
 	OSDriver driver;
 	driver.run("test_job");
 #endif // DEBUG
+	return 0;
 }
 #endif // _WIN32
 
