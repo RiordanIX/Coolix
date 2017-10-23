@@ -113,7 +113,7 @@ void loader::readFromFile(string filename) {
 			if(pid != -1)
 			{
 				// Multiply the instructs by 4 to give bytes instead of words
-				PCB p(pid, address*4, numInstructs*4, inpBuffer*4, outBuffer*4, tmpBuffer*4, priority);
+				PCB p(pid, address, numInstructs*4, inpBuffer*4, outBuffer*4, tmpBuffer*4, priority);
 				process_list.push_back(p);
 			}
 		}

@@ -24,8 +24,11 @@ OSDriver::~OSDriver()
 void OSDriver::run(std::string fileName)
 {
     //  Load to Disk
-	ldr.readFromFile(fileName);  
+	ldr.readFromFile(fileName);
     //  Does an initial load from Disk to RAM and ReadyQueue
+#ifdef DEBUG
+	printf("Running Long term Scheduler\n");
+#endif
 	run_longts();
     //  Runs as long as the ReadyQueue is populated / as long as there are processes to be ran
 	while(readyQueue.size() > 0)
@@ -41,7 +44,7 @@ void OSDriver::run(std::string fileName)
 			printf("%s\n",e);
 			readyQueue.removeProcess();
 		}
-        //  Context Switches for the next process  
+        //  Context Switches for the next process
 		run_shortts();
 	}
 
@@ -55,7 +58,7 @@ void OSDriver::run(std::string fileName)
 	// To flush the stream
 	std::cout << std::endl;
 #endif
-    
+
     //  Calcualtes the AverageCycleRunTime
     /*
 	int averageCycleRunTime = 0;
