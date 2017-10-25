@@ -45,7 +45,7 @@ void loader::readFromFile(string filename) {
 		//following are the process id, number of instructions, and priority
 		//respectively.
         if(x.compare(0, 3, "JOB") == 0) {
-            printf("Creating process...\n");
+            debug_printf("Creating process...%s","\n");
 
 			address = DISK.get_used();
 

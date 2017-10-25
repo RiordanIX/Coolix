@@ -27,6 +27,7 @@ public:
 	instruct_t get_instruction(std::size_t index);
 
 	std::string get_info();
+	void dump_data();
 
 };
 

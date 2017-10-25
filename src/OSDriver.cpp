@@ -27,9 +27,7 @@ void OSDriver::run(std::string fileName)
 	//  Load to Disk
 	ldr.readFromFile(fileName);
 	//  Does an initial load from Disk to RAM and ReadyQueue
-#if (defined DEBUG || defined _DEBUG)
-	printf("Running Long term Scheduler\n");
-#endif
+	debug_printf("Running Long term Scheduler%s","\n");
 	run_longts();
 	//  Runs as long as the ReadyQueue is populated / as long as there are processes to be ran
 	while(readyQueue.size() > 0)
@@ -50,14 +48,7 @@ void OSDriver::run(std::string fileName)
 	}
 
 #if (defined DEBUG || defined _DEBUG)
-	for (unsigned int i = 0; i < MEM.size(); i +=6*4) {
-		for (unsigned int j = i; j < i + 6*4 && j < MEM.size(); j+=4) {
-			printf("%4u: 0x%08x   ", j, MEM.get_instruction(j));
-		}
-		printf("\n");
-	}
-	// To flush the stream
-	std::cout << std::endl;
+	MEM.dump_data();
 #endif
 
 	//  Calcualtes the AverageCycleRunTime
@@ -76,10 +67,12 @@ void OSDriver::run_cpu()
 {
 	while(readyQueue.getProcess()->get_status() != status::TERMINATED)
 	{
-		//  Fetches instruction
 		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
-#if (defined DEBUG || defined _DEBUG)
+
+		// The fetched instruction is 0, meaning it's accessed some zeroed out
+		// data.  This shouldn't happen.
 		if (instruct == 0) {
+
 			auto p = readyQueue.getProcess();
 			auto note = p->get_ram_address() + p->get_program_counter();
 			std::cout << "Instruction at "
@@ -90,7 +83,6 @@ void OSDriver::run_cpu()
 					<< p->get_program_counter()
 					<< '\n';
 		}
-#endif
 		//  Decodes and Executes Instruction
 		CPU.decode_and_execute(instruct, readyQueue.getProcess());
 
