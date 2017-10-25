@@ -2,7 +2,6 @@
 #include "disk.hpp"
 #include "ram.hpp"
 #include <vector>
-#include <algorithm>
 #include "pcb.hpp"
 #include "PriorityQueue.h"
 //#include "FIFO.h"
