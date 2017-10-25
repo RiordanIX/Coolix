@@ -7,6 +7,10 @@
 // 2048 four byte words.  This makes the disk byte-addressable
 #define DEFAULT_DISK 2048*4
 
+/******************************************************************************
+ * Disk
+ * A virtual disk we use for our main storage space.
+ *****************************************************************************/
 class Disk {
 private:
 	std::vector<byte_t> _disk;
@@ -30,5 +34,4 @@ public:
 	std::string get_info();
 
 };
-
 

@@ -2,8 +2,9 @@
 #include "PriorityQueue.h"
 
 extern PriorityQueue terminatedQueue;
+extern PriorityQueue readyQueue;
 
-#ifdef DEBUG
+#if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
 
@@ -26,7 +27,7 @@ void OSDriver::run(std::string fileName)
 	//  Load to Disk
 	ldr.readFromFile(fileName);
 	//  Does an initial load from Disk to RAM and ReadyQueue
-#ifdef DEBUG
+#if (defined DEBUG || defined _DEBUG)
 	printf("Running Long term Scheduler\n");
 #endif
 	run_longts();
@@ -48,7 +49,7 @@ void OSDriver::run(std::string fileName)
 		run_shortts();
 	}
 
-#ifdef DEBUG
+#if (defined DEBUG || defined _DEBUG)
 	for (unsigned int i = 0; i < MEM.size(); i +=6*4) {
 		for (unsigned int j = i; j < i + 6*4 && j < MEM.size(); j+=4) {
 			printf("%4u: 0x%08x   ", j, MEM.get_instruction(j));
@@ -77,7 +78,7 @@ void OSDriver::run_cpu()
 	{
 		//  Fetches instruction
 		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
-#ifdef DEBUG
+#if (defined DEBUG || defined _DEBUG)
 		if (instruct == 0) {
 			auto p = readyQueue.getProcess();
 			auto note = p->get_ram_address() + p->get_program_counter();
@@ -97,7 +98,7 @@ void OSDriver::run_cpu()
 		readyQueue.getProcess()->increment_PC();
 		current_cycle++;
 	}
-#ifdef DEBUG
+#if (defined DEBUG || defined _DEBUG)
 	PCB* p = readyQueue.getProcess();
 	printf("Ram Address:\t%lu\n", p->get_ram_address());
 	for (unsigned int i = p->get_ram_address() + p->get_out_address();

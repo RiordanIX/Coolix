@@ -39,6 +39,7 @@ void Ram::allocate(long unsigned int location, byte_t data) {
 	}
 }
 
+
 /** Returns info about ram state
  *
  */
@@ -60,6 +61,7 @@ instruct_t Ram::get_instruction(size_t index) {
 	return instruct;
 }
 
+
 void Ram::allocate_chunk(long unsigned int location, deque<instruct_t> instructions) {
 	size_t i = location;
 	while(instructions.size()) {
@@ -71,3 +73,4 @@ void Ram::allocate_chunk(long unsigned int location, deque<instruct_t> instructi
 
 // GLOBAL VARIABLES
 Ram MEM = Ram(DEFAULT_RAM);
+
