@@ -22,8 +22,6 @@ using std::stoi;
 // instruct_t is a uint32_t, which is 32 bits.  stoul goes to unsigned long,
 // which should also be 32 bits.
 using std::stoul;
-using std::cout;
-using std::endl;
 
 extern Disk DISK;
 extern std::vector<PCB> process_list;
@@ -38,7 +36,7 @@ void loader::readFromFile(string filename) {
 	size_t numInstructs=0, address=0xDEADBEEF, priority=0, inpBuffer, outBuffer, tmpBuffer;
 
     if(!file) {
-        cout << "Unable to read file." << endl;
+        printf("Unable to read file.\n");
 	}
 
 	//Read each line (for every space in the file, a newline is made)
@@ -47,7 +45,7 @@ void loader::readFromFile(string filename) {
 		//following are the process id, number of instructions, and priority
 		//respectively.
         if(x.compare(0, 3, "JOB") == 0) {
-            cout << "Creating process..." << endl;
+            printf("Creating process...\n");
 
 			address = DISK.get_used();
 
@@ -63,9 +61,9 @@ void loader::readFromFile(string filename) {
 			file >> x;
 			priority = stoul(x, NULL, 16);
 
-			cout << "Process " << pid << " created." << endl
-				 << "Priority: " << priority << endl
-				 << "Loading instructions..." << endl;
+			debug_printf("Process %d created.\n",pid);
+			debug_printf("Priority: %lu\n", priority);
+			debug_printf("Loading instructions...%s","\n");
 
 			//"Load" the process' instructions to disk
 			for(unsigned int i = 0; i < numInstructs; i++) {
@@ -77,14 +75,14 @@ void loader::readFromFile(string filename) {
 				DISK.allocate(instruction);
 			}
 
-			cout << "Instructions loaded for process " << pid << endl;
+			debug_printf("Instructions loaded for process %d\n", pid);
         }
 
 		//The data tag indicates the start of the process' given data. The
 		//following three numbers are the input, output, and temporary buffer
 		//sizes respectively.
 		else if(x.compare(0, 4, "Data") == 0) {
-			cout << "Loading data..." << endl;
+			debug_printf("Loading data...%s","\n");
 
 			//Input buffer size
 			file >> x;

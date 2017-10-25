@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include "debug.hpp"
 #include "disk.hpp"
 
 class loader {

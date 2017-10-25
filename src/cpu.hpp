@@ -6,6 +6,7 @@
 #include "pcb.hpp"
 #include "ram.hpp"
 #include "cpu_defs.hpp"
+#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
 #define DEFAULT_REG_SIZE 16

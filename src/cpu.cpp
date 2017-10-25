@@ -8,9 +8,7 @@
 extern Ram MEM;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
-#ifdef DEBUG
-	printf("This Instruction: %#010X\n",inst);
-#endif //DEBUG
+	debug_printf("This Instruction: %#010X\n",inst);
 
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
 	instruct_t opcode = inst & OPCODE_MASK;
@@ -32,9 +30,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		std::cout << get_info() << std::endl;
 		throw "Error while decoding instruction";
 	}
-#ifdef DEBUG
-	std::cout << get_info();
-#endif
+	debug_printf("%s", get_info().c_str());
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
@@ -72,16 +68,12 @@ inline void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, in
 inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	if(Address == 0)
 		registers[Reg2] = registers[Reg1];
-	else
-		#ifdef DEBUG
-		{
-		printf("Writing: %#010X (%d in decimal), write location: %#010X\n", registers[Reg1], registers[Reg1], Address);
-		printf("End address: %#010X\n", offset);
+	else {
+		debug_printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
+				registers[Reg1], registers[Reg1], Address);
+		debug_printf("End address: %#010X\n", offset);
 		MEM.allocate(Address + offset, registers[Reg1]);
-		}
-		#else
-		MEM.allocate(Address + offset, registers[Reg1]);
-		#endif
+	}
 }
 
 

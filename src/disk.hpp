@@ -3,6 +3,7 @@
 #include <deque>
 #include <string>
 #include "instruct.hpp"
+#include "debug.hpp"
 
 // 2048 four byte words.  This makes the disk byte-addressable
 #define DEFAULT_DISK 2048*4

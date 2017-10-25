@@ -1,5 +1,6 @@
 #pragma once
 #include <deque>
+#include "debug.hpp"
 #include "instruct.hpp"
 #include "pcb.hpp"
 #include "PriorityQueue.h"
