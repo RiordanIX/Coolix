@@ -1,7 +1,8 @@
 #pragma once
+#include <algorithm>
+#include <vector>
 #include "disk.hpp"
 #include "ram.hpp"
-#include <vector>
 #include "pcb.hpp"
 #include "PriorityQueue.h"
 //#include "FIFO.h"
@@ -23,19 +24,14 @@ private:
 	{
 		size_t Sadd;//start address
 		size_t Isize;//instruction size
-		EmptySpace(size_t sadd, size_t isize){
-			Sadd = sadd;
-			Isize = isize;
-		}
+		EmptySpace(size_t sadd, size_t isize)
+			:Sadd(sadd),Isize(isize){ }
 	};
 	struct Used
 	{
 		size_t Start;//start address
 		size_t End;//End address
-		Used(size_t st, size_t ed) {
-			Start = st;
-			End = ed;
-		}
+		Used(size_t st, size_t ed): Start(st), End(ed){ }
 	};
 	struct SortUsedSpace {
 		bool operator() (Used i, Used j) { return ((i.Start+i.End)<(j.Start+i.End)); }
