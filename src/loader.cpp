@@ -25,6 +25,7 @@ using std::stoul;
 
 extern Disk DISK;
 extern std::vector<PCB> process_list;
+extern PriorityQueue newQueue;
 
 void loader::readFromFile(string filename) {
     string x;
@@ -122,5 +123,8 @@ void loader::readFromFile(string filename) {
     }
 
     file.close();
+	for (auto it = process_list.begin(); it != process_list.end(); ++it) {
+		newQueue.addProcess(&(*it));
+	}
 }
 

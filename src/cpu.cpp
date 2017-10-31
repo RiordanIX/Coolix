@@ -112,14 +112,12 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest ) {
 	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
-inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
-	if (B_reg == 0) {
-		registers[D_reg] = Address;
+inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+	if (Address == 0) {
+		MEM.allocate(registers[D_reg], registers[B_reg]);
 	}
 	else {
-		// Address acts as an offset for the Base register
-		instruct_t temp = MEM.get_instruction(offset + registers[D_reg]);
-		MEM.allocate(offset + registers[B_reg], temp);
+		MEM.allocate(Address, registers[B_reg]);
 	}
 }
 
