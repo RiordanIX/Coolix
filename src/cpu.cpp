@@ -56,7 +56,7 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 
 inline void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	//registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
-	if (Address == 0) {
+	if (Reg2 > 0) {
 		registers[Reg1] = MEM.get_instruction(registers[Reg2]+offset);
 	}
 	else {
@@ -66,7 +66,7 @@ inline void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, in
 
 
 inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	if(Address == 0)
+	if(Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
 		debug_printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
@@ -99,12 +99,12 @@ inline void cpu::cpu_div(instruct_t s1, instruct_t s2, instruct_t dest ) {
 
 // Logical AND
 inline void cpu::cpu_and(instruct_t s1, instruct_t s2, instruct_t dest ) {
-	registers[dest] = registers[s1] && registers[s2];
+	registers[dest] = registers[s1] & registers[s2];
 }
 
 // Logical OR
 inline void cpu::cpu_or(instruct_t s1, instruct_t s2, instruct_t dest ) {
-	registers[dest] = registers[s1] || registers[s2];
+	registers[dest] = registers[s1] | registers[s2];
 }
 
 // Set value to 1 if s1 < s2, 0 otherwise
@@ -112,17 +112,12 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest ) {
 	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
-inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
-	if (Address == 0) {
-		MEM.allocate(registers[D_reg], registers[B_reg]);
-	}
-	else {
-		MEM.allocate(Address, registers[B_reg]);
-	}
+inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg) {
+	MEM.allocate(registers[D_reg], registers[B_reg]);
 }
 
-inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg) {
-	registers[D_reg] = registers[B_reg];
+inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+	registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address);
 }
 
 inline void	cpu::cpu_movi(instruct_t D_reg, instruct_t Address) {
@@ -156,36 +151,36 @@ inline void	cpu::cpu_hlt(PCB* pcb) {
 }
 
 inline void	cpu::cpu_jmp(instruct_t Address,/* instruct_t offset,*/PCB* pcb) {
-	pcb->set_program_counter(Address);
+	pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_beq(instruct_t B_reg, instruct_t D_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] == registers[D_reg])
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_bne(instruct_t B_reg, instruct_t D_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] != registers[D_reg])
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_bez(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] == 0)
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_bnz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] != 0)
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_bgz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (!(registers[B_reg] & 0x80000000))
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
 inline void	cpu::cpu_blz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] & 0x80000000)
-		pcb->set_program_counter(Address);
+		pcb->set_program_counter(Address - 4);
 }
 
