@@ -7,13 +7,13 @@ using std::vector;
 using std::deque;
 using std::size_t;
 
-Ram::Ram(std::size_t size) : _size(size), _space(size, 0) { }
+Ram::Ram(size_t size) : _size(size), _space(size, 0) { }
 
 
 /** Assigns instruction to ram location
  * \throws illegal_allocation_error
  */
-void Ram::allocate(long unsigned int location, instruct_t data) {
+void Ram::allocate(size_t location, instruct_t data) {
 	byte_t local = 0;
 
 	local = byte_t((data & 0xFF000000) >> (8*3));
@@ -30,7 +30,7 @@ void Ram::allocate(long unsigned int location, instruct_t data) {
 }
 
 
-void Ram::allocate(long unsigned int location, byte_t data) {
+void Ram::allocate(size_t location, byte_t data) {
 	if (location < _size) {
 		_space.at(location) = data;
 	}
@@ -62,7 +62,7 @@ instruct_t Ram::get_instruction(size_t index) {
 }
 
 
-void Ram::allocate_chunk(long unsigned int location, deque<instruct_t> instructions) {
+void Ram::allocate_chunk(size_t location, deque<instruct_t> instructions) {
 	size_t i = location;
 	while(instructions.size()) {
 		allocate(i, instructions.front());
