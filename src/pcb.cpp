@@ -56,6 +56,15 @@ void PCB::set_ram_address(size_t address){
 	ramAddress = address;
 }
 
+//PAGE TABLE
+std::size_t getFrame(std::size_t pageNumber)
+{
+	if(pageTable.pages[pageNumber].first)
+	{
+		return pageTable.pages[pageNumber].second;
+	}
+}
+
 // GLOBAL VARIABLE
 // Define the PCB List after definition
 std::vector<PCB> process_list;

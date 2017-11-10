@@ -34,10 +34,25 @@ enum resourceType
 };
 
 
+
 class PCB
 {
 
 public:
+	struct PageTable
+	{
+		vector<pair<bool, size_t>> pages;
+		
+		PageTable(std::size_t size) : pages(size)
+		{
+			for(auto it = pages.begin(); it != pages.end(); it++)
+			{
+				(*it).first = false;
+				(*it).second = -1;
+			}
+		}
+	};
+
 	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
 			pid(id),
 			currentStatus(status::NEW),
@@ -75,6 +90,10 @@ public:
 	resourceType get_resource_status() { return resource_held; }
 	status get_status() { return currentStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
+	
+	//PAGE TABLE STUFF
+	void pageTableInit(std::size_t numPages);
+	std::size_t getFrame(std::size_t pageNumber);	//return assoc. frame
 
 
 
@@ -112,6 +131,8 @@ private:
 
 	std::vector<instruct_t> registers;
 	std::vector<instruct_t> sectionSizes;
+	
+	PageTable pageTable;
 };
 
 

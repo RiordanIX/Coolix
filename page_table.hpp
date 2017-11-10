@@ -10,6 +10,11 @@ struct PageDirectory
 	public PageDirectory(Ram ram) : frames(ram.get_size() / FRAME_SIZE, 0);
 }
 
+struct Page
+{
+	public bool valid;
+}
+
 class PageTable
 {
 	public:
