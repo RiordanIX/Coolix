@@ -7,7 +7,7 @@ using std::vector;
 using std::deque;
 using std::size_t;
 
-Ram::Ram(long unsigned int size) : _size(size), _space(size, 0) { }
+Ram::Ram(std::size_t size) : _size(size), _space(size, 0) { }
 
 
 /** Assigns instruction to ram location
