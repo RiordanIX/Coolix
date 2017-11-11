@@ -1,6 +1,7 @@
 #pragma once
 #include "instruct.hpp"
 #include "disk.hpp"
+#include "mmu.cpp"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -69,6 +70,9 @@ public:
 		sectionSizes[section::INPUT] = inp;
 		sectionSizes[section::OUTPUT] = out;
 		sectionSizes[section::TEMP] = temp;
+		
+		//Give the page table enough pages to fit the process
+		pageTable((get_end_address() / PAGE_SIZE + 1) * PAGE_SIZE);	
 	}
 
 	// GETTERS
@@ -92,7 +96,6 @@ public:
 	std::size_t get_program_counter()	{ return programCounter; }
 	
 	//PAGE TABLE STUFF
-	void pageTableInit(std::size_t numPages);
 	std::size_t getFrame(std::size_t pageNumber);	//return assoc. frame
 
 
@@ -110,7 +113,8 @@ public:
 	void set_ram_address(std::size_t address);
 	void set_program_counter(std::size_t new_pc);
 	void increment_PC() { programCounter += 4; }
-
+	
+	void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame);
 
 private:
 	unsigned int pid;

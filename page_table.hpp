@@ -1,8 +1,6 @@
 #include <vector>
 #include "ram.hpp"
 
-#define FRAME_SIZE 128
-
 struct PageDirectory
 {
 	std::vector<bool> frames;

@@ -56,6 +56,12 @@ void PCB::set_ram_address(size_t address){
 	ramAddress = address;
 }
 
+void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame)
+{
+	pageTable.pages[entry].first = valid;
+	pageTable.pages[entry].second = frame;
+}
+
 //PAGE TABLE
 std::size_t getFrame(std::size_t pageNumber)
 {

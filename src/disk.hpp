@@ -32,6 +32,7 @@ public:
 
 	bool is_full() { return _used == _size;}
 	std::size_t get_used() { return _used;}
+	std::size_t size()	   { return _size;}
 	std::string get_info();
 
 };
