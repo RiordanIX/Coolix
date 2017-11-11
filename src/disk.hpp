@@ -27,7 +27,7 @@ public:
 	byte_t     read_byte(std::size_t pos);
 	// pos must be byte indexible and size is the number of bytes
 	std::deque<byte_t> read_byte_chunk(std::size_t pos, std::size_t size);
-	// pos must be byte indexible and size is the number of INSTRUCTIONS
+	// pos must be byte indexible and size is the number of BYTES
 	std::deque<instruct_t> read_instruction_chunk(std::size_t pos, std::size_t size);
 
 	bool is_full() { return _used == _size;}
