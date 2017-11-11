@@ -2,16 +2,15 @@
 #include <queue>
 #include "pcb.hpp"
 
-class PriorityQueue
-{
+class PriorityQueue {
 public:
-	struct LessThanByP
-	{
+	struct LessThanByP {
 		bool operator()(PCB *const lhs, PCB * const rhs) const
 		{
 			return lhs->get_priority() > rhs->get_priority();
 		}
 	};
+
 	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
 	PriorityQueue();
 	~PriorityQueue();
@@ -22,5 +21,4 @@ public:
 	int size();
 	bool empty() { return Q.empty(); };
 };
-
 
