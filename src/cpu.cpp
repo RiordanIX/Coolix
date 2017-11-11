@@ -27,7 +27,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		cpu_io_operation(inst, opcode, pcb);
 	}
 	else {
-		std::cout << get_info() << std::endl;
+		fprintf(stderr,"%s", get_info().c_str());
 		throw "Error while decoding instruction";
 	}
 	debug_printf("%s", get_info().c_str());

@@ -75,9 +75,9 @@ void Ram::allocate_chunk(size_t location, deque<instruct_t> inst) {
 void Ram::dump_data() {
 	for (unsigned int i = 0; i < size(); i +=6*4) {
 		for (unsigned int j = i; j < i + 6*4 && j < size(); j+=4) {
-			printf("%4u: 0x%08x   ", j, get_instruction(j));
+			fprintf(stderr,"%4u: 0x%08x   ", j, get_instruction(j));
 		}
-		printf("\n");
+		fprintf(stderr,"\n");
 	}
 }
 
