@@ -1,5 +1,6 @@
 #include <string>
 #include "ram.hpp"
+#include "debug.hpp"
 
 using std::string;
 using std::to_string;
@@ -14,6 +15,7 @@ Ram::Ram(size_t size) : _size(size), _space(size, 0) { }
  * \throws illegal_allocation_error
  */
 void Ram::allocate(size_t location, instruct_t data) {
+	debug_printf("Placing %u at location %lu in RAM\n", data, location);
 	byte_t local = 0;
 
 	local = byte_t((data & 0xFF000000) >> (8*3));
@@ -62,14 +64,14 @@ instruct_t Ram::get_instruction(size_t index) {
 }
 
 
-void Ram::allocate_chunk(size_t location, deque<instruct_t> instructions) {
+void Ram::allocate_chunk(size_t location, deque<instruct_t> inst) {
 	size_t i = location;
-	while(instructions.size()) {
-		allocate(i, instructions.front());
-		i += 4;
-		instructions.pop_front();
+	for (auto it = inst.begin(); it != inst.end(); ++it,i += 4) {
+		allocate(i, *it);
 	}
 }
+
+
 void Ram::dump_data() {
 	for (unsigned int i = 0; i < size(); i +=6*4) {
 		for (unsigned int j = i; j < i + 6*4 && j < size(); j+=4) {
