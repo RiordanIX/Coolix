@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 	std::cout << argc << '\n' << argv << std::endl;
 	// OSDriver driver;
 	// driver.run("test_job2");
-#else
+#endif
 	if (argc == 1) {
 		std::cout << "Usage:  coolix <run_file>" << std::endl;
 	}
@@ -14,7 +14,6 @@ int main(int argc, char* argv[]) {
 		OSDriver driver;
 		driver.run(argv[1]);
 	}
-#endif
 	return 0;
 }
 
