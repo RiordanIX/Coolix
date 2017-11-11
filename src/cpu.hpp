@@ -103,7 +103,7 @@ public:
 		Dest = (inst & 0x0000F000) >> (3*4);
 		switch (opcode){
 			case OP_R_MOV:
-				cpu_mov(S1, Dest);
+				cpu_mov(S2, Dest);
 				break;
 			case OP_R_ADD:
 				cpu_add(S1, S2, Dest);
