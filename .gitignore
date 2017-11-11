@@ -22,3 +22,6 @@ targetver.h
 *.mk
 .codelite/
 
+# Patch files
+*.diff
+

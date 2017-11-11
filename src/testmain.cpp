@@ -49,5 +49,6 @@ int main(int argc, char* argv[]) {
 		CPU.decode_and_execute(inst, readyQueue.getProcess());
 		readyQueue.getProcess()->increment_PC();
 	}
+	MEM.dump_data();
 }
 

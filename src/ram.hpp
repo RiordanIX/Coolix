@@ -3,8 +3,8 @@
 #include <deque>
 #include "instruct.hpp"
 
-// Default ram size in Bytes. 1024 words of size 4
-#define DEFAULT_RAM 1024*4
+// Default ram size in Bytes. 128 words of size 4 bytes
+#define DEFAULT_RAM 128*4
 
 /******************************************************************************
  * Ram
