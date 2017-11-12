@@ -67,7 +67,7 @@ public:
 	* Immediate instructions {{{
 	* When the last 16 bits contain data, the D-reg is always 0000
 	*************************************************************************/
-	void cpu_st(instruct_t B_reg, instruct_t D_reg, size_t offset);
+	void cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset);
 	void cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
 	void cpu_movi(instruct_t D_reg, instruct_t Address);
 	void cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
@@ -146,7 +146,7 @@ public:
 
 		switch (opcode) {
 		case OP_I_ST:
-			cpu_st(B_reg, D_reg,pcb->get_ram_address());
+			cpu_st(B_reg, D_reg, pcb->get_ram_address());
 			break;
 		case OP_I_LW:
 			cpu_lw(B_reg, D_reg, Address);
