@@ -112,8 +112,8 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
-inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset) {
-	MEM.allocate(offset + registers[D_reg], offset + registers[B_reg]);
+inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, size_t offset) {
+	MEM.allocate(offset + registers[D_reg], registers[B_reg]);
 }
 
 inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
