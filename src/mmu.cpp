@@ -7,13 +7,54 @@ MMU::MMU()
 		_freeFrames.push(i);
 }
 
-//PAGING AND PAGE TABLE
-void MMU::tableInit(PCB pcb, std::size_t diskAddress)
+std::size_t MMU::getPhysicalAddress(PCB pcb, std::size_t virtAddress)
+{
+	std::size_t pageNumber = virtAddress / PAGE_SIZE, 
+	offset = virtAddress % PAGE_SIZE;
+	
+	//if page is in memory, translate to physical and update page stack
+	if(pcb.is_valid(pageNumber))
+	{	
+		pcb.update_page_stack(pageNumber);
+		return pcb.get_frame(pageNumber) * PAGE_SIZE + offset;
+	}
+	
+	else
+	{
+		//we have free frames, so we give one to the process and update page 
+		//table and stack
+		if(!_freeFrames.empty())
+		{
+			std::size_t frame = _freeFrames.pop();
+			
+			readPageFromDisk(pcb, pageNumber, frame);
+			pcb.set_page_table_entry(pageNumber, true, frame);
+			pcb.update_page_stack(pageNumber);
+		}
+		
+		//we have no free frames, so we must replace one 
+		else
+		{
+			std::size_t pageReplace = pcb.pop_lru_page();
+			std::size_t victimFrame = pcb.get_frame(pageReplace);
+			
+			writePageToDisk(pcb, pageReplace);
+			pcb.set_page_table_entry(pageReplace, false, -1);
+			
+			readPageFromDisk(pcb, pageNumber, victimFrame);
+			pcb.set_page_table_entry(pageNumber, true, victimFrame);
+			pcb.update_page_stack(pageNumber);
+		}
+	}
+}
+
+//MODIFICATION
+void MMU::tableInit(PCB pcb, std::size_t frameCount)
 {
 	//If there are at least 3 free frames, allocate them to this process
-	if(_freeFrames.size() >= 3)
+	if(_freeFrames.size() >= frameCount)
 	{
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < frameCount; i++)
 		{
 			std::size_t frame = _freeFrames.pop();
 			
@@ -23,45 +64,51 @@ void MMU::tableInit(PCB pcb, std::size_t diskAddress)
 	}
 }
 
-std::size_t MMU::getPhysicalAddress(PCB pcb, std::size_t virtAddress)
+void MMU::dumpProcess(PCB pcb)
 {
-	std::size_t pageNumber = virtAddress / PAGE_SIZE,
-				offset = virtAddress % PAGE_SIZE,
-				frame = pcb.get_frame(pageNumber);
-	
-	if(frame != -1)
+	for(int i = 0; i < pcb.get_page_table_length(); i++)
 	{
-		return frame * PAGE_SIZE + offset;
+		if(pcb.is_valid_page(i))
+		{
+			std::size_t frame = pcb.get_frame(i);
+			
+			writePageToDisk(pcb, i);
+			pcb.set_page_table_entry(pageReplace, false, -1);
+			
+			_freeFrames.push(frame);
+		}
 	}
 }
 
 //SWAPPING
-void MMU::readPageFromDisk(std::size_t startAddress, std::size_t endAddress, std::size_t pageNumber, std::size_t frameNumber)
+void MMU::readPageFromDisk(PCB pcb, std::size_t pageNumber, std::size_t frameNumber)
 {
 	for(int i = 0; i < PAGE_SIZE; i++)
 	{
-		std::size_t diskLoc = startAddress + pageNumber * PAGE_SIZE + i,
+		std::size_t diskLoc = pcb.get_start_address() + pageNumber * PAGE_SIZE + i,
 					ramLoc = frameNumber * FRAME_SIZE + i;
 		
 		//Make sure process doesn't read beyond its size
-		if(diskLoc - startAddress >= endAddress)
+		if(diskLoc - pcb.get_start_address() >= pcb.get_end_address())
 			break;
 		
 		RAM.allocate(ramLoc, DISK.read_byte(diskLoc));
 	}
 }
 
-void MMU::writePageToDisk(std::size_t startAddress, std::size_t endAddress, std::size_t pageNumber, std::size_t frameNumber)
+void MMU::writePageToDisk(PCB pcb, std::size_t pageNumber)
 {
+	std::size_t frameNumber = pcb.get_frame(pageNumber);
+	
 	for(int i = 0; i < PAGE_SIZE; i++)
 	{
-		std::size_t diskLoc = startAddress + pageNumber * PAGE_SIZE + i,
+		std::size_t diskLoc = pcb.get_start_address() + pageNumber * PAGE_SIZE + i,
 					ramLoc = frameNumber * FRAME_SIZE + i;
 		
 		//Make sure process doesn't write over another process
-		if(diskLoc - startAddress >= endAddress)
+		if(diskLoc - pcb.get_start_address() >= pcb.get_end_address())
 			break;
 		
-		DISK.alllocate(diskLoc, RAM.read_byte(ramLoc));
+		DISK.allocate(diskLoc, RAM.read_byte(ramLoc));
 	}
 }

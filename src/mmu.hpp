@@ -9,12 +9,15 @@ class MMU
 	public:
 		MMU();
 		
-		//PAGING
+		//GETTERS
+		std::size_t free_frame_count()	{ return _freeFrames.size(); }
 		std::size_t getPhysicalAddress(PageTable table, std::size_t virtAddress);
+		
+		//MODIFICATION
 		void tableInit(PageTable table);
+		void dumpProcess(PCB pcb);
 	
 	private:
-		std::vector<std::size_t> _diskPages;
 		std::queue<std::size_t> _freeFrames;
 		
 		//SWAPPING

@@ -95,10 +95,10 @@ public:
 	status get_status() { return currentStatus;}
 	std::size_t get_program_counter()	{ return programCounter; }
 	
-	//PAGE TABLE STUFF
-	std::size_t getFrame(std::size_t pageNumber);	//return assoc. frame
-
-
+	std::size_t get_page_table_length()		{ return pageTable.pages.size(); }
+	bool is_valid_page(std::size_t pageNumber)	{ return pageTable.pages[pageNumber].first; }	
+	std::size_t get_frame(std::size_t pageNumber)	{ return pageTable.pages[pageNumber].second; }
+	std::size_t pop_lru_page()		{ return page_stack.pop_back(); }
 
 	// SETTERS
 	void set_priority(int priorityIn);
@@ -115,6 +115,7 @@ public:
 	void increment_PC() { programCounter += 4; }
 	
 	void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame);
+	void update_page_stack(std::size_t pageNumber);
 
 private:
 	unsigned int pid;
@@ -137,6 +138,7 @@ private:
 	std::vector<instruct_t> sectionSizes;
 	
 	PageTable pageTable;
+	vector<std::size_t> page_stack;		//stack of most recently used pages
 };
 
 
