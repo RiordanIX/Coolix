@@ -8,7 +8,7 @@
 extern Ram MEM;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
-	debug_printf("This Instruction: %#010X\n", inst);
+	printf("This Instruction: %#010X\n", inst);
 
 	instruct_t format_code = inst & FORMAT_CODE_MASK;
 	instruct_t opcode = inst & OPCODE_MASK;
@@ -30,7 +30,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		std::cout << get_info() << std::endl;
 		throw "Error while decoding instruction";
 	}
-	debug_printf("%s", get_info().c_str());
+	printf("%s", get_info().c_str());
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
@@ -69,9 +69,9 @@ inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, in
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
-		debug_printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
+	printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
 			registers[Reg1], registers[Reg1], Address);
-		debug_printf("End address: %#010X\n", offset);
+		printf("End address: %#010X\n", offset);
 		MEM.allocate(Address + offset, registers[Reg1]);
 	}
 }
@@ -112,12 +112,12 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
-inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, size_t offset) {
-	MEM.allocate(offset + registers[D_reg], registers[B_reg]);
+inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset) {
+	MEM.allocate(offset+registers[D_reg], registers[B_reg]);
 }
 
-inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
-	registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address);
+inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
+	registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address + offset);
 }
 
 inline void	cpu::cpu_movi(instruct_t D_reg, instruct_t Address) {
@@ -183,3 +183,4 @@ inline void	cpu::cpu_blz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] & 0x80000000)
 		pcb->set_program_counter(Address - 4);
 }
+
