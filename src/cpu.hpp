@@ -6,7 +6,7 @@
 #include "pcb.hpp"
 #include "ram.hpp"
 #include "cpu_defs.hpp"
-#include "debug.hpp"
+//#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
 #define DEFAULT_REG_SIZE 16
@@ -67,8 +67,13 @@ public:
 	* Immediate instructions {{{
 	* When the last 16 bits contain data, the D-reg is always 0000
 	*************************************************************************/
+<<<<<<< HEAD
 	void cpu_st(instruct_t B_reg, instruct_t D_reg, size_t offset);
 	void cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
+=======
+	void cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset);
+	void cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset);
+>>>>>>> 635e5a1... finally fix offset business in CPU
 	void cpu_movi(instruct_t D_reg, instruct_t Address);
 	void cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
 	void cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
@@ -146,10 +151,10 @@ public:
 
 		switch (opcode) {
 		case OP_I_ST:
-			cpu_st(B_reg, D_reg, pcb->get_ram_address());
+			cpu_st(B_reg, D_reg,pcb->get_ram_address());
 			break;
 		case OP_I_LW:
-			cpu_lw(B_reg, D_reg, Address);
+			cpu_lw(B_reg, D_reg, Address,pcb->get_ram_address());
 			break;
 		case OP_I_MOVI:
 			cpu_movi(D_reg, Address);
