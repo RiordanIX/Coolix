@@ -148,6 +148,8 @@ inline void	cpu::cpu_slti(instruct_t B_reg, instruct_t D_reg, instruct_t Address
 
 inline void	cpu::cpu_hlt(PCB* pcb) {
 	pcb->set_status(status::TERMINATED);
+	for (int i = 0; i < 16; i++)
+		registers[i] = 0;
 }
 
 inline void	cpu::cpu_jmp(instruct_t Address,/* instruct_t offset,*/PCB* pcb) {
