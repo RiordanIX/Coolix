@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <mutex>
+#include <thread>
 #include <iostream>
 #include "instruct.hpp"
 #include "pcb.hpp"
@@ -18,6 +20,8 @@
 * can define the number of registers by passing it in, or just leaving it as
 * the default of 16.
 *****************************************************************************/
+extern std::mutex mtx;
+
 class cpu {
 public:
 	// Public because the dispatcher needs to access it.

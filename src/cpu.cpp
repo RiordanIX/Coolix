@@ -66,6 +66,7 @@ inline void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, in
 
 
 inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	mtx.lock();
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
@@ -74,6 +75,7 @@ inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, in
 		printf("End address: %#010X\n", offset);
 		MEM.allocate(Address + offset, registers[Reg1]);
 	}
+	mtx.unlock();
 }
 
 
@@ -113,7 +115,9 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 }
 
 inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset) {
+	mtx.lock();
 	MEM.allocate(offset+registers[D_reg], registers[B_reg]);
+	mtx.unlock();
 }
 
 inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
