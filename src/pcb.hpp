@@ -34,16 +34,12 @@ enum resourceType
 	SHMEM
 };
 
-
-
 class PCB
 {
-
 public:
 	struct PageTable
 	{
-		vector<pair<bool, size_t>> pages;
-		
+		std::vector<std::pair<bool, size_t>> pages;
 		PageTable(std::size_t size) : pages(size)
 		{
 			for(auto it = pages.begin(); it != pages.end(); it++)
@@ -53,28 +49,26 @@ public:
 			}
 		}
 	};
-
-	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
-			pid(id),
-			currentStatus(status::NEW),
-			resource_held(resourceType::NONE),
-			priority(p),
-			wait_time(0),
-			diskAddress(daddress),
-			ramAddress(0xDEADBEEF),
-			programCounter(0),
-			registers(16, 0),
-			sectionSizes(4,0)
-		{
+public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
+	pid(id),
+	currentStatus(status::NEW),
+	resource_held(resourceType::NONE),
+	priority(p),
+	wait_time(0),
+	diskAddress(daddress),
+	ramAddress(0xDEADBEEF),
+	programCounter(0),
+	registers(16, 0),
+	sectionSizes(4, 0)
+    {
 		sectionSizes[section::INSTRUCTION] = instruct;
 		sectionSizes[section::INPUT] = inp;
 		sectionSizes[section::OUTPUT] = out;
 		sectionSizes[section::TEMP] = temp;
 		
 		//Give the page table enough pages to fit the process
-		pageTable((get_end_address() / PAGE_SIZE + 1) * PAGE_SIZE);	
+		pageTable = PCB::PageTable((get_end_address() / PAGE_SIZE + 1) * PAGE_SIZE);
 	}
-
 	// GETTERS
 	int get_priority() { return priority; }
 	unsigned int get_pid() { return pid; }
@@ -98,7 +92,8 @@ public:
 	std::size_t get_page_table_length()		{ return pageTable.pages.size(); }
 	bool is_valid_page(std::size_t pageNumber)	{ return pageTable.pages[pageNumber].first; }	
 	std::size_t get_frame(std::size_t pageNumber)	{ return pageTable.pages[pageNumber].second; }
-	std::size_t pop_lru_page()		{ return page_stack.pop_back(); }
+	std::size_t pop_lru_page() { page_stack.pop_back(); return page_stack.back(); }
+	std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 
 	// SETTERS
 	void set_priority(int priorityIn);
@@ -128,17 +123,13 @@ private:
 	int run_time;
 	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
 
-
 	std::size_t diskAddress, ramAddress;
-
-    // instruct_t cpuid;
+	// instruct_t cpuid;
 	std::size_t programCounter; //code_size
-
 	std::vector<instruct_t> registers;
 	std::vector<instruct_t> sectionSizes;
-	
-	PageTable pageTable;
-	vector<std::size_t> page_stack;		//stack of most recently used pages
+	PCB::PageTable pageTable = PageTable(PAGE_SIZE);
+	std::deque<std::size_t> page_stack;		//stack of most recently used pages
 };
 
 

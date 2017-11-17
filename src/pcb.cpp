@@ -58,18 +58,17 @@ void PCB::set_ram_address(size_t address){
 
 
 //PAGE TABLE
-std::size_t get_page_table_entry(std::size_t pageNumber)
+std::pair<bool,size_t> PCB::get_page_table_entry(std::size_t pageNumber)
 {
 	return pageTable.pages[pageNumber];
 }
-
-void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame)
+void PCB::set_page_table_entry(std::size_t entry, bool valid, std::size_t frame)
 {
 	pageTable.pages[entry].first = valid;
 	pageTable.pages[entry].second = frame;
 }
 
-void update_page_stack(std::size_t pageNumber)
+void PCB::update_page_stack(std::size_t pageNumber)
 {
 	auto contains = std::find(page_stack.begin(), page_stack.end(), pageNumber);
 	if(contains != page_stack.end())
