@@ -1,11 +1,12 @@
 #pragma once
 #include "instruct.hpp"
 #include "disk.hpp"
-#include "mmu.cpp"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#define PAGE_SIZE 128
 
 enum status
 {
@@ -36,19 +37,6 @@ enum resourceType
 
 class PCB
 {
-public:
-	struct PageTable
-	{
-		std::vector<std::pair<bool, size_t>> pages;
-		PageTable(std::size_t size) : pages(size)
-		{
-			for (auto it = pages.begin(); it != pages.end(); it++)
-			{
-				(*it).first = false;
-				(*it).second = -1;
-			}
-		}
-	};
 public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
 	pid(id),
 	currentStatus(status::NEW),
@@ -128,8 +116,21 @@ private:
 	std::size_t programCounter; //code_size
 	std::vector<instruct_t> registers;
 	std::vector<instruct_t> sectionSizes;
-	PCB::PageTable pageTable = PageTable(PAGE_SIZE);
 	std::deque<std::size_t> page_stack;		//stack of most recently used pages
+	public:
+	struct PageTable
+	{
+		std::vector<std::pair<bool, size_t>> pages;
+		PageTable(std::size_t size) : pages(size)
+		{
+			for (auto it = pages.begin(); it != pages.end(); it++)
+			{
+				(*it).first = false;
+				(*it).second = -1;
+			}
+		}
+	};
+	PCB::PageTable pageTable = PageTable(PAGE_SIZE);
 };
 
 
