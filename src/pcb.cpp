@@ -1,4 +1,5 @@
 #include "pcb.hpp"
+#include <algorithm>
 
 using std::vector;
 using std::size_t;
@@ -46,8 +47,8 @@ void PCB::set_start_time(int startIn)
 void PCB::set_cycle_start_time(int cycleIn)
 {
 	cycle_start_time = cycleIn;
-}   
- 
+}
+
 void PCB::set_program_counter(size_t new_pc){
 	programCounter = new_pc;
 }
@@ -73,7 +74,7 @@ void PCB::update_page_stack(std::size_t pageNumber)
 	auto contains = std::find(page_stack.begin(), page_stack.end(), pageNumber);
 	if(contains != page_stack.end())
 		page_stack.erase(contains);
-	
+
 	page_stack.push_front(pageNumber);
 }
 
