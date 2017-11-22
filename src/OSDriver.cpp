@@ -91,6 +91,7 @@ void OSDriver::run_cpu(cpu CPU) {
 
 		// Increment Program counter
 		CPU.CurrentProcess->increment_PC();
+		CPU.current_cycle++;
 		current_cycle++;
 	}
 #if (defined DEBUG || defined _DEBUG)

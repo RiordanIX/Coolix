@@ -23,7 +23,8 @@ public:
 	// Public because the dispatcher needs to access it.
 
 	// process cpu currently running
-	PCB* CurrentProcess; 
+	PCB* CurrentProcess;
+	int current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
 
