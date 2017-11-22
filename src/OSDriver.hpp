@@ -26,13 +26,15 @@ public:
 
     loader ldr;
     Dispatcher Dispatch;
-    cpu CPU;
     LongTerm ltSched;
 	ShortTermScheduler StSched;
-	
+
     void run(std::string fileName);  // Runs the OS
+
+private:
     void run_cpu();
     void run_shortts();
     void run_longts();
+	void OSDriver::print_error(PCB* p);
 };
 

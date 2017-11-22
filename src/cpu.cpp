@@ -186,3 +186,6 @@ inline void	cpu::cpu_blz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 		pcb->set_program_counter(Address - 4);
 }
 
+// GLOBAL VARIABLES
+cpu CPU0, CPU1, CPU2, CPU3;
+

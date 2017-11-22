@@ -13,23 +13,19 @@ OSDriver::OSDriver() :
 		current_cycle(0),
 		ldr(),
 		Dispatch(),
-		CPU(),
 		ltSched()
 	{ }
 
-OSDriver::~OSDriver()
-{
+OSDriver::~OSDriver() { }
 
-}
-
-void OSDriver::run(std::string fileName)
-{
+void OSDriver::run(std::string fileName) {
 	//  Load to Disk
 	ldr.readFromFile(fileName);
 	//  Does an initial load from Disk to RAM and ReadyQueue
 	//debug_printf("Running Long term Scheduler%s","\n");
 	run_longts();
-	//  Runs as long as the ReadyQueue is populated / as long as there are processes to be ran
+	//  Runs as long as the ReadyQueue is populated as long as there are
+	//  processes to be ran
 	while(readyQueue.size() > 0)
 	{
 		//  Load and Move Processes accordingly
@@ -62,26 +58,28 @@ void OSDriver::run(std::string fileName)
 	*/
 }
 
+void OSDriver::print_error(PCB* p) {
+	auto note = p->get_ram_address() + p->get_program_counter();
+	std::cout << "Instruction at "
+			<< note << " is 0\n"
+			<< "Process Ram address is "
+			<< p->get_ram_address()
+			<< "\nProgram Counter is "
+			<< p->get_program_counter()
+			<< '\n';
+}
 
-void OSDriver::run_cpu()
-{
-	while(readyQueue.getProcess()->get_status() != status::TERMINATED)
+void OSDriver::run_cpu() {
+	auto p = readyQueue.getProcess();
+	while(p->get_status() != status::TERMINATED)
 	{
 		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
 
 		// The fetched instruction is 0, meaning it's accessed some zeroed out
 		// data.  This shouldn't happen.
 		if (instruct == 0) {
-
-			auto p = readyQueue.getProcess();
-			auto note = p->get_ram_address() + p->get_program_counter();
-			std::cout << "Instruction at "
-					<< note << " is 0\n"
-					<< "Process Ram address is "
-					<< p->get_ram_address()
-					<< "\nProgram Counter is "
-					<< p->get_program_counter()
-					<< '\n';
+			print_error(p);
+			return;
 		}
 		//  Decodes and Executes Instruction
 		CPU.decode_and_execute(instruct, readyQueue.getProcess());
@@ -107,15 +105,20 @@ void OSDriver::run_cpu()
 }
 
 
-void OSDriver::run_longts()
-{
-	ltSched.DiskToRam();	//  Populate RAM and ReadyQueue
-	StSched.ReadyToWait();	//  Checks to see if any process in the Ready Queue should be moved to Waiting Queue, then moves it
-	StSched.WaitToReady();	//  Checks to see if any process in the Waiting Queue should be moved to Ready Queue, then moves it
+void OSDriver::run_longts() {
+	// Populate RAM and ReadyQueue
+	ltSched.DiskToRam();
+
+	// Checks to see if any process in the Ready Queue should be moved to
+	// Waiting Queue, then moves it
+	StSched.ReadyToWait();
+
+	// Checks to see if any process in the Waiting Queue should be moved to
+	// Ready Queue, then moves it
+	StSched.WaitToReady();
 }
 
-void OSDriver::run_shortts()
-{
+void OSDriver::run_shortts() {
 	// Dispatches the current Processes. Context Switches In AND Out
 	if (!readyQueue.empty()) {
 		Dispatch.dispatch(&CPU, readyQueue.getProcess());

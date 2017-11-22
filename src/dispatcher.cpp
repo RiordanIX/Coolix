@@ -41,6 +41,8 @@ void Dispatcher::switchIn(cpu* CPU) {
 	if (!readyQueue.empty())
 	{
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
+		readyQueue.getProcess()->set_status(status::RUNNING);
+		readyQueue.removeProcess();
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}
 }
