@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <deque>
+#include <string>
 #include "instruct.hpp"
 
 // Default ram size in Bytes. 1024 words of size 4

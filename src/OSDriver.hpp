@@ -35,7 +35,7 @@ private:
     void run_cpu(cpu CPU);
     void run_shortts(cpu CPU);
     void run_longts();
-	void OSDriver::print_error(PCB* p);
+	void print_error(PCB* p);
 	cpu Freecpu();
 };
 

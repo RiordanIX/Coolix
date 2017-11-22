@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #define PAGE_SIZE 128
 
@@ -84,10 +85,10 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t pop_lru_page() { std::size_t lru = page_stack.back(); page_stack.pop_back(); return lru; }
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 
-		
+
 
 		// SETTERS
-		
+
 		void set_priority(int priorityIn);
 		void set_registers(std::vector<instruct_t> source);
 		//void acquire_resource(status code);
