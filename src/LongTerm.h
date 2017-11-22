@@ -15,10 +15,6 @@ public:
 	~LongTerm();//distructor
 	//Move  processes from disk to ram
 	void DiskToRam();
-	//move io bond process from ready to wait queue if io is busy
-	void ReadyToWait();
-	//move io bond process from ready to wait queue if io is busy
-	void WaitToReady();
 private:
 	struct EmptySpace
 	{

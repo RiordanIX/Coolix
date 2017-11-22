@@ -100,57 +100,6 @@ void LongTerm::DiskToRam()
 		}
 	}
 }
-void LongTerm::ReadyToWait()
-{
-	/*how to pop ready queue pointer if process goes to wait?*/
-	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
-	while (readyQueue.size() > 0)
-	{
-		if (readyQueue.getProcess()->get_resource_status() != resourceType::NONE)
-		{
-			if (CheckResource( readyQueue.getProcess()->get_resource_status() ) == false )//need a getter for resourse that returns if true or false if resource being held at the moment
-			{//if resource being held then pop this pcb from ready queue and push it into wait queue
-				waitingQueue.addProcess(readyQueue.getProcess());
-				readyQueue.getProcess()->set_status(status::WAITING);//update pcb
-				readyQueue.removeProcess();
-			}
-		}
-			hold.push_back(readyQueue.getProcess());
-			readyQueue.removeProcess();
-
-	}
-	while (hold.empty()==false)//refill ready queue
-	{
-		readyQueue.addProcess(hold.back());
-		hold.pop_back();
-	}
-}
-
-void LongTerm::WaitToReady()
-{
-	/*how to pop wait queue pointer if process goes to ready?*/
-	std::vector<PCB*> hold;//variable is used to refill queue b/c pop is the only way to iterate through priority queue
-	while (waitingQueue.size() > 0)
-	{
-		if (waitingQueue.getProcess()->get_resource_status() != resourceType::NONE)
-		{
-			if (CheckResource(waitingQueue.getProcess()->get_resource_status()) == true)//need a getter for resourse that returns if true or false if resource being held at the moment
-			{//if resource not being held then pop this pcb from wait queue and push it into ready queue
-				readyQueue.addProcess(waitingQueue.getProcess());
-				waitingQueue.getProcess()->set_status(status::READY);//update pcb
-				waitingQueue.removeProcess();
-			}
-		}
-		hold.push_back(waitingQueue.getProcess());
-		waitingQueue.removeProcess();
-	}
-	while (hold.empty() == false)//refill wait queue
-	{
-		waitingQueue.addProcess(hold.back());
-		hold.pop_back();
-	}
-}
-
 std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 {
 	std::vector<EmptySpace> ess;
