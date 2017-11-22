@@ -71,6 +71,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		int get_end_time() { return end_time; }
 		int get_run_time() { return (start_time - end_time); }
 		int get_cycle_start_time() { return cycle_start_time; }
+		bool get_waitformmu() { return waitformmu; }
 
 		std::vector<instruct_t> get_registers();
 		resourceType get_resource_status() { return resource_held; }
@@ -83,7 +84,10 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t pop_lru_page() { std::size_t lru = page_stack.back(); page_stack.pop_back(); return lru; }
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 
+		
+
 		// SETTERS
+		
 		void set_priority(int priorityIn);
 		void set_registers(std::vector<instruct_t> source);
 		//void acquire_resource(status code);
@@ -99,6 +103,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 
 		void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame);
 		void update_page_stack(std::size_t pageNumber);
+		void set_waitformmu(bool mmuwait) { waitformmu = mmuwait; }
 
 private:
 	unsigned int pid;
@@ -110,6 +115,7 @@ private:
 	int end_time;
 	int run_time;
 	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
+	bool waitformmu; //check to see if process is waiting for mmu
 
 	std::size_t diskAddress, ramAddress;
 	// instruct_t cpuid;
