@@ -8,7 +8,6 @@ MMU::MMU()
 	for(unsigned int i = 0; i < MEM.size() / PAGE_SIZE; i++)
 		_freeFrames.push(i);
 }
-
 std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 {
 	std::size_t pageNumber = virtAddress / PAGE_SIZE, 
@@ -56,11 +55,12 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 void MMU::tableInit(PCB* pcb, std::size_t frameCount)
 {
 	//If there are at least 3 free frames, allocate them to this process
+	std::size_t frame;
 	if(_freeFrames.size() >= frameCount)
 	{
 		for(unsigned int i = 0; i < frameCount; i++)
 		{
-			std::size_t frame = _freeFrames.back();
+			frame = _freeFrames.back();
 			_freeFrames.pop();
 			
 			pcb->set_page_table_entry(i, true, frame);
@@ -70,11 +70,12 @@ void MMU::tableInit(PCB* pcb, std::size_t frameCount)
 }
 void MMU::dumpProcess(PCB* pcb)
 {
+	std::size_t frame;
 	for(unsigned int i = 0; i < pcb->get_page_table_length(); i++)
 	{
 		if(pcb->is_valid_page(i))
 		{
-			std::size_t frame = pcb->get_frame(i);
+			frame = pcb->get_frame(i);
 			
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(pageReplace, false, -1);
