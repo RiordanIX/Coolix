@@ -75,16 +75,9 @@ void MMU::dumpProcess(PCB* pcb)
 	{
 		if(pcb->is_valid_page(i))
 		{
-<<<<<<< HEAD
 			frame = pcb->get_frame(i);
-			
-=======
-			std::size_t frame = pcb->get_frame(i);
-
->>>>>>> 2a54e85a0104e33b1f114f8b072adad9196fb9a8
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(pageReplace, false, -1);
-
 			_freeFrames.push(frame);
 		}
 	}
