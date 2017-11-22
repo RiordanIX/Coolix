@@ -9,6 +9,7 @@
 #include "pcb.hpp"
 #include "PriorityQueue.h"
 #include "LongTerm.h"
+#include "ShortTerm.hpp"
 //#include short term scheduler
 //#include long term scheduler
 
@@ -27,7 +28,8 @@ public:
     Dispatcher Dispatch;
     cpu CPU;
     LongTerm ltSched;
-
+	ShortTermScheduler StSched;
+	
     void run(std::string fileName);  // Runs the OS
     void run_cpu();
     void run_shortts();

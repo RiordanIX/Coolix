@@ -27,7 +27,7 @@ void OSDriver::run(std::string fileName)
 	//  Load to Disk
 	ldr.readFromFile(fileName);
 	//  Does an initial load from Disk to RAM and ReadyQueue
-	debug_printf("Running Long term Scheduler%s","\n");
+	//debug_printf("Running Long term Scheduler%s","\n");
 	run_longts();
 	//  Runs as long as the ReadyQueue is populated / as long as there are processes to be ran
 	while(readyQueue.size() > 0)
@@ -110,8 +110,8 @@ void OSDriver::run_cpu()
 void OSDriver::run_longts()
 {
 	ltSched.DiskToRam();	//  Populate RAM and ReadyQueue
-	ltSched.ReadyToWait();	//  Checks to see if any process in the Ready Queue should be moved to Waiting Queue, then moves it
-	ltSched.WaitToReady();	//  Checks to see if any process in the Waiting Queue should be moved to Ready Queue, then moves it
+	StSched.ReadyToWait();	//  Checks to see if any process in the Ready Queue should be moved to Waiting Queue, then moves it
+	StSched.WaitToReady();	//  Checks to see if any process in the Waiting Queue should be moved to Ready Queue, then moves it
 }
 
 void OSDriver::run_shortts()
