@@ -32,9 +32,10 @@ public:
     void run(std::string fileName);  // Runs the OS
 
 private:
-    void run_cpu();
-    void run_shortts();
+    void run_cpu(cpu CPU);
+    void run_shortts(cpu CPU);
     void run_longts();
 	void OSDriver::print_error(PCB* p);
+	cpu Freecpu();
 };
 

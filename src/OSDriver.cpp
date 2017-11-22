@@ -1,8 +1,9 @@
 #include "OSDriver.hpp"
-#include "PriorityQueue.h"
+//#include "PriorityQueue.h"
 
 extern PriorityQueue terminatedQueue;
 extern PriorityQueue readyQueue;
+extern cpu CPU0, CPU1, CPU2, CPU3;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
@@ -32,15 +33,15 @@ void OSDriver::run(std::string fileName) {
 		run_longts();
 		try {
 			//  Runs the CPU
-			run_cpu();
+			run_cpu(Freecpu());
 		}
 		catch (const char* e) {
 			//  Remove the process if it malfunctions
 			printf("%s\n",e);
-			readyQueue.removeProcess();
+			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
 		//  Context Switches for the next process
-		run_shortts();
+		run_shortts(Freecpu());
 	}
 
 #if (defined DEBUG || defined _DEBUG)
@@ -69,41 +70,44 @@ void OSDriver::print_error(PCB* p) {
 			<< '\n';
 }
 
-void OSDriver::run_cpu() {
-	auto p = readyQueue.getProcess();
-	while(p->get_status() != status::TERMINATED)
+void OSDriver::run_cpu(cpu CPU) {
+
+	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
+	CPU.CurrentProcess = readyQueue.getProcess();
+	readyQueue.removeProcess(); //remove process from the ready queue 
+	CPU.CurrentProcess->set_status(RUNNING);//set process pcb to running status
+	while(CPU.CurrentProcess->get_status() != status::TERMINATED)
 	{
-		instruct_t instruct = CPU.fetch(readyQueue.getProcess());
+		instruct_t instruct = CPU.fetch(CPU.CurrentProcess);
 
 		// The fetched instruction is 0, meaning it's accessed some zeroed out
 		// data.  This shouldn't happen.
 		if (instruct == 0) {
-			print_error(p);
+			print_error(CPU.CurrentProcess);
 			return;
 		}
 		//  Decodes and Executes Instruction
-		CPU.decode_and_execute(instruct, readyQueue.getProcess());
+		CPU.decode_and_execute(instruct, CPU.CurrentProcess);
 
 		// Increment Program counter
-		readyQueue.getProcess()->increment_PC();
+		CPU.CurrentProcess->increment_PC();
 		current_cycle++;
 	}
 #if (defined DEBUG || defined _DEBUG)
-	PCB* p = readyQueue.getProcess();
-	printf("Ram Address:\t%lu\n", p->get_ram_address());
-	for (unsigned int i = p->get_ram_address() + p->get_out_address();
-			i < p->get_ram_address() + p->get_end_address();
+	//PCB* p = readyQueue.getProcess();
+	printf("Ram Address:\t%lu\n", CPU.CurrentProcess->get_ram_address());
+	for (unsigned int i = CPU.CurrentProcess->get_ram_address() + CPU.CurrentProcess->get_out_address();
+			i < CPU.CurrentProcess->get_ram_address() + CPU.CurrentProcess->get_end_address();
 			i+=4) {
 		printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
 	}
 #endif // DEBUG
 
 	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-	terminatedQueue.addProcess(readyQueue.getProcess());
-	readyQueue.removeProcess();
+	terminatedQueue.addProcess(CPU.CurrentProcess);
+	//readyQueue.removeProcess();
 
 }
-
 
 void OSDriver::run_longts() {
 	// Populate RAM and ReadyQueue
@@ -118,12 +122,36 @@ void OSDriver::run_longts() {
 	StSched.WaitToReady();
 }
 
-void OSDriver::run_shortts() {
+void OSDriver::run_shortts(cpu CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
 	if (!readyQueue.empty()) {
 		Dispatch.dispatch(&CPU, readyQueue.getProcess());
 		if(current_cycle >= cpu_cycle)
 			current_cycle = 0;
+	}
+}
+//check each cpu then determines which one is not running a process
+cpu OSDriver::Freecpu()
+{
+	if (CPU0.CurrentProcess->get_status() != RUNNING)
+	{
+		return CPU0;
+	}
+	else if (CPU1.CurrentProcess->get_status() != RUNNING)
+	{
+		return CPU1;
+	}
+	else if (CPU2.CurrentProcess->get_status() != RUNNING)
+	{
+		return CPU2;
+	}
+	else if (CPU3.CurrentProcess->get_status() != RUNNING)
+	{
+		return CPU3;
+	}
+	else
+	{
+		return Freecpu();//keep looking for free cpu
 	}
 }
 

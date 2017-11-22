@@ -21,6 +21,9 @@
 class cpu {
 public:
 	// Public because the dispatcher needs to access it.
+
+	// process cpu currently running
+	PCB* CurrentProcess; 
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
 
