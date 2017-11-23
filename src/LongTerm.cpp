@@ -1,4 +1,4 @@
-#include "LongTerm.h"
+#include "LongTerm.hpp"
 
 // GLOBAL VARIABLES!!!
 extern std::vector<PCB> process_list;

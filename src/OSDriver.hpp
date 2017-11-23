@@ -2,13 +2,13 @@
 
 #define DEFAULT_CPU_CYCLE_TIME  50
 
-//#include "FIFO.h"
+//#include "FIFO.hpp"
 #include "loader.hpp"
 #include "cpu.hpp"
 #include "dispatcher.hpp"
 #include "pcb.hpp"
-#include "PriorityQueue.h"
-#include "LongTerm.h"
+#include "PriorityQueue.hpp"
+#include "LongTerm.hpp"
 #include "ShortTerm.hpp"
 //#include short term scheduler
 //#include long term scheduler

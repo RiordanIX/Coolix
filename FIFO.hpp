@@ -1,6 +1,6 @@
 #pragma once
 #include <deque>
-#include "PCB.h"
+#include "PCB.hpp"
 
 class FIFO
 {

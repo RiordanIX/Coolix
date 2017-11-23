@@ -1,32 +1,43 @@
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 
-PriorityQueue::PriorityQueue()//initialize priority queue
-{
+//initialize priority queue
+PriorityQueue::PriorityQueue() {
 	Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
 }
-PriorityQueue::~PriorityQueue()
-{
+
+
+PriorityQueue::~PriorityQueue() {
 	while (Q.empty() == false)
 	{
 		Q.pop();
 	}
 }
-PCB* PriorityQueue::getProcess()
-{
-	return Q.top();
+
+
+PCB* PriorityQueue::getProcess() {
+	if (Q.empty()) {
+		return nullptr;
+	}
+	else {
+		return Q.top();
+	}
 }
-void PriorityQueue::addProcess(PCB* procc)
-{
+
+
+void PriorityQueue::addProcess(PCB* procc) {
 	Q.push(procc);
 }
-void PriorityQueue::removeProcess()
-{
+
+
+void PriorityQueue::removeProcess() {
 	Q.pop();
 }
-int PriorityQueue::size()
-{
+
+
+int PriorityQueue::size() {
 	return Q.size();
 }
+
 
 // GLOBAL VARIABLES
 PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;

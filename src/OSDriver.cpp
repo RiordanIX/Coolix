@@ -1,5 +1,5 @@
 #include "OSDriver.hpp"
-//#include "PriorityQueue.h"
+//#include "PriorityQueue.hpp"
 
 extern PriorityQueue terminatedQueue;
 extern PriorityQueue readyQueue;

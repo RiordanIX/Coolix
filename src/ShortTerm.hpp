@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "pcb.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 
 class ShortTermScheduler
 {

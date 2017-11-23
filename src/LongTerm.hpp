@@ -4,8 +4,8 @@
 #include "disk.hpp"
 #include "ram.hpp"
 #include "pcb.hpp"
-#include "PriorityQueue.h"
-//#include "FIFO.h"
+#include "PriorityQueue.hpp"
+//#include "FIFO.hpp"
 
 
 class LongTerm
