@@ -3,7 +3,7 @@
 
 extern PriorityQueue terminatedQueue;
 extern PriorityQueue readyQueue;
-extern cpu CPU0, CPU1, CPU2, CPU3;
+//extern cpu CPU0, CPU1, CPU2, CPU3;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
@@ -13,6 +13,7 @@ OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
 		current_cycle(0),
 		ldr(),
+		CPU(),
 		Dispatch(),
 		ltSched()
 	{ }
@@ -33,7 +34,7 @@ void OSDriver::run(std::string fileName) {
 		run_longts();
 		try {
 			//  Runs the CPU
-			run_cpu(Freecpu());
+			run_cpu(CPU);
 		}
 		catch (const char* e) {
 			//  Remove the process if it malfunctions
@@ -41,7 +42,7 @@ void OSDriver::run(std::string fileName) {
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
 		//  Context Switches for the next process
-		run_shortts(Freecpu());
+		run_shortts(CPU);
 	}
 
 #if (defined DEBUG || defined _DEBUG)
@@ -74,7 +75,7 @@ void OSDriver::run_cpu(cpu CPU) {
 
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU.CurrentProcess = readyQueue.getProcess();
-	readyQueue.removeProcess(); //remove process from the ready queue 
+	readyQueue.removeProcess(); //remove process from the ready queue
 	CPU.CurrentProcess->set_status(RUNNING);//set process pcb to running status
 	while(CPU.CurrentProcess->get_status() != status::TERMINATED)
 	{
@@ -131,7 +132,9 @@ void OSDriver::run_shortts(cpu CPU) {
 			current_cycle = 0;
 	}
 }
+
 //check each cpu then determines which one is not running a process
+/*
 cpu OSDriver::Freecpu()
 {
 	if (CPU0.CurrentProcess->get_status() != RUNNING)
@@ -155,4 +158,5 @@ cpu OSDriver::Freecpu()
 		return Freecpu();//keep looking for free cpu
 	}
 }
+*/
 

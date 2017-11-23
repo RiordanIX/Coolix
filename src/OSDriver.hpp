@@ -25,6 +25,7 @@ public:
     int current_cycle;
 
     loader ldr;
+	cpu CPU;
     Dispatcher Dispatch;
     LongTerm ltSched;
 	ShortTermScheduler StSched;
@@ -36,6 +37,6 @@ private:
     void run_shortts(cpu CPU);
     void run_longts();
 	void print_error(PCB* p);
-	cpu Freecpu();
+	//cpu Freecpu();
 };
 

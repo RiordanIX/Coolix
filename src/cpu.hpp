@@ -9,7 +9,9 @@
 //#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
-#define DEFAULT_REG_SIZE 16
+#define DEF_REG_SIZE 16
+// Default Cache size is 4 frames:  4 bytes per instruct, 4 instructs per frame
+#define DEF_CACHE_SIZE 4*4*4
 
 
 /******************************************************************************
@@ -27,8 +29,14 @@ public:
 	int current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
+	std::vector<instruct_t> input_cache;
+	std::vector<instruct_t> instruct_cache;
+	std::vector<instruct_t> output_cache;
 
-	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
+
+	cpu(std::size_t size=DEF_REG_SIZE, std::size_t cache=DEF_CACHE_SIZE) :
+			num_registers(size), registers(size, 0), input_cache(cache),
+			instruct_cache(cache), output_cache(cache) {}
 	instruct_t fetch(PCB* pcb);
 	void set_registers(std::vector<instruct_t> to_switch);
 	void decode_and_execute(instruct_t inst, PCB* pcb);
