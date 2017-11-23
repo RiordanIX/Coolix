@@ -15,7 +15,7 @@ process into memory.
 #include "loader.hpp"
 #include "pcb.hpp"
 #include "instruct.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 
 using std::size_t;
 using std::string;
@@ -50,7 +50,7 @@ void loader::readFromFile(string filename) {
             debug_printf("Creating process...%s","\n");
 
 			//address = DISK.get_used();
-			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;  
+			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;
 
 			//Read process id
             file >> x;

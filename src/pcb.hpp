@@ -7,7 +7,8 @@
 #include <vector>
 #include <algorithm>
 
-#define PAGE_SIZE 128
+// Page size: 4 instructions at 4 bytes each
+#define PAGE_SIZE 4*4
 
 enum status
 {

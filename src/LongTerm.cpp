@@ -1,7 +1,9 @@
 #include "LongTerm.hpp"
 
+using std::vector;
+using std::sort;
 // GLOBAL VARIABLES!!!
-extern std::vector<PCB> process_list;
+extern vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern Ram MEM;
@@ -19,7 +21,10 @@ LongTerm::~LongTerm()
 
 void LongTerm::DiskToRam()
 {
-	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
+
+	///////////////////////////////////////////////////////////////////////////
+
+	vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
 	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
 	if (ReadySize < DEFAULT_RAM)//checks if ram still have space
 	{
@@ -39,7 +44,7 @@ void LongTerm::DiskToRam()
 							break;
 						}
 						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
-						std::printf("Allocated to RAM Process id:%u", newQueue.getProcess()->get_pid());
+						printf("Allocated to RAM Process id:%u", newQueue.getProcess()->get_pid());
 						used.push_back(Used(ess1[i].Sadd, ess1[i].Isize));
 						newQueue.getProcess()->set_ram_address(ess1[i].Sadd);
 						ess1[i].Sadd = ess1[i].Sadd + newQueue.getProcess()->get_end_address();
@@ -73,7 +78,7 @@ void LongTerm::DiskToRam()
 							MaxAddress = MaxAddress + (newQueue.getProcess()->get_end_address());//not sure about this
 
 							/*insert into ready queue here*/
-							std::printf("Allocated to RAM Process id:%u\n", newQueue.getProcess()->get_pid());
+							printf("Allocated to RAM Process id:%u\n", newQueue.getProcess()->get_pid());
 							newQueue.getProcess()->set_status(status::READY);//update pcb
 							readyQueue.addProcess(newQueue.getProcess());
 							newQueue.removeProcess();
@@ -100,9 +105,9 @@ void LongTerm::DiskToRam()
 		}
 	}
 }
-std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
+vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 {
-	std::vector<EmptySpace> ess;
+	vector<EmptySpace> ess;
 	used.clear();
 	// unsigned int prestart = 0;
 	unsigned int preend = 0;
@@ -124,7 +129,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 		}
 		if (used.size() > 0)
 		{
-			std::sort(used.begin(), used.end(), SortUsed);
+			sort(used.begin(), used.end(), SortUsed);
 			preend = 0;
 			for (unsigned int x = 0; x < used.size(); x++)
 			{
@@ -145,7 +150,7 @@ std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 	return ess;
 }
 //check if this range is empty within Ram
-bool LongTerm::CheckEmpty(EmptySpace es, std::vector<Used> used)
+bool LongTerm::CheckEmpty(EmptySpace es, vector<Used> used)
 {
 	bool there = true;
 	for (unsigned int x = 0; x < used.size(); x++)
@@ -178,3 +183,4 @@ bool LongTerm::CheckResource(resourceType RT)
 	}
 	return there;
 }
+
