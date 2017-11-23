@@ -13,6 +13,7 @@ process into memory.
 #include <iostream>
 #include <cstdint>
 #include "loader.hpp"
+#include "pcb.hpp"
 #include "instruct.hpp"
 #include "PriorityQueue.h"
 
@@ -48,7 +49,8 @@ void loader::readFromFile(string filename) {
         if(x.compare(0, 3, "JOB") == 0) {
             debug_printf("Creating process...%s","\n");
 
-			address = DISK.get_used();
+			//address = DISK.get_used();
+			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;  
 
 			//Read process id
             file >> x;

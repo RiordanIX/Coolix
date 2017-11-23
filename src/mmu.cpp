@@ -35,7 +35,14 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 			return frame;
 		}
 
+		else
+		{
+			pcb->set_status(status::WAITING);
+			pcb->set_waitformmu(true);
+			waitingQueue.push(pcb);
+		}
 		//we have no free frames, so we must replace one
+		/*
 		else
 		{
 			pageReplace = pcb->pop_lru_page();
@@ -49,12 +56,12 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 			pcb->update_page_stack(pageNumber);
 			return victimFrame;
 		}
+		*/
 	}
 }
 //MODIFICATION
 void MMU::tableInit(PCB* pcb, std::size_t frameCount)
 {
-	//If there are at least 3 free frames, allocate them to this process
 	std::size_t frame;
 	if(_freeFrames.size() >= frameCount)
 	{
