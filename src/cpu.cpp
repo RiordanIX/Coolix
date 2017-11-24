@@ -34,8 +34,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
-	return MEM.get_instruction(pcb->get_program_counter() + pcb->get_ram_address());
-}
+	return MMU.getPhysicalAddress(pcb, pcb->get_program_counter());
 
 std::string cpu::get_info() {
 	std::string info = "CPU Registers:\n";

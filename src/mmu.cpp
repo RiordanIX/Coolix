@@ -13,33 +13,19 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 	std::size_t pageNumber = virtAddress / PAGE_SIZE,
 	offset = virtAddress % PAGE_SIZE;
 
-	//if page is in memory, translate to physical and update page stack
+	//if page is in memory, translate to physical address
 	if(pcb->is_valid_page(pageNumber))
 	{
-		pcb->update_page_stack(pageNumber);
 		return pcb->get_frame(pageNumber) * PAGE_SIZE + offset;
 	}
 
 	else
 	{
-		//we have free frames, so we give one to the process and update page
-		//table and stack
-		if(!_freeFrames.empty())
-		{
-			std::size_t frame = _freeFrames.back();
-			_freeFrames.pop();
+		//page fault, store requested page number and wait for the fault to be serviced
+		pcb->set_waitformmu(true);
+		pcb->pageRequest = pageNumber;
+		return 0xDEADBEEF;
 
-			readPageFromDisk(pcb, pageNumber, frame);
-			pcb->set_page_table_entry(pageNumber, true, frame);
-			pcb->update_page_stack(pageNumber);
-			return frame;
-		}
-
-		else
-		{
-			pcb->set_waitformmu(true);
-			ShortTermScheduler::RunningToWait(pcb);
-		}
 		//we have no free frames, so we must replace one
 		/*
 		else
@@ -59,6 +45,19 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 	}
 }
 //MODIFICATION
+void MMU::allocateFrame(PCB* pcb)
+{
+	if(!_freeFrames.empty() && pcb->pageRequest != 0xDEADBEEF)
+	{
+		std::size_t frame = _freeFrames.back();
+		_freeFrames.pop();
+
+		readPageFromDisk(pcb, pcb->pageRequest, frame);
+		pcb->set_page_table_entry(pcb->pageRequest, true, frame);
+		pcb->set_waitformmu(false);
+	}
+}
+
 void MMU::tableInit(PCB* pcb, std::size_t frameCount)
 {
 	std::size_t frame;
@@ -83,7 +82,7 @@ void MMU::dumpProcess(PCB* pcb)
 		{
 			frame = pcb->get_frame(i);
 			writePageToDisk(pcb, i);
-			pcb->set_page_table_entry(pageReplace, false, -1);
+			pcb->set_page_table_entry(i, false, -1);
 			_freeFrames.push(frame);
 		}
 	}
@@ -104,7 +103,7 @@ void MMU::readPageFromDisk(PCB* pcb, std::size_t pageNumber, std::size_t frameNu
 		if(diskLoc - pcb->get_ram_address() >= pcb->get_end_address())
 			break;
 
-		//MEM.allocate(ramLoc, DISK.read_byte(diskLoc));
+		MEM.allocate(ramLoc, DISK.read_byte(diskLoc));
 	}
 }
 void MMU::writePageToDisk(PCB* pcb, std::size_t pageNumber)
@@ -122,6 +121,6 @@ void MMU::writePageToDisk(PCB* pcb, std::size_t pageNumber)
 		if(diskLoc - pcb->get_ram_address() >= pcb->get_end_address())
 			break;
 
-		//DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
+		DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
 	}
 }

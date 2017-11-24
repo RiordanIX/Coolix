@@ -86,6 +86,13 @@ void OSDriver::run_cpu(cpu CPU) {
 			print_error(CPU.CurrentProcess);
 			return;
 		}
+		
+		else if(instruct == 0xDEADBEEF)	//page fault
+		{
+			StSched.RunningToWait(CPU.CurrentProcess);
+			return;
+		}
+		
 		//  Decodes and Executes Instruction
 		CPU.decode_and_execute(instruct, CPU.CurrentProcess);
 
@@ -105,6 +112,7 @@ void OSDriver::run_cpu(cpu CPU) {
 #endif // DEBUG
 
 	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
+	MMU.dumpProcess(CPU.CurrentProcess);
 	terminatedQueue.addProcess(CPU.CurrentProcess);
 	Hardware::FreeHardware(CPU.CurrentProcess->get_resource_status());//free resource for other processes
 	//readyQueue.removeProcess();

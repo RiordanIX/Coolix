@@ -105,6 +105,8 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		void set_page_table_entry(std::size_t entry, bool valid, std::size_t frame);
 		void update_page_stack(std::size_t pageNumber);
 		void set_waitformmu(bool mmuwait) { waitformmu = mmuwait; }
+		
+		size_t page_request = 0xDEADBEEF;
 
 private:
 	unsigned int pid;

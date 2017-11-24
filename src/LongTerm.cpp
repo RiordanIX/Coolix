@@ -5,6 +5,7 @@ extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern Ram MEM;
+extern mmu MMU;
 
 LongTerm::LongTerm()
 {
@@ -21,6 +22,15 @@ void LongTerm::DiskToRam()
 {
 	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
 	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
+	while(!newQueue.empty() && MMU.free_frame_count() >= 4)
+	{
+		PCB* process = newQueue.getProcess();
+		MMU.tableInit(process, 4);
+		process->set_status(status::READY);
+		readyQueue.addProcess(process);
+		newQueue.removeProcess();
+	}
+	/*
 	if (ReadySize < DEFAULT_RAM)//checks if ram still have space
 	{
 		while (!newQueue.empty())
@@ -38,12 +48,13 @@ void LongTerm::DiskToRam()
 						{
 							break;
 						}
-						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
+						//MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
+						MMU.tableInit()
 						std::printf("Allocated to RAM Process id:%u", newQueue.getProcess()->get_pid());
 						used.push_back(Used(ess1[i].Sadd, ess1[i].Isize));
 						newQueue.getProcess()->set_ram_address(ess1[i].Sadd);
 						ess1[i].Sadd = ess1[i].Sadd + newQueue.getProcess()->get_end_address();
-						/*insert into ready queue here*/
+						//insert into ready queue here
 						newQueue.getProcess()->set_status(READY);//update pcb
 						readyQueue.addProcess(newQueue.getProcess());
 						newQueue.removeProcess();
@@ -60,7 +71,7 @@ void LongTerm::DiskToRam()
 				else if (spotNotfound > 0)//if process is not placed in memory hole than place it at the end of max end address in ready state.
 				{
 					spotNotfound = 0;
-					/*insert in ready queue here*/
+					//insert in ready queue here
 
 					ReadySize += (newQueue.getProcess()->get_end_address());
 					if (ReadySize < DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
@@ -72,7 +83,7 @@ void LongTerm::DiskToRam()
 							used.push_back(Used(MaxAddress, MaxAddress + newQueue.getProcess()->get_end_address()));
 							MaxAddress = MaxAddress + (newQueue.getProcess()->get_end_address());//not sure about this
 
-							/*insert into ready queue here*/
+							//insert into ready queue here
 							std::printf("Allocated to RAM Process id:%u\n", newQueue.getProcess()->get_pid());
 							newQueue.getProcess()->set_status(status::READY);//update pcb
 							readyQueue.addProcess(newQueue.getProcess());
@@ -99,6 +110,7 @@ void LongTerm::DiskToRam()
 			}
 		}
 	}
+	*/
 }
 std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
 {

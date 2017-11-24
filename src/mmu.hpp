@@ -11,9 +11,10 @@ class MMU
 		
 		//GETTERS
 		std::size_t free_frame_count()	{ return _freeFrames.size(); }
-		std::size_t getPhysicalAddress(PCB* pcb, std::size_t virtAddress);
+		std::size_t getPhysicalAddress(PCB* pcb);
 		
 		//MODIFICATION
+		void allocateFrame(PCB* pcb);
 		void tableInit(PCB* pcb, std::size_t frameCount);
 		void dumpProcess(PCB* pcb);
 	

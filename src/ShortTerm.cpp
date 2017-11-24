@@ -45,12 +45,17 @@ void ShortTermScheduler::WaitToReady()
 	/*how to pop wait queue pointer if process goes to ready?*/
 	//set pcb status to ready
 	//check to see if resouce is free and process is not waiting for mmu
-	if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
-									&& waitingQueue.getProcess()->get_waitformmu() == false)
+	
+	//if the process is waiting for a frame, allocate one to it if one's available
+	if(waitingQueue.getProcess()->get_waitformmu())
+	{
+		MMU.allocateFrame(waitingQueue.getProcess());
+	}
+	
+	if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE)
 	{
 		readyQueue.addProcess(waitingQueue.getProcess());
 		waitingQueue.getProcess()->set_status(status::READY);
 		waitingQueue.removeProcess();
 	}
-
 }
