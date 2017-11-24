@@ -52,7 +52,8 @@ void ShortTermScheduler::WaitToReady()
 		MMU.allocateFrame(waitingQueue.getProcess());
 	}
 	
-	if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE)
+	if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE && 
+		waitingQueue.getProcess->get_waitformmu())
 	{
 		readyQueue.addProcess(waitingQueue.getProcess());
 		waitingQueue.getProcess()->set_status(status::READY);
