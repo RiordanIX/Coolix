@@ -15,7 +15,7 @@ process into memory.
 #include "loader.hpp"
 #include "pcb.hpp"
 #include "instruct.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 
 using std::size_t;
 using std::string;

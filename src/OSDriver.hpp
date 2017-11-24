@@ -36,6 +36,5 @@ private:
     void run_shortts(cpu CPU);
     void run_longts();
 	void print_error(PCB* p);
-	cpu Freecpu();
 };
 

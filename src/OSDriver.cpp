@@ -3,7 +3,6 @@
 
 extern PriorityQueue terminatedQueue;
 extern PriorityQueue readyQueue;
-extern cpu CPU0, CPU1, CPU2, CPU3;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
@@ -33,7 +32,7 @@ void OSDriver::run(std::string fileName) {
 		run_longts();
 		try {
 			//  Runs the CPU
-			run_cpu(Freecpu());
+			run_cpu(CPU_Pool::FreeCPU());
 		}
 		catch (const char* e) {
 			//  Remove the process if it malfunctions
@@ -41,7 +40,7 @@ void OSDriver::run(std::string fileName) {
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
 		//  Context Switches for the next process
-		run_shortts(Freecpu());
+		run_shortts(CPU_Pool::FreeCPU());
 	}
 
 #if (defined DEBUG || defined _DEBUG)
@@ -72,6 +71,7 @@ void OSDriver::print_error(PCB* p) {
 
 void OSDriver::run_cpu(cpu CPU) {
 
+	Hardware::LockHardware(readyQueue.getProcess()->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU.CurrentProcess = readyQueue.getProcess();
 	readyQueue.removeProcess(); //remove process from the ready queue 
@@ -106,6 +106,7 @@ void OSDriver::run_cpu(cpu CPU) {
 
 	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
 	terminatedQueue.addProcess(CPU.CurrentProcess);
+	Hardware::FreeHardware(CPU.CurrentProcess->get_resource_status());//free resource for other processes
 	//readyQueue.removeProcess();
 
 }
@@ -129,30 +130,6 @@ void OSDriver::run_shortts(cpu CPU) {
 		Dispatch.dispatch(&CPU, readyQueue.getProcess());
 		if(current_cycle >= cpu_cycle)
 			current_cycle = 0;
-	}
-}
-//check each cpu then determines which one is not running a process
-cpu OSDriver::Freecpu()
-{
-	if (CPU0.CurrentProcess->get_status() != RUNNING)
-	{
-		return CPU0;
-	}
-	else if (CPU1.CurrentProcess->get_status() != RUNNING)
-	{
-		return CPU1;
-	}
-	else if (CPU2.CurrentProcess->get_status() != RUNNING)
-	{
-		return CPU2;
-	}
-	else if (CPU3.CurrentProcess->get_status() != RUNNING)
-	{
-		return CPU3;
-	}
-	else
-	{
-		return Freecpu();//keep looking for free cpu
 	}
 }
 

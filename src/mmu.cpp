@@ -37,9 +37,8 @@ std::size_t MMU::getPhysicalAddress(PCB* pcb, std::size_t virtAddress)
 
 		else
 		{
-			pcb->set_status(status::WAITING);
 			pcb->set_waitformmu(true);
-			waitingQueue.push(pcb);
+			ShortTermScheduler::RunningToWait(pcb);
 		}
 		//we have no free frames, so we must replace one
 		/*

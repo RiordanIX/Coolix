@@ -1,6 +1,7 @@
 #include "ram.hpp"
 #include "pcb.hpp"
 #include "disk.hpp"
+#include "ShortTerm.hpp"
 #include <queue>
 
 class MMU
