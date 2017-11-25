@@ -9,7 +9,7 @@
 
 // we have 4 bytes per instruction, 4 instructions per frame.
 #define INST_SIZE 4
-#define PAGE_SIZE (4 * INST_SIZE)
+#define PAGE_SIZE 4*4
 
 enum status
 {
