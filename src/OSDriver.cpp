@@ -21,9 +21,15 @@ OSDriver::~OSDriver() { }
 void OSDriver::run(std::string fileName) {
 	//  Load to Disk
 	ldr.readFromFile(fileName);
+
+
 	//  Does an initial load from Disk to RAM and ReadyQueue
-	//debug_printf("Running Long term Scheduler%s","\n");
-	run_longts();
+	debug_printf("Running Long term Scheduler%s","\n");
+	ltSched.loadProcess();
+#if (defined DEBUG || defined _DEBUG)
+	debug_printf("Beginning MEMORY%s","\n");
+	MEM.dump_data();
+#endif
 	debug_printf("Finished with LongTerm Schdeduler%s","\n");
 	//  Runs as long as the ReadyQueue is populated as long as there are
 	//  processes to be ran
@@ -114,7 +120,6 @@ void OSDriver::run_cpu(cpu CPU) {
 
 void OSDriver::run_longts() {
 	// Populate RAM and ReadyQueue
-	ltSched.loadProcess();
 
 	// Checks to see if any process in the Ready Queue should be moved to
 	// Waiting Queue, then moves it

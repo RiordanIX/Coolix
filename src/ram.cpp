@@ -82,5 +82,5 @@ void Ram::dump_data() {
 }
 
 // GLOBAL VARIABLES
-Ram MEM = Ram(DEFAULT_RAM);
+Ram MEM;
 

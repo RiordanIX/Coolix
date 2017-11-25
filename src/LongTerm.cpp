@@ -19,10 +19,13 @@ void LongTerm::loadProcess() {
 	PCB *pcb = newQueue.getProcess();
 	// Load first 4 pages into RAM
 	for (int i = 0; i < 4; ++i) {
-		if (MMU.processDiskToRam(pcb, i) )
+		if (MMU.processDiskToRam(pcb, i) ) {
 			continue;
-		else
+		}
+		else {
+			debug_printf("No frames are available%s", "\n");
 			return;
+		}
 	}
 	pcb->set_status(status::READY);
 	readyQueue.addProcess(pcb);

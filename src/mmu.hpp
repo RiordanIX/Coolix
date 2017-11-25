@@ -19,7 +19,7 @@ class mmu
 		bool processDiskToRam(PCB* pcb, std::size_t pageNumber);
 
 	private:
-		std::queue<std::size_t> _freeFrames;
+		std::vector<std::size_t> _freeFrames;
 		std::size_t pageReplace;
 		//SWAPPING
 		void writePageToDisk(PCB* pcb, std::size_t pageNumber);

@@ -6,8 +6,11 @@ extern Disk DISK;
 using std::size_t;
 
 mmu::mmu() {
-	for(unsigned int i = 0; i < MEM.size() / PAGE_SIZE; i++)
-		_freeFrames.push(i);
+	for(unsigned int i = 0; i < MEM.size(); i++)
+		_freeFrames.push_back(i);
+	debug_printf("Available Frames:\t%lu\tMEM size\t%lu\tPage size\t%d\n",free_frame_count(), MEM.size(), PAGE_SIZE);
+	for (auto i = _freeFrames.begin(); i != _freeFrames.end(); ++i)
+		debug_printf("%lu ", *i);
 }
 
 
@@ -29,7 +32,7 @@ size_t mmu::getPhysicalAddress(PCB* pcb, size_t virtAddress) {
 		if(!_freeFrames.empty())
 		{
 			size_t frame = _freeFrames.back();
-			_freeFrames.pop();
+			_freeFrames.pop_back();
 
 			processDiskToRam(pcb, pageNumber);
 			pcb->set_page_table_entry(pageNumber, true, frame);
@@ -70,7 +73,7 @@ void mmu::tableInit(PCB* pcb, size_t frameCount)
 		for(unsigned int i = 0; i < frameCount; i++)
 		{
 			frame = _freeFrames.back();
-			_freeFrames.pop();
+			_freeFrames.pop_back();
 
 			pcb->set_page_table_entry(i, true, frame);
 			processDiskToRam(pcb,(size_t)(pcb->get_disk_address() / PAGE_SIZE));
@@ -86,7 +89,7 @@ void mmu::dumpProcess(PCB* pcb) {
 			frame = pcb->get_frame(i);
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(pageReplace, false, -1);
-			_freeFrames.push(frame);
+			_freeFrames.push_back(frame);
 		}
 	}
 }
@@ -99,17 +102,23 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	if (_freeFrames.empty())
 		return false;
 	diskLoc= pcb->get_disk_address() + pageNumber * PAGE_SIZE;
-	ramLoc = _freeFrames.front();
+	ramLoc = _freeFrames.back();
 
 	// Sanity check to make sure not allocating more RAM than we have.
 	if (ramLoc + PAGE_SIZE > MEM.size())
 		return false;
 	// We're confident the frame can be popped.
-	_freeFrames.pop();
+	_freeFrames.pop_back();
 
 	// Now actually allocate data to main memory
-	for(int i = 0; i < PAGE_SIZE / INST_SIZE; i++, diskLoc++, ramLoc++) {
+	for(int i = 0; i < (PAGE_SIZE / INST_SIZE); i++, diskLoc++, ramLoc++) {
+		try {
 		MEM.allocate(ramLoc, DISK.read_instruction(diskLoc));
+		}
+		catch (char* e) {
+			printf("%s",e);
+			return false;
+		}
 	}
 	return true;
 }
