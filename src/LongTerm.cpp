@@ -4,104 +4,33 @@
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
-extern Ram MEM;
+extern mmu MMU;
 
-LongTerm::LongTerm()
-{
+LongTerm::LongTerm() {
 	ReadySize = 0;
 	MaxAddress = 0;
 }
 
 
-LongTerm::~LongTerm()
-{
-}
+LongTerm::~LongTerm() { }
 
-void LongTerm::DiskToRam()
-{
-	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
-	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
-	if (ReadySize < DEFAULT_RAM)//checks if ram still have space
-	{
-		while (!newQueue.empty())
-		{
-			//store process with a status of NEW
-			if (newQueue.getProcess()->get_status() == status::NEW)
-			{
-				spotNotfound++;
-				for (unsigned int i = 0; i < ess1.size(); i++)//loop through empty spaces to see if anything fits
-				{
-					if ((ess1[i].Isize - ess1[i].Sadd) >= (newQueue.getProcess()->get_end_address()))
-					{
-						ReadySize += ((newQueue.getProcess()->get_end_address()));
-						if (ReadySize >= DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
-						{
-							break;
-						}
-						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
-						std::printf("Allocated to RAM Process id:%u", newQueue.getProcess()->get_pid());
-						used.push_back(Used(ess1[i].Sadd, ess1[i].Isize));
-						newQueue.getProcess()->set_ram_address(ess1[i].Sadd);
-						ess1[i].Sadd = ess1[i].Sadd + newQueue.getProcess()->get_end_address();
-						/*insert into ready queue here*/
-						newQueue.getProcess()->set_status(READY);//update pcb
-						readyQueue.addProcess(newQueue.getProcess());
-						newQueue.removeProcess();
-						spotNotfound--;
-						break;
-					}
-				}
-				if (ReadySize >= DEFAULT_RAM)//minus the previous size and so we look for another process that would fit
-				{
-					ReadySize = ReadySize - ((newQueue.getProcess()->get_end_address()));
-					spotNotfound--;
-					break;
-				}
-				else if (spotNotfound > 0)//if process is not placed in memory hole than place it at the end of max end address in ready state.
-				{
-					spotNotfound = 0;
-					/*insert in ready queue here*/
 
-					ReadySize += (newQueue.getProcess()->get_end_address());
-					if (ReadySize < DEFAULT_RAM)//if ram is full than break the loop before allocating space in ram
-					{
-						if (CheckEmpty(EmptySpace(MaxAddress, MaxAddress+ newQueue.getProcess()->get_end_address()), used))
-						{
-							newQueue.getProcess()->set_ram_address(MaxAddress);
-							MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
-							used.push_back(Used(MaxAddress, MaxAddress + newQueue.getProcess()->get_end_address()));
-							MaxAddress = MaxAddress + (newQueue.getProcess()->get_end_address());//not sure about this
-
-							/*insert into ready queue here*/
-							std::printf("Allocated to RAM Process id:%u\n", newQueue.getProcess()->get_pid());
-							newQueue.getProcess()->set_status(status::READY);//update pcb
-							readyQueue.addProcess(newQueue.getProcess());
-							newQueue.removeProcess();
-							if (ReadySize == DEFAULT_RAM)
-							{
-								ReadySize = ReadySize - ((newQueue.getProcess()->get_end_address()));
-								break;
-							}
-						}
-						else
-						{
-							ReadySize = ReadySize - ((newQueue.getProcess()->get_end_address()));
-							break;
-						}
-					}
-					else
-					{
-						ReadySize = ReadySize - ((newQueue.getProcess()->get_end_address()));
-						break;
-					}
-
-				}
-			}
-		}
+void LongTerm::loadProcess() {
+	PCB *pcb = newQueue.getProcess();
+	// Load first 4 pages into RAM
+	for (int i = 0; i < 4; ++i) {
+		if (MMU.processDiskToRam(pcb, i) )
+			continue;
+		else
+			return;
 	}
+	pcb->set_status(status::READY);
+	readyQueue.addProcess(pcb);
+	newQueue.removeProcess();
 }
-std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces()
-{
+
+
+std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces() {
 	std::vector<EmptySpace> ess;
 	used.clear();
 	// unsigned int prestart = 0;

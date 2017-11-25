@@ -24,6 +24,7 @@ void OSDriver::run(std::string fileName) {
 	//  Does an initial load from Disk to RAM and ReadyQueue
 	//debug_printf("Running Long term Scheduler%s","\n");
 	run_longts();
+	debug_printf("Finished with LongTerm Schdeduler%s","\n");
 	//  Runs as long as the ReadyQueue is populated as long as there are
 	//  processes to be ran
 	while(readyQueue.size() > 0)
@@ -74,7 +75,7 @@ void OSDriver::run_cpu(cpu CPU) {
 	Hardware::LockHardware(readyQueue.getProcess()->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU.CurrentProcess = readyQueue.getProcess();
-	readyQueue.removeProcess(); //remove process from the ready queue 
+	readyQueue.removeProcess(); //remove process from the ready queue
 	CPU.CurrentProcess->set_status(RUNNING);//set process pcb to running status
 	while(CPU.CurrentProcess->get_status() != status::TERMINATED)
 	{
@@ -113,7 +114,7 @@ void OSDriver::run_cpu(cpu CPU) {
 
 void OSDriver::run_longts() {
 	// Populate RAM and ReadyQueue
-	ltSched.DiskToRam();
+	ltSched.loadProcess();
 
 	// Checks to see if any process in the Ready Queue should be moved to
 	// Waiting Queue, then moves it

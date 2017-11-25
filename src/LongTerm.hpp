@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <vector>
+#include "mmu.hpp"
 #include "disk.hpp"
 #include "ram.hpp"
 #include "pcb.hpp"
@@ -14,7 +15,7 @@ public:
 	LongTerm();//contructor
 	~LongTerm();//distructor
 	//Move  processes from disk to ram
-	void DiskToRam();
+	void loadProcess();
 private:
 	struct EmptySpace
 	{

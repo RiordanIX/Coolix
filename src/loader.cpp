@@ -50,7 +50,7 @@ void loader::readFromFile(string filename) {
             debug_printf("Creating process...%s","\n");
 
 			//address = DISK.get_used();
-			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;  
+			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;
 
 			//Read process id
             file >> x;
@@ -128,5 +128,6 @@ void loader::readFromFile(string filename) {
 	for (auto it = process_list.begin(); it != process_list.end(); ++it) {
 		newQueue.addProcess(&(*it));
 	}
+	debug_printf("Done Loading Processes%s", "\n");
 }
 
