@@ -3,6 +3,7 @@
 
 extern PriorityQueue terminatedQueue;
 extern PriorityQueue readyQueue;
+extern mmu MMU;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
@@ -74,7 +75,7 @@ void OSDriver::run_cpu(cpu CPU) {
 	Hardware::LockHardware(readyQueue.getProcess()->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU.CurrentProcess = readyQueue.getProcess();
-	readyQueue.removeProcess(); //remove process from the ready queue 
+	readyQueue.removeProcess(); //remove process from the ready queue
 	CPU.CurrentProcess->set_status(RUNNING);//set process pcb to running status
 	while(CPU.CurrentProcess->get_status() != status::TERMINATED)
 	{
@@ -86,13 +87,13 @@ void OSDriver::run_cpu(cpu CPU) {
 			print_error(CPU.CurrentProcess);
 			return;
 		}
-		
+
 		else if(instruct == 0xDEADBEEF)	//page fault
 		{
 			StSched.RunningToWait(CPU.CurrentProcess);
 			return;
 		}
-		
+
 		//  Decodes and Executes Instruction
 		CPU.decode_and_execute(instruct, CPU.CurrentProcess);
 

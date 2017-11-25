@@ -39,6 +39,15 @@ void Disk::allocate(instruct_t data) {
 	debug_printf("Allocated: %#010X\n",this->read_instruction(this->_used - 4));
 }
 
+void Disk::allocate(std::size_t location, byte_t data) {
+	if (is_full()) {
+		throw "Illegal allocation. Disk is full";
+	}
+	else {
+		_disk[location] = data;
+		if (location > _used) ++_used;
+	}
+}
 
 
 /**

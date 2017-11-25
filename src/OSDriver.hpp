@@ -3,15 +3,14 @@
 #define DEFAULT_CPU_CYCLE_TIME  50
 
 //#include "FIFO.hpp"
+#include "PriorityQueue.hpp"
 #include "loader.hpp"
+#include "mmu.hpp"
 #include "cpu.hpp"
 #include "dispatcher.hpp"
 #include "pcb.hpp"
-#include "PriorityQueue.hpp"
 #include "LongTerm.hpp"
 #include "ShortTerm.hpp"
-//#include short term scheduler
-//#include long term scheduler
 
 //extern PCB process_list;
 //extern PriorityQueue readyQueue;

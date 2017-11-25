@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+
 enum Mutex
 {
 	FREE = 0,
@@ -23,13 +24,16 @@ public:
 	static Mutex GetResourceLock(resourceType Rt);
 
 };
+
 class CPU_Pool
 {
 public:
 	CPU_Pool();
 	static cpu FreeCPU();
 };
+
 static Hardware IO1 = Hardware(resourceType::DISK_IO, Mutex::FREE);
 static Hardware IO2 = Hardware(resourceType::KEYBOARD, Mutex::FREE);
 static Hardware IO3 = Hardware(resourceType::SHMEM, Mutex::FREE);
 static Hardware IO4 = Hardware(resourceType::STDOUT, Mutex::FREE);
+

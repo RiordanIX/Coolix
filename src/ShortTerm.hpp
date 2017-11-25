@@ -3,6 +3,7 @@
 #include "pcb.hpp"
 #include "CpuPool.hpp"
 #include "PriorityQueue.hpp"
+#include "mmu.hpp"
 
 class ShortTermScheduler
 {

@@ -6,6 +6,7 @@
 #endif
 
 extern Ram MEM;
+extern mmu MMU;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	printf("This Instruction: %#010X\n", inst);

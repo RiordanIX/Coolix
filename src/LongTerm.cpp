@@ -21,7 +21,7 @@ LongTerm::~LongTerm()
 void LongTerm::DiskToRam()
 {
 	std::vector<EmptySpace> ess1 = GetOpenSpaces();//gets vector of addresses and size for memory holes
-	int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
+	//int spotNotfound = 0;//use this variable to determine if process fits in memory hole or not
 	while(!newQueue.empty() && MMU.free_frame_count() >= 4)
 	{
 		PCB* process = newQueue.getProcess();
