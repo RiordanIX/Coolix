@@ -129,7 +129,7 @@ private:
 	public:
 	struct PageTable
 	{
-		std::vector<std::pair<bool, size_t>> pages;
+		std::vector<std::pair<bool, instruct_t>> pages;
 		PageTable(std::size_t size) : pages(size)
 		{
 			for (auto it = pages.begin(); it != pages.end(); it++)

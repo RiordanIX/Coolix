@@ -27,7 +27,7 @@ class CPU_Pool
 {
 public:
 	CPU_Pool();
-	static cpu FreeCPU();
+	static cpu * FreeCPU();
 };
 static Hardware IO1 = Hardware(resourceType::DISK_IO, Mutex::FREE);
 static Hardware IO2 = Hardware(resourceType::KEYBOARD, Mutex::FREE);

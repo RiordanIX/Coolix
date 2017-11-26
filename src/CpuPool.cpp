@@ -5,27 +5,43 @@ extern cpu CPU0, CPU1, CPU2, CPU3;
 CPU_Pool::CPU_Pool()
 {
 }
-cpu CPU_Pool::FreeCPU()//check each cpu then determines which one is not running a process
+cpu* CPU_Pool::FreeCPU()//check each cpu then determines which one is not running a process
 {
-	if (CPU0.CurrentProcess->get_status() != RUNNING)
+	if (CPU0.CurrentProcess == nullptr)
 	{
-		return CPU0;
+		return &CPU0;
+	}
+	else if (CPU0.CurrentProcess->get_status() != RUNNING)
+	{
+		return &CPU0;
+	}
+	else if (CPU1.CurrentProcess == nullptr)
+	{
+		return &CPU1;
 	}
 	else if (CPU1.CurrentProcess->get_status() != RUNNING)
 	{
-		return CPU1;
+		return &CPU1;
+	}
+	else if (CPU2.CurrentProcess == nullptr)
+	{
+		return &CPU2;
 	}
 	else if (CPU2.CurrentProcess->get_status() != RUNNING)
 	{
-		return CPU2;
+		return &CPU2;
+	}
+	else if (CPU3.CurrentProcess == nullptr)
+	{
+		return &CPU3;
 	}
 	else if (CPU3.CurrentProcess->get_status() != RUNNING)
 	{
-		return CPU3;
+		return &CPU3;
 	}
 	else
 	{
-		return FreeCPU();//keep looking for free cpu
+		return nullptr;
 	}
 }
 //Lock Resource by setting the mutex to lock

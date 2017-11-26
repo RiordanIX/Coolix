@@ -16,6 +16,7 @@ process into memory.
 #include "pcb.hpp"
 #include "instruct.hpp"
 #include "PriorityQueue.hpp"
+#include "mmu.hpp"
 
 using std::size_t;
 using std::string;
@@ -27,10 +28,10 @@ using std::stoul;
 extern Disk DISK;
 extern std::vector<PCB> process_list;
 extern PriorityQueue newQueue;
+extern mmu MMU;
 
 void loader::readFromFile(string filename) {
     string x;
-
     file.open(filename.c_str());
 
 	//Properties of a loaded process
@@ -49,8 +50,9 @@ void loader::readFromFile(string filename) {
         if(x.compare(0, 3, "JOB") == 0) {
             debug_printf("Creating process...%s","\n");
 
-			//address = DISK.get_used();
-			address = (DISK.get_used() / PAGE_SIZE + 1) * PAGE_SIZE;
+		//	address = DISK.get_used();
+			address = (DISK.get_used() / (PAGE_SIZE) + 1) * (PAGE_SIZE);
+		
 
 			//Read process id
             file >> x;
@@ -125,6 +127,7 @@ void loader::readFromFile(string filename) {
     }
 
     file.close();
+	MMU.SetFreeFrames();
 	for (auto it = process_list.begin(); it != process_list.end(); ++it) {
 		newQueue.addProcess(&(*it));
 	}

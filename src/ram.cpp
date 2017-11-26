@@ -63,7 +63,6 @@ instruct_t Ram::get_instruction(size_t index) {
 	return instruct;
 }
 
-
 void Ram::allocate_chunk(size_t location, deque<instruct_t> inst) {
 	size_t i = location;
 	for (auto it = inst.begin(); it != inst.end(); ++it,i += 4) {
