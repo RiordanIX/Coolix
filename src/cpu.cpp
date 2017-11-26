@@ -31,7 +31,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		std::cout << get_info() << std::endl;
 		throw "Error while decoding instruction";
 	}
-	printf("%s", get_info().c_str());
+	//printf("%s", get_info().c_str());
 }
 
 instruct_t cpu::fetch(PCB* pcb) {

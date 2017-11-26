@@ -58,7 +58,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 	sectionSizes[section::TEMP] = temp;
 
 	//Give the page table enough pages to fit the process
-	pageTable = PCB::PageTable((get_end_address() / (PAGE_SIZE) + 1) * (PAGE_SIZE));
+	pageTable = PCB::PageTable(get_end_address() / (PAGE_SIZE));
 }
 		// GETTERS
 		int get_priority() { return priority; }
@@ -140,7 +140,7 @@ private:
 		}
 		std::size_t size() { return pages.size(); }
 	};
-	PCB::PageTable pageTable = PageTable(PAGE_SIZE);
+	PCB::PageTable pageTable;
 };
 
 
