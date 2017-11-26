@@ -56,6 +56,7 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 
 
 inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+	
 	if (Reg2 > 0) {
 		registers[Reg1] = MMU.get_instruction(pcb, registers[Reg2] + offset);
 	}
@@ -69,12 +70,19 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
-		pcb->get_temp_address();
+		
 		printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
 			registers[Reg1], registers[Reg1], Address);
 		printf("End address: %#010X\n", offset);
 		// Needs some sort of offset.  This should be figured out some way.
-		MMU.writeToRam(Address +offset, registers[Reg1]);
+		if (offset > 0)
+		{
+			MMU.writeToRam(Address + offset, registers[Reg1]);
+		}
+		else
+		{
+			//page fault
+		}
 	}
 }
 
@@ -114,13 +122,30 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 	registers[dest] = registers[s1] < registers[s2] ? 1 : 0;
 }
 
-inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset) {
-	MMU.writeToRam(offset + registers[D_reg], registers[B_reg]);
+inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, PCB * pcb) {
+	std::size_t offset = MMU.getRamAddress(pcb, registers[D_reg]);
+	if (offset > 0)
+	{
+	//	MMU.writeToRam(offset + registers[D_reg], registers[B_reg]);
+		MMU.writeToRam(offset, registers[B_reg]);
+	}
+	else
+	{
+		//page fault
+	}
 
 }
 
-inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
-	registers[D_reg] = MMU.get_instruction(pcb, registers[B_reg] + Address + offset);
+inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
+	std::size_t offset = MMU.getRamAddress(pcb, registers[B_reg] + Address);
+	if (offset > 0)
+	{
+		registers[D_reg] = MMU.get_instruction(pcb, registers[B_reg] + Address);
+	}
+	else
+	{
+		//page fault
+	}
 }
 
 inline void	cpu::cpu_movi(instruct_t D_reg, instruct_t Address) {

@@ -83,7 +83,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t get_program_counter() { return programCounter; }
 
 		std::size_t get_page_table_length() { return pageTable.pages.size(); }
-		std::size_t get_frame(std::size_t pageNumber) { return pageTable.pages[pageNumber].second; }
+		std::size_t get_frame(std::size_t pageNumber);
 		std::size_t pop_lru_page() { std::size_t lru = page_stack.back(); page_stack.pop_back(); return lru; }
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 		bool is_valid_page(size_t frame);

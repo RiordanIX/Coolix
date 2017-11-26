@@ -25,6 +25,8 @@ class mmu
 		void writeToRam(instruct_t location, instruct_t data);
 		instruct_t get_instruction(PCB* pcb);
 
+		instruct_t getRamAddress(PCB * pcb, instruct_t offset);
+
 		instruct_t get_instruction(PCB * pcb, instruct_t address);
 
 	private:

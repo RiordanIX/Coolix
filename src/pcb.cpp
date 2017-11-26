@@ -57,6 +57,11 @@ void PCB::set_ram_address(size_t address){
 }
 
 
+std::size_t PCB::get_frame(std::size_t pageNumber)
+{
+	 return pageTable.pages[pageNumber].second; 
+}
+
 //PAGE TABLE
 std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 {
@@ -66,7 +71,9 @@ std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 // returns false if out of bounds.
 bool PCB::is_valid_page(size_t frame) {
 	if (frame > pageTable.size())
+	{
 		return false;
+	}
 	return pageTable.pages[frame].first;
 }
 
