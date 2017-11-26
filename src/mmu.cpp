@@ -152,7 +152,8 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 
 
 void mmu::writeToRam(instruct_t location, instruct_t data) {
-
+	// Need to make sure that the frame is active. Otherwise, wrong data
+	MEM.allocate(location, data);
 }
 
 
@@ -178,32 +179,36 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
 
 
 
-instruct_t mmu::get_instruction(PCB* pcb) 
+instruct_t mmu::get_instruction(PCB* pcb)
 {
 	size_t frame;
-	size_t address;
 	size_t offset;
 	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE))){
 		frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
+		offset = (pcb->get_program_counter()) % (INST_SIZE);
+		return MEM.get_instruction(frame * (PAGE_SIZE) + offset);
 	}
 	else {
+		// Page Fault
+		return -1;
 	}
-	offset = (pcb->get_program_counter()) % (INST_SIZE);
-	address = MEM.get_instruction(frame*(PAGE_SIZE) + offset);
-	return address;
 }
 
 
-instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
+instruct_t mmu::get_instruction(PCB* pcb, instruct_t localAddress)
 {
 	size_t frame;
-	if (pcb->is_valid_page(address / (PAGE_SIZE)))
+	if (pcb->is_valid_page(localAddress / (PAGE_SIZE)))
 	{
-		frame = pcb->get_frame(address / (PAGE_SIZE));
+		frame = pcb->get_frame(localAddress / (PAGE_SIZE));
+		return MEM.get_instruction(frame* (PAGE_SIZE) + (localAddress % (PAGE_SIZE)));
 	}
-	else;
-	return address;
+	else{
+		return -1;
+	}
 }
+
+
 // GLOBAL VARIABLE
 mmu MMU;
 

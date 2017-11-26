@@ -7,7 +7,6 @@
 #endif
 
 extern mmu MMU;
-extern Ram MEM;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	printf("This Instruction: %#010X\n", inst);
@@ -57,7 +56,6 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 
 
 inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	//registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
 	if (Reg2 > 0) {
 		registers[Reg1] = MMU.get_instruction(pcb, registers[Reg2] + offset);
 	}
@@ -71,10 +69,12 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
-	printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
+		pcb->get_temp_address();
+		printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
 			registers[Reg1], registers[Reg1], Address);
 		printf("End address: %#010X\n", offset);
-		MMU.writeToRam(Address + offset, registers[Reg1]);
+		// Needs some sort of offset.  This should be figured out some way.
+		MMU.writeToRam(Address +offset, registers[Reg1]);
 	}
 }
 
@@ -115,11 +115,12 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 }
 
 inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset) {
-	MEM.allocate(offset+registers[D_reg], registers[B_reg]);
+	MMU.writeToRam(offset + registers[D_reg], registers[B_reg]);
+
 }
 
-inline void	cpu::cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
-	registers[D_reg] = MEM.get_instruction(registers[B_reg] + Address + offset);
+inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset) {
+	registers[D_reg] = MMU.get_instruction(pcb, registers[B_reg] + Address + offset);
 }
 
 inline void	cpu::cpu_movi(instruct_t D_reg, instruct_t Address) {
@@ -201,11 +202,11 @@ inline void cpu::cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) 
 	{
 	case OP_IO_RD:
 
-		cpu_rd(pcb, Reg1, Reg2, Address, offset);
+		cpu_rd(pcb, Reg1, Reg2, frameNum, offset);
 		break;
 
 	case OP_IO_WR:
-		cpu_wr(pcb, Reg1, Reg2, Address, offset);
+		cpu_wr(pcb, Reg1, Reg2, frameNum, offset);
 		break;
 	default:
 		throw "Invalid IO instruction format";
