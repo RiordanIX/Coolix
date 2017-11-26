@@ -41,25 +41,26 @@ enum resourceType
 class PCB
 {
 public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
-	pid(id),
-	currentStatus(status::NEW),
-	resource_held(resourceType::NONE),
-	priority(p),
-	wait_time(0),
-	diskAddress(daddress),
-	ramAddress(0xDEADBEEF),
-	programCounter(0),
-	registers(16, 0),
-	sectionSizes(4, 0)
-{
-	sectionSizes[section::INSTRUCTION] = instruct;
-	sectionSizes[section::INPUT] = inp;
-	sectionSizes[section::OUTPUT] = out;
-	sectionSizes[section::TEMP] = temp;
+		pid(id),
+		currentStatus(status::NEW),
+		resource_held(resourceType::NONE),
+		priority(p),
+		wait_time(0),
+		diskAddress(daddress),
+		ramAddress(0xDEADBEEF),
+		programCounter(0),
+		registers(16, 0),
+		sectionSizes(4, 0),
+		pageTable((instruct + inp + out+ temp)/ (PAGE_SIZE))
+	{
+		sectionSizes[section::INSTRUCTION] = instruct;
+		sectionSizes[section::INPUT] = inp;
+		sectionSizes[section::OUTPUT] = out;
+		sectionSizes[section::TEMP] = temp;
 
-	//Give the page table enough pages to fit the process
-	pageTable = PCB::PageTable(get_end_address() / (PAGE_SIZE));
-}
+		//Give the page table enough pages to fit the process
+	}
+
 		// GETTERS
 		int get_priority() { return priority; }
 		unsigned int get_pid() { return pid; }
@@ -140,7 +141,7 @@ private:
 		}
 		std::size_t size() { return pages.size(); }
 	};
-	PCB::PageTable pageTable;
+	PageTable pageTable;
 };
 
 
