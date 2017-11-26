@@ -172,17 +172,18 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
 		if(diskLoc - pcb->get_ram_address() >= pcb->get_end_address())
 			break;
 
-		DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
+		//DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
 	}
 }
 
 
 
-instruct_t mmu::get_instruction(PCB* pcb) {
+instruct_t mmu::get_instruction(PCB* pcb) 
+{
 	size_t frame;
 	size_t address;
 	size_t offset;
-	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE)){
+	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE))){
 		frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 	}
 	else {
@@ -193,14 +194,16 @@ instruct_t mmu::get_instruction(PCB* pcb) {
 }
 
 
-instruct_t mmu::get_instruction(PCB* pcb, instruct_t address) {
-	if (pcb->is_valid_page(address / (PAGE_SIZE)){
+instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
+{
+	size_t frame;
+	if (pcb->is_valid_page(address / (PAGE_SIZE)))
+	{
 		frame = pcb->get_frame(address / (PAGE_SIZE));
 	}
-	else
-
-
-
+	else;
+	return address;
+}
 // GLOBAL VARIABLE
 mmu MMU;
 

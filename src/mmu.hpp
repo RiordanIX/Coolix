@@ -22,7 +22,10 @@ class mmu
 		void dumpProcess(PCB* pcb);
 		size_t FrameNumberToLocation(std::size_t Frame);
 		bool processDiskToRam(PCB* pcb, std::size_t pageNumber);
+		void writeToRam(instruct_t location, instruct_t data);
 		instruct_t get_instruction(PCB* pcb);
+
+		instruct_t get_instruction(PCB * pcb, instruct_t address);
 
 	private:
 		std::queue<std::size_t> _freeFrames;
