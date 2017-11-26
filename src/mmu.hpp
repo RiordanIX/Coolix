@@ -1,3 +1,4 @@
+#include "instruct.hpp"
 #include "ram.hpp"
 #include "pcb.hpp"
 #include "disk.hpp"
@@ -21,6 +22,7 @@ class mmu
 		void dumpProcess(PCB* pcb);
 		size_t FrameNumberToLocation(std::size_t Frame);
 		bool processDiskToRam(PCB* pcb, std::size_t pageNumber);
+		instruct_t get_instruction(PCB* pcb);
 
 	private:
 		std::queue<std::size_t> _freeFrames;

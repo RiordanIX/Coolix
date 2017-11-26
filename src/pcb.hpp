@@ -58,7 +58,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 	sectionSizes[section::TEMP] = temp;
 
 	//Give the page table enough pages to fit the process
-	pageTable = PCB::PageTable((get_end_address() / PAGE_SIZE + 1) * PAGE_SIZE);
+	pageTable = PCB::PageTable((get_end_address() / (PAGE_SIZE) + 1) * (PAGE_SIZE));
 }
 		// GETTERS
 		int get_priority() { return priority; }
@@ -82,10 +82,10 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t get_program_counter() { return programCounter; }
 
 		std::size_t get_page_table_length() { return pageTable.pages.size(); }
-		bool is_valid_page(std::size_t pageNumber) { return pageTable.pages[pageNumber].first; }
 		std::size_t get_frame(std::size_t pageNumber) { return pageTable.pages[pageNumber].second; }
 		std::size_t pop_lru_page() { std::size_t lru = page_stack.back(); page_stack.pop_back(); return lru; }
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
+		bool is_valid_page(size_t frame);
 
 
 
@@ -138,6 +138,7 @@ private:
 				(*it).second = -1;
 			}
 		}
+		std::size_t size() { return pages.size(); }
 	};
 	PCB::PageTable pageTable = PageTable(PAGE_SIZE);
 };

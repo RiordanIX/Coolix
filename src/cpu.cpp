@@ -5,7 +5,7 @@
 #include <cstdio>
 #endif
 
-extern Ram MEM;
+extern mmu MMU;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	printf("This Instruction: %#010X\n", inst);
@@ -34,7 +34,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 }
 
 instruct_t cpu::fetch(PCB* pcb) {
-	return MEM.get_instruction(pcb->get_program_counter() + pcb->get_ram_address());
+	return MMU.get_instruction(pcb);
 }
 
 std::string cpu::get_info() {
@@ -54,25 +54,25 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 }
 
 
-inline void cpu::cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	//registers[Reg1] = (Address == 0) ? registers[Reg2] : MEM.get_instruction(Address + offset);
 	if (Reg2 > 0) {
-		registers[Reg1] = MEM.get_instruction(registers[Reg2] + offset);
+		registers[Reg1] = MMU.get_instruction(registers[Reg2] + offset);
 	}
 	else {
-		registers[Reg1] = MEM.get_instruction(Address + offset);
+		registers[Reg1] = MMU.get_instruction(Address + offset);
 	}
 }
 
 
-inline void cpu::cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
+inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
 	printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
 			registers[Reg1], registers[Reg1], Address);
 		printf("End address: %#010X\n", offset);
-		MEM.allocate(Address + offset, registers[Reg1]);
+		MMU.writeToRam(Address + offset, registers[Reg1]);
 	}
 }
 
@@ -184,6 +184,30 @@ inline void	cpu::cpu_bgz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 inline void	cpu::cpu_blz(instruct_t B_reg, instruct_t Address, PCB* pcb) {
 	if (registers[B_reg] & 0x80000000)
 		pcb->set_program_counter(Address - 4);
+}
+
+inline void cpu::cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
+	instruct_t Reg1, Reg2, Address, offset;
+	Reg1 = (inst & 0x00F00000) >> (5 * 4);
+	Reg2 = (inst & 0x000F0000) >> (4 * 4);
+	Address = inst & 0x0000FFFF;
+
+	size_t frameNum = Address / (PAGE_SIZE);
+	size_t offset = Address % (PAGE_SIZE);
+
+	switch (opcode)
+	{
+	case OP_IO_RD:
+
+		cpu_rd(pcb, Reg1, Reg2, Address, offset);
+		break;
+
+	case OP_IO_WR:
+		cpu_wr(pcb, Reg1, Reg2, Address, offset);
+		break;
+	default:
+		throw "Invalid IO instruction format";
+	}
 }
 
 // GLOBAL VARIABLES

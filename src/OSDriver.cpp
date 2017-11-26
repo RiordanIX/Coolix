@@ -42,7 +42,7 @@ void OSDriver::run(std::string fileName) {
 		//  Load and Move Processes accordingly
 		run_longts();
 		try {
-			
+
 			CPU = CPU_Pool::FreeCPU();
 			if (CPU != nullptr)
 			{
@@ -92,7 +92,8 @@ void OSDriver::run_cpu(cpu * CPU) {
 	CPU->CurrentProcess = readyQueue.getProcess();
 	readyQueue.removeProcess(); //remove process from the ready queue
 	CPU->CurrentProcess->set_status(RUNNING);//set process pcb to running status
-	while(CPU->CurrentProcess->get_status() != status::TERMINATED)
+	while(CPU->CurrentProcess->get_status() != status::TERMINATED ||
+			CPU->CurrentProcess->get_status() != status::WAITING)
 	{
 		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
 

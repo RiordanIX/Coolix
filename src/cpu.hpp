@@ -6,10 +6,12 @@
 #include "pcb.hpp"
 #include "ram.hpp"
 #include "cpu_defs.hpp"
+#include "mmu.hpp"
 //#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
 #define DEFAULT_REG_SIZE 16
+
 
 
 /******************************************************************************
@@ -44,8 +46,8 @@ public:
 	/**************************************************************************
 	*  I/O instructions {{{
 	*************************************************************************/
-	void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
-	void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+	void cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+	void cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 	/**************************************************************************
 	* }}} End I/O instructions
 	*************************************************************************/
@@ -229,26 +231,8 @@ public:
 	/**************************************************************************
 	* IO Operations{{{
 	*************************************************************************/
-	inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
-		instruct_t Reg1, Reg2, Address, offset;
-		Reg1 = (inst & 0x00F00000) >> (5 * 4);
-		Reg2 = (inst & 0x000F0000) >> (4 * 4);
-		Address = inst & 0x0000FFFF;
-		offset = pcb->get_ram_address();
+	inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb);
 
-		switch (opcode)
-		{
-		case OP_IO_RD:
-			cpu_rd(Reg1, Reg2, Address, offset);
-			break;
-
-		case OP_IO_WR:
-			cpu_wr(Reg1, Reg2, Address, offset);
-			break;
-		default:
-			throw "Invalid IO instruction format";
-		}
-	}
 	/**************************************************************************
 	* }}} End of IO operations
 	*************************************************************************/

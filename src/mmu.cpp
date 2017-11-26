@@ -67,6 +67,9 @@ size_t mmu::getPhysicalAddress(PCB* pcb, size_t virtAddress) {
 		*/
 	}
 }
+
+
+
 //MODIFICATION
 void mmu::tableInit(PCB* pcb, size_t frameCount)
 {
@@ -75,7 +78,7 @@ void mmu::tableInit(PCB* pcb, size_t frameCount)
 	{
 		for(unsigned int i = 0; i < frameCount; i++)
 		{
-			frame = _freeFrames.back();
+			frame = _freeFrames.front();
 			_freeFrames.pop();
 
 			pcb->set_page_table_entry(i, true, frame);
@@ -83,6 +86,9 @@ void mmu::tableInit(PCB* pcb, size_t frameCount)
 		}
 	}
 }
+
+
+
 void mmu::dumpProcess(PCB* pcb) {
 	size_t frame;
 	for(unsigned int i = 0; i < pcb->get_page_table_length(); i++)
@@ -96,38 +102,46 @@ void mmu::dumpProcess(PCB* pcb) {
 		}
 	}
 }
+
+
+
 std::size_t mmu::FrameNumberToLocation(size_t Frame)
 {
 	return Frame * PAGE_SIZE;
 }
+
+
+
 //SWAPPING
 bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	size_t diskLoc;
-	size_t FrameNum;
-	size_t Address;
+	size_t frameNum;
+	size_t address;
 	// No frames are available, failed
 	if (free_frame_count()== 0)
 	{
 		return false;
 	}
 	diskLoc = pcb->get_disk_address() + pageNumber * (PAGE_SIZE);
-	FrameNum = _freeFrames.front();
-	Address = FrameNumberToLocation(FrameNum);
-	if (FrameNum + (PAGE_SIZE) > MEM.size())
+	frameNum = _freeFrames.front();
+	address = FrameNumberToLocation(frameNum);
+
+
+	// Sanity check to make sure not allocating more RAM than we have.
+	if (address + (PAGE_SIZE) > MEM.size())
 	{
 		return false;
 	}
-	// Sanity check to make sure not allocating more RAM than we have.
 
 	// We're confident the frame can be popped.
 	_freeFrames.pop();
-	
+
 	// Now actually allocate data to main memory
-	for(int i = 0; i < ((PAGE_SIZE)/ (INST_SIZE)); i++, diskLoc+=4, Address+=4) {
+	for(int i = 0; i < ((PAGE_SIZE)/ (INST_SIZE)); i++, diskLoc+=4, address+=4) {
 		try {
-		MEM.allocate(Address, DISK.read_instruction((diskLoc)));
-		
-			}
+			MEM.allocate(address, DISK.read_instruction((diskLoc)));
+			pcb->set_page_table_entry(i, true, frameNum);
+		}
 		catch (char* e) {
 			printf("%s",e);
 			return false;
@@ -135,6 +149,13 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 	return true;
 }
+
+
+void mmu::writeToRam(instruct_t location, instruct_t data) {
+
+}
+
+
 
 
 void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
@@ -151,9 +172,34 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
 		if(diskLoc - pcb->get_ram_address() >= pcb->get_end_address())
 			break;
 
-		//DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
+		DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
 	}
 }
+
+
+
+instruct_t mmu::get_instruction(PCB* pcb) {
+	size_t frame;
+	size_t address;
+	size_t offset;
+	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE)){
+		frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
+	}
+	else {
+	}
+	offset = (pcb->get_program_counter()) % (INST_SIZE);
+	address = MEM.get_instruction(frame*(PAGE_SIZE) + offset);
+	return address;
+}
+
+
+instruct_t mmu::get_instruction(PCB* pcb, instruct_t address) {
+	if (pcb->is_valid_page(address / (PAGE_SIZE)){
+		frame = pcb->get_frame(address / (PAGE_SIZE));
+	}
+	else
+
+
 
 // GLOBAL VARIABLE
 mmu MMU;

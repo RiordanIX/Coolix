@@ -46,8 +46,8 @@ void PCB::set_start_time(int startIn)
 void PCB::set_cycle_start_time(int cycleIn)
 {
 	cycle_start_time = cycleIn;
-}   
- 
+}
+
 void PCB::set_program_counter(size_t new_pc){
 	programCounter = new_pc;
 }
@@ -58,22 +58,31 @@ void PCB::set_ram_address(size_t address){
 
 
 //PAGE TABLE
-std::pair<bool,size_t> PCB::get_page_table_entry(std::size_t pageNumber)
+std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 {
 	return pageTable.pages[pageNumber];
 }
-void PCB::set_page_table_entry(std::size_t entry, bool valid, std::size_t frame)
+
+// returns false if out of bounds.
+bool PCB::is_valid_page(size_t frame) {
+	if (frame > pageTable.size())
+		return false;
+	return pageTable.pages[frame].first;
+}
+
+
+void PCB::set_page_table_entry(size_t entry, bool valid, size_t frame)
 {
 	pageTable.pages[entry].first = valid;
 	pageTable.pages[entry].second = frame;
 }
 
-void PCB::update_page_stack(std::size_t pageNumber)
+void PCB::update_page_stack(size_t pageNumber)
 {
 	auto contains = std::find(page_stack.begin(), page_stack.end(), pageNumber);
 	if(contains != page_stack.end())
 		page_stack.erase(contains);
-	
+
 	page_stack.push_front(pageNumber);
 }
 
