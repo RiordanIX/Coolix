@@ -97,7 +97,7 @@ void OSDriver::print_error(PCB* p) {
 }
 
 void OSDriver::run_cpu(cpu * CPU) {
-
+	
 	Hardware::LockHardware(readyQueue.getProcess()->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU->CurrentProcess = readyQueue.getProcess();
@@ -118,7 +118,7 @@ void OSDriver::run_cpu(cpu * CPU) {
 			print_error(CPU->CurrentProcess);
 			return;
 		}
-		if (CPU->CurrentProcess->get_status() != TERMINATED)
+		if (CPU->CurrentProcess->get_status() == RUNNING)
 		{	//  Decodes and Executes Instruction
 			CPU->decode_and_execute(instruct, CPU->CurrentProcess);
 		}

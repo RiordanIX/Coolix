@@ -50,8 +50,8 @@ void loader::readFromFile(string filename) {
         if(x.compare(0, 3, "JOB") == 0) {
             debug_printf("Creating process...%s","\n");
 
-		//	address = DISK.get_used();
-			address = (DISK.get_used() / (PAGE_SIZE));
+			address = DISK.get_used();
+		//	address = (DISK.get_used() / (PAGE_SIZE));
 		
 
 			//Read process id
