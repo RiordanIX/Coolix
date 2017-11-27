@@ -17,7 +17,7 @@ public:
 	//Move  processes from disk to ram
 	void loadProcess(PCB * pcb,std::size_t pagenumber);
 	void loadPage(PCB * pcb, std::size_t pagenumber);
-	void DumpProcess(PCB * pcb);
+	static void DumpProcess(PCB * pcb);
 private:
 	struct EmptySpace
 	{

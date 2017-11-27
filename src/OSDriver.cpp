@@ -7,6 +7,8 @@ extern PriorityQueue readyQueue, newQueue;
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
+std::mutex mtx;
+std::thread RUN;
 
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
@@ -17,6 +19,70 @@ OSDriver::OSDriver() :
 	{ }
 
 OSDriver::~OSDriver() { }
+
+void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
+{
+	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
+	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
+	CPU->CurrentProcess = pcb;
+	 //remove process from the ready queue
+	CPU->CurrentProcess->set_status(RUNNING);
+	//set process pcb to running status
+	while (CPU->CurrentProcess->get_status() != status::TERMINATED &&
+		CPU->CurrentProcess->get_status() != status::WAITING)
+	{
+		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
+		if (CPU->CurrentProcess->get_status() == WAITING)
+		{
+			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
+			break;
+		}
+		// The fetched instruction is 0, meaning it's accessed some zeroed out
+		// data.  This shouldn't happen.
+		if (instruct == 0) {
+			auto note = pcb->get_frame(pcb->get_program_counter()/(PAGE_SIZE));
+			std::cout << "Instruction at "
+				<< note << " is 0\n"
+				<< "Process page is "
+				<< pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE))
+				<< "\nProgram Counter is "
+				<< pcb->get_program_counter()
+				<< '\n';
+			return;
+		}
+		if (CPU->CurrentProcess->get_status() == RUNNING)
+		{	//  Decodes and Executes Instruction
+			CPU->decode_and_execute(instruct, CPU->CurrentProcess);
+		}
+		if (CPU->CurrentProcess->get_status() == WAITING)
+		{
+			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
+			break;
+		}
+		// Increment Program counter
+		CPU->CurrentProcess->increment_PC();
+		CPU->current_cycle++;
+		current_cycle++;
+	}
+#if (defined DEBUG || defined _DEBUG)
+	//PCB* p = readyQueue.getProcess();
+	/*
+	printf("Ram Address:\t%lu\n", CPU->CurrentProcess->get_ram_address());
+	for (unsigned int i = CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_out_address();
+	i < CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_end_address();
+	i+=4) {
+	printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
+	}*/
+#endif // DEBUG
+	if (CPU->CurrentProcess->get_status() != WAITING)//if process not in waiting
+	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
+		terminatedQueue.addProcess(CPU->CurrentProcess);
+		LongTerm::DumpProcess(CPU->CurrentProcess);
+	}
+	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
+																	   //readyQueue.removeProcess();
+}
+
 
 void OSDriver::run(std::string fileName) {
 	//  Load to Disk
@@ -47,8 +113,12 @@ void OSDriver::run(std::string fileName) {
 
 			if (CPU != nullptr)
 			{
-				//  Runs the CPU
-				run_cpu(CPU);
+				std::thread RUN(run_cpu, CPU, readyQueue.getProcess(), &current_cycle);
+				readyQueue.removeProcess();
+				if (RUN.joinable() == true)
+				{
+					RUN.detach();
+				}
 			}
 		}
 		catch (const char* e) {
@@ -57,7 +127,7 @@ void OSDriver::run(std::string fileName) {
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
 		//run mmu for pagefault to load 4 more pages into memory
-		if (CPU != nullptr)
+		if (CPU != nullptr && CPU->CurrentProcess != nullptr)
 		{
 			if (CPU->CurrentProcess->get_waitformmu() == true)
 			{
@@ -67,7 +137,7 @@ void OSDriver::run(std::string fileName) {
 		}
 
 		//  Context Switches for the next process
-		if (CPU != nullptr)
+		if (CPU != nullptr && CPU->CurrentProcess != nullptr)
 		{
 			run_shortts(CPU);
 		}
@@ -97,62 +167,6 @@ void OSDriver::print_error(PCB* p) {
 			<< "\nProgram Counter is "
 			<< p->get_program_counter()
 			<< '\n';
-}
-
-void OSDriver::run_cpu(cpu * CPU) {
-	
-	Hardware::LockHardware(readyQueue.getProcess()->get_resource_status()); //locks resource
-	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
-	CPU->CurrentProcess = readyQueue.getProcess();
-	readyQueue.removeProcess(); //remove process from the ready queue
-	CPU->CurrentProcess->set_status(RUNNING);//set process pcb to running status
-	while(CPU->CurrentProcess->get_status() != status::TERMINATED &&
-			CPU->CurrentProcess->get_status() != status::WAITING)
-	{
-		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
-		if (CPU->CurrentProcess->get_status() == WAITING)
-		{
-			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
-			break;
-		}
-		// The fetched instruction is 0, meaning it's accessed some zeroed out
-		// data.  This shouldn't happen.
-		if (instruct == 0) {
-			print_error(CPU->CurrentProcess);
-			return;
-		}
-		if (CPU->CurrentProcess->get_status() == RUNNING)
-		{	//  Decodes and Executes Instruction
-			CPU->decode_and_execute(instruct, CPU->CurrentProcess);
-		}
-		if (CPU->CurrentProcess->get_status() == WAITING)
-		{
-			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
-			break;
-		}
-		// Increment Program counter
-		CPU->CurrentProcess->increment_PC();
-		CPU->current_cycle++;
-		current_cycle++;
-	}
-#if (defined DEBUG || defined _DEBUG)
-	//PCB* p = readyQueue.getProcess();
-	/*
-	printf("Ram Address:\t%lu\n", CPU->CurrentProcess->get_ram_address());
-	for (unsigned int i = CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_out_address();
-			i < CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_end_address();
-			i+=4) {
-		printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
-	}*/
-#endif // DEBUG
-	if (CPU->CurrentProcess->get_status() != WAITING)//if process not in waiting
-	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		terminatedQueue.addProcess(CPU->CurrentProcess);
-		ltSched.DumpProcess(CPU->CurrentProcess);
-	}
-	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
-	//readyQueue.removeProcess();
-
 }
 
 void OSDriver::run_longts() {
