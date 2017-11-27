@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include <mutex>
 
 //#include "FIFO.hpp"
@@ -40,6 +41,6 @@ private:
     void run_shortts(cpu * CPU);
     void run_longts();
 	void print_error(PCB* p);
-	
+
 };
 

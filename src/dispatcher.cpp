@@ -29,7 +29,7 @@ void Dispatcher::switchIn(cpu* CPU) {
 	//	If process is terminated. Throw it into the Terminated Queue
 	if(CPU->CurrentProcess->get_status() == status::TERMINATED)
 	{
-		PCB* exitingProcess = CPU->CurrentProcess;
+	//	PCB* exitingProcess = CPU->CurrentProcess;
 		//exitingProcess->set_end_time();
 		//terminatedQueue.addProcess(exitingProcess);
 	}

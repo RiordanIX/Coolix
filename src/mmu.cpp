@@ -66,7 +66,7 @@ std::size_t mmu::FrameNumberToLocation(size_t Frame)
 
 //SWAPPING
 bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
-	
+
 	size_t diskLoc;
 	size_t frameNum;
 	size_t address;
@@ -76,11 +76,11 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 		return false;
 	}
 	diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
-	
+
 	frameNum = _freeFrames.front();
-	
+
 	address = FrameNumberToLocation(frameNum);
-	
+
 
 	// Sanity check to make sure not allocating more RAM than we have.
 	if (address + (PAGE_SIZE) > MEM.size())
@@ -89,7 +89,7 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 
 	// We're confident the frame can be popped.
-	
+
 	_freeFrames.pop();
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
@@ -98,7 +98,7 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 			MEM.allocate(address, DISK.read_instruction((diskLoc)));
 		}
 		catch (char* e) {
-			printf("%s",e);
+			printf("%s: In the MMU\n",e);
 			return false;
 		}
 	}

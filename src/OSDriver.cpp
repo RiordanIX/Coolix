@@ -15,6 +15,7 @@ std::thread RUN;
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
 		current_cycle(0),
+		totalJobs(0),
 		ldr(),
 		Dispatch(),
 		ltSched()
@@ -24,7 +25,7 @@ OSDriver::~OSDriver() { }
 
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
-	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
+	//Hardware::LockHardware(pcb->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU->CurrentProcess = pcb;
 	CPU->cache.current_pid = pcb->get_pid();
@@ -32,6 +33,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	while (CPU->CurrentProcess->get_status() != status::TERMINATED &&
 		CPU->CurrentProcess->get_status() != status::WAITING)
 	{
+		debug_printf("Status:\t%d\n", CPU->CurrentProcess->get_status());
 		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
 		if (CPU->CurrentProcess->get_status() == WAITING)
 		{
@@ -77,26 +79,40 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 #endif // DEBUG
 	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		//while (tq.try_lock() == false) {}
+		while (tq.try_lock() == false) {
+			debug_printf("Waiting on Terminated Queue%s","\n");
+			}
 		terminatedQueue.addProcess(CPU->CurrentProcess);
-		//while (frame.try_lock()) {}
-		LongTerm::DumpProcess(CPU->CurrentProcess);
-		//frame.unlock();
-		//tq.unlock();
-	}
-	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
-																	   //readyQueue.removeProcess();
-	if (RUN.joinable() == true)
-	{
-		RUN.join();
-	}
-	else
-	{
-		try {
-			RUN.~thread();
+		while (frame.try_lock()) {
+			debug_printf("Waiting on Frame %s","\n");
 		}
-		catch (std::exception &ee) {}
+		LongTerm::DumpProcess(CPU->CurrentProcess);
+		frame.unlock();
+		tq.unlock();
+		debug_printf("Everything is unlocked%s","\n");
+
 	}
+	//Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
+																	   //readyQueue.removeProcess();
+	//while ( true) {
+		if (RUN.joinable() == true) {
+			debug_printf("Rejoining thread%s","\n");
+			RUN.join();
+			//break;
+		}
+		else {
+			std::this_thread::sleep_for(std::chrono::nanoseconds(1000));
+			printf("Waiting to rejoin");
+			try {
+				RUN.~thread();
+			}
+			catch (std::exception &ee) {
+				printf("%s: due to threading issues\n", ee.what());
+			}
+		}
+		debug_printf("End of run_cpu%s","\n");
+
+	//}
 }
 
 
@@ -123,17 +139,19 @@ void OSDriver::run(std::string fileName) {
 	cpu* CPU = CPU_Pool::FreeCPU();
 	while(terminatedQueue.size() < totalJobs)
 	{
-		
+
+		debug_printf("Total Jobs::\t%d\n", totalJobs);
+		debug_printf("Terminated Queue:\t%d\n", terminatedQueue.size());
 		try {
 
 			if (CPU != nullptr && readyQueue.size() > 0)
 			{
 				//remove process from the ready queue
-				//while (rq.try_lock() == false) {}
+				while (rq.try_lock() == false) {}
 				CPU->CurrentProcess = readyQueue.getProcess();
 				CPU->CurrentProcess->set_status(RUNNING);
 				readyQueue.removeProcess();
-				//rq.unlock();
+				rq.unlock();
 				std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
 				if (RUN.joinable() == true)
 				{
@@ -143,18 +161,19 @@ void OSDriver::run(std::string fileName) {
 		}
 		catch (const char* e) {
 			//  Remove the process if it malfunctions
-			printf("%s\n",e);
+			printf("%s in the OSDriver\n",e);
+			//return;
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
 		if (waitingQueue.size() > 0)
 		{
-			
-				//while (wq.try_lock() == false) {}
+
+				while (wq.try_lock() == false) {}
 				pcb = waitingQueue.getProcess();
-				//wq.unlock();
+				wq.unlock();
 				if (pcb->get_waitformmu() == true)
 				{
-					
+
 					if (pcb->get_lastRequestedPage() < 256)
 					{
 						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
@@ -162,7 +181,7 @@ void OSDriver::run(std::string fileName) {
 							pcb->set_waitformmu(false);
 						}
 					}
-					//StSched.WaitToReady();
+					StSched.WaitToReady();
 				}
 		}
 		//  Load and Move Processes accordingly
@@ -183,7 +202,7 @@ void OSDriver::run(std::string fileName) {
 		}
 		if (waitingQueue.size() > 0 && readyQueue.size() == 0)
 		{
-			
+
 		}
 	}
 
@@ -227,7 +246,7 @@ void OSDriver::run_longts() {
 
 void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
-	if (!readyQueue.empty()) 
+	if (!readyQueue.empty())
 	{
 		Dispatch.dispatch(CPU, CPU->CurrentProcess);
 		if(current_cycle >= cpu_cycle)
