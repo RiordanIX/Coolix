@@ -2,6 +2,10 @@
 
 #define DEFAULT_CPU_CYCLE_TIME  50
 
+#include <iostream>
+#include <thread>
+#include <mutex>
+
 //#include "FIFO.hpp"
 #include "loader.hpp"
 #include "cpu.hpp"
@@ -32,9 +36,10 @@ public:
     void run(std::string fileName);  // Runs the OS
 
 private:
-    void run_cpu(cpu* CPU);
+  //  void run_cpu(cpu* CPU);
     void run_shortts(cpu * CPU);
     void run_longts();
 	void print_error(PCB* p);
+	
 };
 
