@@ -34,7 +34,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	//printf("%s", get_info().c_str());
 }
 
-instruct_t cpu::fetch(PCB* pcb) 
+instruct_t cpu::fetch(PCB* pcb)
 {
 	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
 	{
@@ -66,11 +66,11 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 }
 
 
-inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
-	
+inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address) {
+
 		size_t pageNumber = (Address / (PAGE_SIZE));
 		if (Reg2 > 0)
-		{	
+		{
 			//Address = (registers[Reg2] / (PAGE_SIZE));
 			//offset = (registers[Reg2] % (PAGE_SIZE));
 			pageNumber = (registers[Reg2] / (PAGE_SIZE));
@@ -106,7 +106,7 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 	if (Reg2 > 0)
 		registers[Reg2] = registers[Reg1];
 	else {
-		
+
 		printf("Writing: %#010X (%d in decimal), write location: %#010X\n",
 			registers[Reg1], registers[Reg1], Address);
 		printf("End address: %#010X\n", offset);
@@ -164,7 +164,7 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 }
 
 inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, PCB * pcb) {
-	
+
 	if (pcb->is_valid_page(registers[D_reg] / (PAGE_SIZE) ))
 	{
 		std::size_t frame = pcb->get_frame((registers[D_reg]) / (PAGE_SIZE));
@@ -278,7 +278,7 @@ inline void cpu::cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) 
 	{
 	case OP_IO_RD:
 
-		cpu_rd(pcb, Reg1, Reg2, Address, offset);
+		cpu_rd(pcb, Reg1, Reg2, Address);
 		break;
 
 	case OP_IO_WR:

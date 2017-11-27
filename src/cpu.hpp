@@ -45,7 +45,7 @@ public:
 	/**************************************************************************
 	*  I/O instructions {{{
 	*************************************************************************/
-	void cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+	void cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address);
 	void cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 	/**************************************************************************
 	* }}} End I/O instructions
@@ -148,7 +148,7 @@ public:
 		B_reg = (inst & 0x00F00000) >> (5 * 4);
 		D_reg = (inst & 0x000F0000) >> (4 * 4);
 		Address = inst & 0x0000FFFF;
-	
+
 		switch (opcode) {
 		case OP_I_ST:
 			cpu_st(B_reg, D_reg,pcb);
