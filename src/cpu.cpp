@@ -45,6 +45,7 @@ instruct_t cpu::fetch(PCB* pcb)
 		pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING); //fetch method
+		return -1;
 	}
 }
 

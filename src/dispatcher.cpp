@@ -27,9 +27,9 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 
 void Dispatcher::switchIn(cpu* CPU) {
 	//	If process is terminated. Throw it into the Terminated Queue
-	if(readyQueue.getProcess()->get_status() == status::TERMINATED)
+	if(CPU->CurrentProcess->get_status() == status::TERMINATED)
 	{
-		PCB* exitingProcess = readyQueue.getProcess();
+		PCB* exitingProcess = CPU->CurrentProcess;
 		//exitingProcess->set_end_time();
 		terminatedQueue.addProcess(exitingProcess);
 	}
@@ -41,8 +41,8 @@ void Dispatcher::switchIn(cpu* CPU) {
 	if (!readyQueue.empty())
 	{
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
-		readyQueue.getProcess()->set_status(status::RUNNING);
-		readyQueue.removeProcess();
+		//readyQueue.getProcess()->set_status(status::RUNNING);
+		//readyQueue.removeProcess();
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}
 }

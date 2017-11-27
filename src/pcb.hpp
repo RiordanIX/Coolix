@@ -51,7 +51,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		programCounter(0),
 		registers(16, 0),
 		sectionSizes(4, 0),
-		pageTable(((instruct + inp + out+ temp)/ (PAGE_SIZE)) + 1)
+		pageTable(((instruct + inp + out+ temp)/ (PAGE_SIZE)) + 2)
 	{
 		sectionSizes[section::INSTRUCTION] = instruct;
 		sectionSizes[section::INPUT] = inp;

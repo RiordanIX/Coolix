@@ -33,7 +33,7 @@ public:
 
 private:
     void run_cpu(cpu* CPU);
-    void run_shortts(cpu CPU);
+    void run_shortts(cpu * CPU);
     void run_longts();
 	void print_error(PCB* p);
 };

@@ -67,7 +67,10 @@ void OSDriver::run(std::string fileName) {
 		}
 
 		//  Context Switches for the next process
-	//	run_shortts(CPU_Pool::FreeCPU());
+		if (CPU != nullptr)
+		{
+			run_shortts(CPU);
+		}
 	}
 
 #if (defined DEBUG || defined _DEBUG)
@@ -103,7 +106,7 @@ void OSDriver::run_cpu(cpu * CPU) {
 	CPU->CurrentProcess = readyQueue.getProcess();
 	readyQueue.removeProcess(); //remove process from the ready queue
 	CPU->CurrentProcess->set_status(RUNNING);//set process pcb to running status
-	while(CPU->CurrentProcess->get_status() != status::TERMINATED ||
+	while(CPU->CurrentProcess->get_status() != status::TERMINATED &&
 			CPU->CurrentProcess->get_status() != status::WAITING)
 	{
 		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
@@ -164,10 +167,10 @@ void OSDriver::run_longts() {
 	StSched.WaitToReady();
 }
 
-void OSDriver::run_shortts(cpu CPU) {
+void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
 	if (!readyQueue.empty()) {
-		Dispatch.dispatch(&CPU, readyQueue.getProcess());
+		Dispatch.dispatch(CPU, CPU->CurrentProcess);
 		if(current_cycle >= cpu_cycle)
 			current_cycle = 0;
 	}
