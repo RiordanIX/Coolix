@@ -2,6 +2,7 @@
 #include "ram.hpp"
 #include "pcb.hpp"
 #include "disk.hpp"
+#include "cache.hpp"
 #include <queue>
 
 class mmu

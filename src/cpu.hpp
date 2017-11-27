@@ -6,6 +6,7 @@
 #include "pcb.hpp"
 #include "ram.hpp"
 #include "cpu_defs.hpp"
+#include "cache.hpp"
 //#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
@@ -29,11 +30,26 @@ public:
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
 
-	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
+	// for cache, we want it to be 4 frames
+	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0), cache(4 *PAGE_SIZE) {}
 	instruct_t fetch(PCB* pcb);
 	void set_registers(std::vector<instruct_t> to_switch);
 	void decode_and_execute(instruct_t inst, PCB* pcb);
 	std::string get_info();
+
+
+	Cache cache;
+
+	// Cache information. Setting and getting
+	void set_running_pid(int id) { cache.current_pid = id;}
+	int current_pid() { return cache.current_pid;}
+	bool in_cache(unsigned int pid, std::size_t frame) {
+		return cache.in_cache(pid, frame);
+	}
+	void set_cache(std::size_t frame, std::vector<instruct_t> instructs) {
+		cache.set_cache(frame, instructs);
+	}
+
 
 
 	/**************************************************************************

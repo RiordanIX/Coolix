@@ -18,13 +18,13 @@ LongTerm::~LongTerm() { }
 void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 4 pages into RAM
-	for (int i = pagenumber; i < (pagenumber + 4); ++i)
+	for (unsigned int i = pagenumber; i < (pagenumber + 4); ++i)
 	{
-		if (MMU.processDiskToRam(pcb, i) ) 
+		if (MMU.processDiskToRam(pcb, i) )
 		{
 			continue;
 		}
-		else 
+		else
 		{
 			debug_printf("No frames are available%s", "\n");
 			return;
@@ -36,10 +36,10 @@ void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 void LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 1 page into RAM
-	
+
 		if (MMU.processDiskToRam(pcb, pagenumber))
 		{
-			
+
 		}
 		else
 		{
