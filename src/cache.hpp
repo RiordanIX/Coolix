@@ -26,6 +26,15 @@ public:
 		next_frame();
 	}
 
+	instruct_t get_instruction(std::size_t frame, std::size_t offset) {
+		for (auto it = data.begin(); it != data.end(); it++) {
+			if (frame == (*it).first){
+				return (*it).second[offset/(INST_SIZE)];
+			}
+		}
+		return -1;
+	}
+
 	bool in_cache(unsigned int pid, std::size_t frame) {
 		if (pid != current_pid) return false;
 		else {

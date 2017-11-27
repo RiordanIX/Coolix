@@ -4,6 +4,7 @@ extern Ram MEM;
 extern Disk DISK;
 
 using std::size_t;
+using std::vector;
 
 mmu::mmu() {
 
@@ -17,56 +18,6 @@ void mmu::SetFreeFrames()
 //	for (auto i = _freeFrames.begin(); i != _freeFrames.end(); ++i)
 //		debug_printf("%lu ", *i);
 }
-size_t mmu::getPhysicalAddress(PCB* pcb, size_t virtAddress) {
-	size_t pageNumber = virtAddress / (PAGE_SIZE),
-	offset = virtAddress % (PAGE_SIZE);
-
-	//if page is in memory, translate to physical and update page stack
-	if(pcb->is_valid_page(pageNumber))
-	{
-		pcb->update_page_stack(pageNumber);
-		return pcb->get_frame(pageNumber) * (PAGE_SIZE) + offset;
-	}
-
-	else
-	{
-		//we have free frames, so we give one to the process and update page
-		//table and stack
-		if(!_freeFrames.empty())
-		{
-			size_t frame = _freeFrames.front();
-			_freeFrames.pop();
-
-			processDiskToRam(pcb, pageNumber);
-			pcb->set_page_table_entry(pageNumber, true, frame);
-			pcb->update_page_stack(pageNumber);
-			return frame;
-		}
-
-		else
-		{
-			//page fault
-			return -1;
-		}
-		/*
-		//we have no free frames, so we must replace one
-		else
-		{
-			pageReplace = pcb->pop_lru_page();
-			size_t victimFrame = pcb->get_frame(pageReplace);
-
-			writePageToDisk(pcb, pageReplace);
-			pcb->set_page_table_entry(pageReplace, false, -1);
-
-			processDiskToRam(pcb, pageNumber);
-			pcb->set_page_table_entry(pageNumber, true, victimFrame);
-			pcb->update_page_stack(pageNumber);
-			return victimFrame;
-		}
-		*/
-	}
-}
-
 
 
 //MODIFICATION
@@ -193,6 +144,18 @@ instruct_t mmu::get_instruction(PCB* pcb)
 		return -1;
 	}
 }
+
+vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
+	unsigned int counter = pcb->get_program_counter();
+	vector<instruct_t> insts;
+	insts.resize(4);
+	for (unsigned int i = 0; i < 4; i++, counter +=4) {
+		insts.push_back(get_instruction(pcb, counter));
+	}
+	return insts;
+}
+
+
 instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 {
 	size_t pageNumber = (address / (PAGE_SIZE));
@@ -207,12 +170,14 @@ instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 			return -1;
 		}
 }
+
+
 instruct_t mmu::getRamAddress(PCB * pcb, instruct_t localAddress)
 {
 	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 	pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
 	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE))) {
-		
+
 		return (frame* (PAGE_SIZE) + (localAddress % (PAGE_SIZE)));
 	}
 	else {

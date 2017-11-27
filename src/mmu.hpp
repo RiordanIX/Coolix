@@ -4,6 +4,7 @@
 #include "disk.hpp"
 #include "cache.hpp"
 #include <queue>
+#include <vector>
 
 class mmu
 {
@@ -14,7 +15,6 @@ class mmu
 
 		//GETTERS
 		std::size_t free_frame_count()	{ return _freeFrames.size(); }
-		std::size_t getPhysicalAddress(PCB* pcb, std::size_t virtAddress);
 
 		//MODIFICATION
 		void addFreeFrame(int x) { _freeFrames.push(x); };
@@ -28,12 +28,12 @@ class mmu
 		instruct_t getRamAddress(PCB * pcb, instruct_t offset);
 
 		instruct_t get_instruction(PCB* pcb, instruct_t address);
+		std::vector<instruct_t> get_frame_data(PCB* pcb);
 
 	private:
 		std::queue<std::size_t> _freeFrames;
 		std::size_t pageReplace;
 		//SWAPPING
 		void writePageToDisk(PCB* pcb, std::size_t pageNumber);
-
 };
 

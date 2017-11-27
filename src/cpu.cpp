@@ -6,6 +6,7 @@
 #include <cstdio>
 #endif
 
+using std::size_t;
 extern mmu MMU;
 
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
@@ -36,8 +37,19 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 
 instruct_t cpu::fetch(PCB* pcb)
 {
-	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
+	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
+	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
+	// Cache hit
+	if (in_cache(pcb->get_pid(), frame)) {
+		debug_printf("Frame is in the cache%s","\n");
+		return cache.get_instruction(frame, offset);
+	}
+	// Cache Miss
+	else if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
 	{
+		std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
+		debug_printf("Setting the cache%s","\n");
+		set_cache(frame, insts);
 		return MMU.get_instruction(pcb);
 	}
 	else
