@@ -40,16 +40,19 @@ instruct_t cpu::fetch(PCB* pcb)
 	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	// Cache hit
-	if (in_cache(pcb->get_pid(), frame)) {
+	if (cache.in_cache(pcb->get_pid(), frame)) {
 		debug_printf("Frame is in the cache%s","\n");
 		return cache.get_instruction(frame, offset);
 	}
 	// Cache Miss
 	else if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
 	{
-		std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
-		debug_printf("Setting the cache%s","\n");
-		set_cache(frame, insts);
+		if ((offset + pcb->get_program_counter()) / (INST_SIZE) <= 3)
+		{
+			std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
+			debug_printf("Setting the cache%s", "\n");
+			cache.set_cache(frame, insts);
+		}
 		return MMU.get_instruction(pcb);
 	}
 	else

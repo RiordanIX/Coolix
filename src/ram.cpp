@@ -1,12 +1,15 @@
 #include <string>
 #include "ram.hpp"
 #include "debug.hpp"
+#include <mutex>
 
 using std::string;
 using std::to_string;
 using std::vector;
 using std::deque;
 using std::size_t;
+
+extern std::mutex frame;
 
 Ram::Ram(size_t size) : _size(size), _space(size, 0) { }
 
@@ -34,6 +37,7 @@ void Ram::allocate(size_t location, instruct_t data) {
 
 void Ram::allocate(size_t location, byte_t data) {
 	if (location < _size) {
+		//while (frame.try_lock()) {}
 		_space.at(location) = data;
 	}
 	else {

@@ -2,12 +2,14 @@
 //#include "PriorityQueue.hpp"
 
 extern PriorityQueue terminatedQueue;
-extern PriorityQueue readyQueue, newQueue;
+extern PriorityQueue readyQueue, newQueue , waitingQueue;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
-std::mutex mtx;
+std::mutex tq,ex, frame;
+std::mutex wq;
+std::mutex rq;
 std::thread RUN;
 
 OSDriver::OSDriver() :
@@ -25,8 +27,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU->CurrentProcess = pcb;
-	 //remove process from the ready queue
-	CPU->CurrentProcess->set_status(RUNNING);
+	CPU->cache.current_pid = pcb->get_pid();
 	//set process pcb to running status
 	while (CPU->CurrentProcess->get_status() != status::TERMINATED &&
 		CPU->CurrentProcess->get_status() != status::WAITING)
@@ -74,18 +75,34 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
 	}*/
 #endif // DEBUG
-	if (CPU->CurrentProcess->get_status() != WAITING)//if process not in waiting
+	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
+		//while (tq.try_lock() == false) {}
 		terminatedQueue.addProcess(CPU->CurrentProcess);
+		//while (frame.try_lock()) {}
 		LongTerm::DumpProcess(CPU->CurrentProcess);
+		//frame.unlock();
+		//tq.unlock();
 	}
 	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
 																	   //readyQueue.removeProcess();
+	if (RUN.joinable() == true)
+	{
+		RUN.join();
+	}
+	else
+	{
+		try {
+			RUN.~thread();
+		}
+		catch (std::exception &ee) {}
+	}
 }
 
 
 void OSDriver::run(std::string fileName) {
 	//  Load to Disk
+	PCB * pcb;
 	ldr.readFromFile(fileName);
 
 
@@ -94,7 +111,7 @@ void OSDriver::run(std::string fileName) {
 	while (!newQueue.empty())
 	{
 		ltSched.loadProcess(newQueue.getProcess(),0);
-		newQueue.removeProcess();
+		newQueue.removeProcess(); totalJobs++;
 	}
 #if (defined DEBUG || defined _DEBUG)
 	debug_printf("Beginning MEMORY%s","\n");
@@ -103,18 +120,21 @@ void OSDriver::run(std::string fileName) {
 	debug_printf("Finished with LongTerm Schdeduler%s","\n");
 	//  Runs as long as the ReadyQueue is populated as long as there are
 	//  processes to be ran
-	cpu* CPU;
-	while(readyQueue.size() > 0)
+	cpu* CPU = CPU_Pool::FreeCPU();
+	while(terminatedQueue.size() < totalJobs)
 	{
-		//  Load and Move Processes accordingly
-		run_longts();
-		CPU = CPU_Pool::FreeCPU();
+		
 		try {
 
-			if (CPU != nullptr)
+			if (CPU != nullptr && readyQueue.size() > 0)
 			{
-				std::thread RUN(run_cpu, CPU, readyQueue.getProcess(), &current_cycle);
+				//remove process from the ready queue
+				//while (rq.try_lock() == false) {}
+				CPU->CurrentProcess = readyQueue.getProcess();
+				CPU->CurrentProcess->set_status(RUNNING);
 				readyQueue.removeProcess();
+				//rq.unlock();
+				std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
 				if (RUN.joinable() == true)
 				{
 					RUN.detach();
@@ -126,20 +146,44 @@ void OSDriver::run(std::string fileName) {
 			printf("%s\n",e);
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
-		//run mmu for pagefault to load 4 more pages into memory
-		if (CPU != nullptr && CPU->CurrentProcess != nullptr)
+		if (waitingQueue.size() > 0)
 		{
-			if (CPU->CurrentProcess->get_waitformmu() == true)
-			{
-				ltSched.loadPage(CPU->CurrentProcess, CPU->CurrentProcess->get_lastRequestedPage());
-				CPU->CurrentProcess->set_waitformmu(false);
-			}
+			
+				//while (wq.try_lock() == false) {}
+				pcb = waitingQueue.getProcess();
+				//wq.unlock();
+				if (pcb->get_waitformmu() == true)
+				{
+					
+					if (pcb->get_lastRequestedPage() < 256)
+					{
+						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
+						{
+							pcb->set_waitformmu(false);
+						}
+					}
+					//StSched.WaitToReady();
+				}
 		}
-
+		//  Load and Move Processes accordingly
+		run_longts();
+		CPU = CPU_Pool::FreeCPU();
 		//  Context Switches for the next process
-		if (CPU != nullptr && CPU->CurrentProcess != nullptr)
+		if(CPU != nullptr && CPU->CurrentProcess != nullptr)
+		if ((readyQueue.size() > 0 || (waitingQueue.size() > 0)))
 		{
-			run_shortts(CPU);
+			try
+			{
+				if (CPU->CurrentProcess->get_status() != RUNNING)
+				{
+					run_shortts(CPU_Pool::FreeCPU());
+				}
+			}
+			catch (std::exception) {}
+		}
+		if (waitingQueue.size() > 0 && readyQueue.size() == 0)
+		{
+			
 		}
 	}
 
@@ -183,10 +227,12 @@ void OSDriver::run_longts() {
 
 void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
-	if (!readyQueue.empty()) {
+	if (!readyQueue.empty()) 
+	{
 		Dispatch.dispatch(CPU, CPU->CurrentProcess);
 		if(current_cycle >= cpu_cycle)
 			current_cycle = 0;
 	}
+
 }
 

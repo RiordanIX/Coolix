@@ -31,7 +31,7 @@ void Dispatcher::switchIn(cpu* CPU) {
 	{
 		PCB* exitingProcess = CPU->CurrentProcess;
 		//exitingProcess->set_end_time();
-		terminatedQueue.addProcess(exitingProcess);
+		//terminatedQueue.addProcess(exitingProcess);
 	}
 
 	// Removes the Current Running Process, so the next one will be the new
@@ -41,7 +41,8 @@ void Dispatcher::switchIn(cpu* CPU) {
 	if (!readyQueue.empty())
 	{
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
-		//readyQueue.getProcess()->set_status(status::RUNNING);
+
+		readyQueue.getProcess()->set_status(status::RUNNING);
 		//readyQueue.removeProcess();
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}

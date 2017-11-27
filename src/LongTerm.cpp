@@ -1,10 +1,12 @@
 #include "LongTerm.hpp"
+#include <mutex>
 
 // GLOBAL VARIABLES!!!
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern mmu MMU;
+extern std::mutex frame;
 
 LongTerm::LongTerm() {
 	ReadySize = 0;
@@ -30,24 +32,29 @@ void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 			return;
 		}
 	}
+	
 	pcb->set_status(status::READY);
 	readyQueue.addProcess(pcb);
+	
 }
-void LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
+bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 1 page into RAM
-
+	
 		if (MMU.processDiskToRam(pcb, pagenumber))
 		{
-
+			pcb->set_status(status::READY);
+			return true;
 		}
 		else
 		{
 			debug_printf("No frames are available%s", "\n");
-			return;
+			return false;
+			
 		}
-	pcb->set_status(status::READY);
-	readyQueue.addProcess(pcb);
+	
+
+
 }
 void LongTerm::DumpProcess(PCB * pcb)
 {

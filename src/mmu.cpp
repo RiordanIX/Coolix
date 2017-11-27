@@ -1,7 +1,9 @@
 #include "mmu.hpp"
+#include <mutex>
 
 extern Ram MEM;
 extern Disk DISK;
+extern std::mutex frame;
 
 using std::size_t;
 using std::vector;
@@ -64,18 +66,21 @@ std::size_t mmu::FrameNumberToLocation(size_t Frame)
 
 //SWAPPING
 bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
+	
 	size_t diskLoc;
 	size_t frameNum;
 	size_t address;
 	// No frames are available, failed
-	if (free_frame_count()== 0)
+	if (_freeFrames.size() == 0)
 	{
 		return false;
 	}
 	diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
+	
 	frameNum = _freeFrames.front();
+	
 	address = FrameNumberToLocation(frameNum);
-
+	
 
 	// Sanity check to make sure not allocating more RAM than we have.
 	if (address + (PAGE_SIZE) > MEM.size())
@@ -84,6 +89,7 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 
 	// We're confident the frame can be popped.
+	
 	_freeFrames.pop();
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
@@ -147,14 +153,30 @@ instruct_t mmu::get_instruction(PCB* pcb)
 
 vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	unsigned int counter = pcb->get_program_counter();
+	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	vector<instruct_t> insts;
-	insts.resize(4);
+	insts.resize(8);
 	for (unsigned int i = 0; i < 4; i++, counter +=4) {
-		insts.push_back(get_instruction(pcb, counter));
+		offset = (offset + counter) / (4);
+		insts[offset]=(get_instructionCache(pcb,counter));
 	}
 	return insts;
 }
-
+instruct_t mmu::get_instructionCache(PCB* pcb, instruct_t address)
+{
+	size_t pageNumber = (address / (PAGE_SIZE));
+	pcb->set_lastRequestedPage(pageNumber);
+	if (pcb->is_valid_page(pageNumber))
+	{
+		size_t frame = pcb->get_frame(pageNumber);
+		size_t offset = (address % (PAGE_SIZE));
+		return MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
+	}
+	else {
+		//page fault
+		return -1;
+	}
+}
 
 instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 {

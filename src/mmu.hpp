@@ -30,6 +30,8 @@ class mmu
 		instruct_t get_instruction(PCB* pcb, instruct_t address);
 		std::vector<instruct_t> get_frame_data(PCB* pcb);
 
+		instruct_t get_instructionCache(PCB * pcb, instruct_t address);
+
 	private:
 		std::queue<std::size_t> _freeFrames;
 		std::size_t pageReplace;

@@ -27,7 +27,7 @@ public:
 
     int cpu_cycle;
     int current_cycle;
-
+	int totalJobs;
     loader ldr;
     Dispatcher Dispatch;
     LongTerm ltSched;

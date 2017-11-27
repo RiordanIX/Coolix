@@ -29,7 +29,7 @@ public:
 	instruct_t get_instruction(std::size_t frame, std::size_t offset) {
 		for (auto it = data.begin(); it != data.end(); it++) {
 			if (frame == (*it).first){
-				return (*it).second[offset/(INST_SIZE)];
+				return (*it).second[(offset)/(4)];
 			}
 		}
 		return -1;
@@ -39,7 +39,17 @@ public:
 		if (pid != current_pid) return false;
 		else {
 			for (auto it = data.begin(); it != data.end(); it++) {
-				if ((*it).first == frame) return true;
+				if ((*it).first == frame)
+				{
+					if ((*it).second[0] == 0)
+					{
+						return false;
+					}
+					else
+					{
+						return true;
+					}
+				}
 			}
 			return false;
 		}
