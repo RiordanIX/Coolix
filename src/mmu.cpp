@@ -45,8 +45,7 @@ size_t mmu::getPhysicalAddress(PCB* pcb, size_t virtAddress) {
 
 		else
 		{
-			pcb->set_waitformmu(true);
-			ShortTermScheduler::RunningToWait(pcb);
+			//page fault
 			return -1;
 		}
 		/*
@@ -150,9 +149,10 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 }
 
 
-void mmu::writeToRam(instruct_t location, instruct_t data) {
+void mmu::writeToRam(instruct_t frame,instruct_t offset, instruct_t data) {
 	// Need to make sure that the frame is active. Otherwise, wrong data
-	MEM.allocate(location, data);
+	instruct_t address = FrameNumberToLocation(frame);
+	MEM.allocate(address + offset, data);
 }
 
 
@@ -182,9 +182,10 @@ instruct_t mmu::get_instruction(PCB* pcb)
 {
 	size_t frame;
 	size_t offset;
+	pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
 	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE))){
 		frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
-		offset = (pcb->get_program_counter());
+		offset = (pcb->get_program_counter() % (PAGE_SIZE));
 		return MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
 	}
 	else {
@@ -192,12 +193,26 @@ instruct_t mmu::get_instruction(PCB* pcb)
 		return -1;
 	}
 }
+instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
+{
+	size_t pageNumber = (address / (PAGE_SIZE));
+	pcb->set_lastRequestedPage(pageNumber);
+		if (pcb->is_valid_page(pageNumber))
+		{
+			size_t frame = pcb->get_frame(pageNumber);
+			return MEM.get_instruction((frame* (PAGE_SIZE)) + (address % (PAGE_SIZE)));
+		}
+		else {
+			//page fault
+			return -1;
+		}
+}
 instruct_t mmu::getRamAddress(PCB * pcb, instruct_t localAddress)
 {
-	size_t frame = pcb->get_frame(localAddress / (PAGE_SIZE));
-
-	if (pcb->is_valid_page(localAddress / (PAGE_SIZE))) {
-		frame = pcb->get_frame(localAddress / (PAGE_SIZE));
+	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
+	pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
+	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE))) {
+		
 		return (frame* (PAGE_SIZE) + (localAddress % (PAGE_SIZE)));
 	}
 	else {
@@ -205,19 +220,7 @@ instruct_t mmu::getRamAddress(PCB * pcb, instruct_t localAddress)
 		return -1;
 	}
 }
-instruct_t mmu::get_instruction(PCB* pcb, instruct_t localAddress)
-{
-	size_t frame;
-	if (pcb->is_valid_page(localAddress / (PAGE_SIZE)))
-	{
-		frame = pcb->get_frame(localAddress / (PAGE_SIZE));
-		return MEM.get_instruction(frame* (PAGE_SIZE) + (localAddress % (PAGE_SIZE)));
-	}
-	else{
-		//page fault
-		return -1;
-	}
-}
+
 
 
 // GLOBAL VARIABLE

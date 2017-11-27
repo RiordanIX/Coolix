@@ -15,11 +15,10 @@ LongTerm::LongTerm() {
 LongTerm::~LongTerm() { }
 
 
-void LongTerm::loadProcess() 
+void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 {
-	PCB *pcb = newQueue.getProcess();
-	// Load first 4 pages into RAM
-	for (int i = 0; i < 4; ++i)
+	// Load 4 pages into RAM
+	for (int i = pagenumber; i < (pagenumber + 4); ++i)
 	{
 		if (MMU.processDiskToRam(pcb, i) ) 
 		{
@@ -33,9 +32,27 @@ void LongTerm::loadProcess()
 	}
 	pcb->set_status(status::READY);
 	readyQueue.addProcess(pcb);
-	newQueue.removeProcess();
 }
-
+void LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
+{
+	// Load 1 page into RAM
+	
+		if (MMU.processDiskToRam(pcb, pagenumber))
+		{
+			
+		}
+		else
+		{
+			debug_printf("No frames are available%s", "\n");
+			return;
+		}
+	pcb->set_status(status::READY);
+	readyQueue.addProcess(pcb);
+}
+void LongTerm::DumpProcess(PCB * pcb)
+{
+	MMU.dumpProcess(pcb);
+}
 
 std::vector<LongTerm::EmptySpace> LongTerm::GetOpenSpaces() {
 	std::vector<EmptySpace> ess;

@@ -69,12 +69,13 @@ std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 }
 
 // returns false if out of bounds.
-bool PCB::is_valid_page(size_t frame) {
-	if (frame > pageTable.size())
+bool PCB::is_valid_page(size_t pageNumber) {
+	
+	if (pageNumber > pageTable.size())
 	{
 		return false;
 	}
-	return pageTable.pages[frame].first;
+	return pageTable.pages[pageNumber].first;
 }
 
 

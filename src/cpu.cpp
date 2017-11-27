@@ -34,8 +34,18 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	//printf("%s", get_info().c_str());
 }
 
-instruct_t cpu::fetch(PCB* pcb) {
-	return MMU.get_instruction(pcb);
+instruct_t cpu::fetch(PCB* pcb) 
+{
+	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
+	{
+		return MMU.get_instruction(pcb);
+	}
+	else
+	{
+		pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
+		pcb->set_waitformmu(true);
+		pcb->set_status(WAITING); //fetch method
+	}
 }
 
 std::string cpu::get_info() {
@@ -57,12 +67,37 @@ void cpu::set_registers(std::vector<instruct_t> source) {
 
 inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset) {
 	
-	if (Reg2 > 0) {
-		registers[Reg1] = MMU.get_instruction(pcb, registers[Reg2] + offset);
-	}
-	else {
-		registers[Reg1] = MMU.get_instruction(pcb, Address + offset);
-	}
+		size_t pageNumber = (Address / (PAGE_SIZE));
+		if (Reg2 > 0)
+		{	
+			//Address = (registers[Reg2] / (PAGE_SIZE));
+			//offset = (registers[Reg2] % (PAGE_SIZE));
+			pageNumber = (registers[Reg2] / (PAGE_SIZE));
+			if (pcb->is_valid_page(pageNumber) )
+			{
+				registers[Reg1] = MMU.get_instruction(pcb, registers[Reg2]);
+			}
+			else
+			{
+				//page fault
+				pcb->set_lastRequestedPage(pageNumber);
+				pcb->set_waitformmu(true);
+				pcb->set_status(WAITING);
+			}
+		}
+		else {
+			if (pcb->is_valid_page(pageNumber))
+			{
+				registers[Reg1] = MMU.get_instruction(pcb, Address);
+			}
+			else
+			{
+				//page fault
+				pcb->set_lastRequestedPage(pageNumber);
+				pcb->set_waitformmu(true);
+				pcb->set_status(WAITING);
+			}
+		}
 }
 
 
@@ -75,13 +110,18 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 			registers[Reg1], registers[Reg1], Address);
 		printf("End address: %#010X\n", offset);
 		// Needs some sort of offset.  This should be figured out some way.
-		if (offset > 0)
+		if (pcb->is_valid_page(Address / (PAGE_SIZE)))
 		{
-			MMU.writeToRam(Address + offset, registers[Reg1]);
+			size_t frame = pcb->get_frame(Address / (PAGE_SIZE));
+			offset = Address % (PAGE_SIZE);
+			MMU.writeToRam(frame, offset, registers[Reg1]);
 		}
 		else
 		{
 			//page fault
+			pcb->set_lastRequestedPage(Address / (PAGE_SIZE));
+			pcb->set_waitformmu(true);
+			pcb->set_status(WAITING);
 		}
 	}
 }
@@ -123,28 +163,38 @@ inline void cpu::cpu_slt(instruct_t s1, instruct_t s2, instruct_t dest) {
 }
 
 inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, PCB * pcb) {
-	std::size_t offset = MMU.getRamAddress(pcb, registers[D_reg]);
-	if (offset > 0)
+	
+	if (pcb->is_valid_page(registers[D_reg] / (PAGE_SIZE) ))
 	{
+		std::size_t frame = pcb->get_frame((registers[D_reg]) / (PAGE_SIZE));
+		instruct_t offset = (registers[D_reg]) % (PAGE_SIZE);
 	//	MMU.writeToRam(offset + registers[D_reg], registers[B_reg]);
-		MMU.writeToRam(offset, registers[B_reg]);
+		MMU.writeToRam(frame,offset, registers[B_reg]);
 	}
 	else
 	{
 		//page fault
+		pcb->set_lastRequestedPage(registers[D_reg] / (PAGE_SIZE));
+		pcb->set_waitformmu(true);
+		pcb->set_status(WAITING);
 	}
 
 }
 
 inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t Address) {
-	std::size_t offset = MMU.getRamAddress(pcb, registers[B_reg] + Address);
-	if (offset > 0)
+
+	if (pcb->is_valid_page((registers[B_reg] + Address) / (PAGE_SIZE)))
 	{
+	//	Address = (registers[B_reg] + Address) / (PAGE_SIZE);
+	//	instruct_t offset = (registers[B_reg] + Address) % (PAGE_SIZE);
 		registers[D_reg] = MMU.get_instruction(pcb, registers[B_reg] + Address);
 	}
 	else
 	{
 		//page fault
+		pcb->set_lastRequestedPage(registers[D_reg] / (PAGE_SIZE));
+		pcb->set_waitformmu(true);
+		pcb->set_status(WAITING);
 	}
 }
 
@@ -220,18 +270,18 @@ inline void cpu::cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) 
 	Reg2 = (inst & 0x000F0000) >> (4 * 4);
 	Address = inst & 0x0000FFFF;
 
-	size_t frameNum = Address / (PAGE_SIZE);
+	//size_t frameNum = Address / (PAGE_SIZE);
 	offset = Address % (PAGE_SIZE);
 
 	switch (opcode)
 	{
 	case OP_IO_RD:
 
-		cpu_rd(pcb, Reg1, Reg2, frameNum, offset);
+		cpu_rd(pcb, Reg1, Reg2, Address, offset);
 		break;
 
 	case OP_IO_WR:
-		cpu_wr(pcb, Reg1, Reg2, frameNum, offset);
+		cpu_wr(pcb, Reg1, Reg2, Address, offset);
 		break;
 	default:
 		throw "Invalid IO instruction format";

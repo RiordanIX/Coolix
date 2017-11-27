@@ -19,20 +19,18 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 		//set pcb status to waiting
 		if (pcb->get_waitformmu() == true)
      	{
-			readyQueue.getProcess()->set_status(status::WAITING);
-			waitingQueue.addProcess(readyQueue.getProcess());
-			readyQueue.removeProcess();
+			waitingQueue.addProcess(pcb);
 		}
 }
 void ShortTermScheduler::ReadyToWait()
 {
 	/*how to pop ready queue pointer if process goes to wait?*/
 	
-	if (readyQueue.size() > 0)
+	if (readyQueue.size() > 0 && readyQueue.getProcess()->get_status() != WAITING)
 	{
 		//places ready queue process into wait queue
 		//set pcb status to waiting
-		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == FREE)
+		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == LOCK)
 		{
 			readyQueue.getProcess()->set_status(status::WAITING);
 			waitingQueue.addProcess(readyQueue.getProcess());
@@ -45,7 +43,7 @@ void ShortTermScheduler::WaitToReady()
 	/*how to pop wait queue pointer if process goes to ready?*/
 	//set pcb status to ready
 	//check to see if resouce is free and process is not waiting for mmu
-	if (waitingQueue.size() > 0)
+	if (waitingQueue.size() > 0 && readyQueue.getProcess()->get_status() != READY)
 	{
 		if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
 			&& waitingQueue.getProcess()->get_waitformmu() == false)

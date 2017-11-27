@@ -15,7 +15,9 @@ public:
 	LongTerm();//contructor
 	~LongTerm();//distructor
 	//Move  processes from disk to ram
-	void loadProcess();
+	void loadProcess(PCB * pcb,std::size_t pagenumber);
+	void loadPage(PCB * pcb, std::size_t pagenumber);
+	void DumpProcess(PCB * pcb);
 private:
 	struct EmptySpace
 	{

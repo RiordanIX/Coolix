@@ -15,7 +15,7 @@ cpu* CPU_Pool::FreeCPU()//check each cpu then determines which one is not runnin
 	{
 		return &CPU0;
 	}
-	else if (CPU1.CurrentProcess == nullptr)
+	/*else if (CPU1.CurrentProcess == nullptr)
 	{
 		return &CPU1;
 	}
@@ -38,7 +38,7 @@ cpu* CPU_Pool::FreeCPU()//check each cpu then determines which one is not runnin
 	else if (CPU3.CurrentProcess->get_status() != RUNNING)
 	{
 		return &CPU3;
-	}
+	}*/
 	else
 	{
 		return nullptr;
