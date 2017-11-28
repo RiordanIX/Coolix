@@ -3,7 +3,7 @@
 
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue;
-extern std::mutex wq,rq,tq,ex;
+extern int waitQueueLock;
 
 ShortTermScheduler::ShortTermScheduler()
 {
@@ -23,9 +23,10 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 		
 		if (pcb->get_waitformmu() == true)
 		{
-			while (wq.try_lock() == false) {}
+			while (waitQueueLock == 1) {}
+			waitQueueLock = 1;
 			waitingQueue.addProcess(pcb);
-			wq.unlock();
+			waitQueueLock = 0;
 		}
 		
 	
@@ -41,9 +42,10 @@ void ShortTermScheduler::ReadyToWait()
 		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == LOCK)
 		{
 			readyQueue.getProcess()->set_status(status::WAITING);
-			while (wq.try_lock() == false) {}
+			while (waitQueueLock == 1) {}
+			waitQueueLock = 1;
 			waitingQueue.addProcess(readyQueue.getProcess());
-			wq.unlock();
+			waitQueueLock = 0;
 			
 			readyQueue.removeProcess();
 			
@@ -57,7 +59,8 @@ void ShortTermScheduler::WaitToReady()
 	//check to see if resouce is free and process is not waiting for mmu
 	if (waitingQueue.size() > 0 )
 	{
-	while (wq.try_lock() == false) {}
+		while (waitQueueLock == 1) {}
+		waitQueueLock = 1;
 		if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
 			&& waitingQueue.getProcess()->get_waitformmu() == false)
 		{   
@@ -65,7 +68,7 @@ void ShortTermScheduler::WaitToReady()
 			waitingQueue.getProcess()->set_status(status::READY);
 			waitingQueue.removeProcess();
 		}
-	wq.unlock();
+		waitQueueLock = 0;
 		
 
 	}

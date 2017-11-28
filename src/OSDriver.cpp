@@ -7,9 +7,13 @@ extern PriorityQueue readyQueue, newQueue , waitingQueue;
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
-std::mutex tq,ex, frame;
-std::mutex wq;
-std::mutex rq;
+//to prevent race condition
+int readInstruction = 0;
+int writeInstruction = 0;
+int waitQueueLock = 0;
+int terminatedQueueLock = 0;
+int freeframeLock = 0;
+int busywait = 0;
 std::thread RUN;
 
 OSDriver::OSDriver() :
@@ -29,10 +33,14 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	CPU->CurrentProcess = pcb;
 	CPU->cache.current_pid = pcb->get_pid();
 	//set process pcb to running status
-	while (CPU->CurrentProcess->get_status() != status::TERMINATED &&
-		CPU->CurrentProcess->get_status() != status::WAITING)
+	int dumbv = 0;
+	while (CPU->CurrentProcess->get_status() != status::TERMINATED 
+		/*CPU->CurrentProcess->get_status() != status::WAITING*/)
 	{
+		while (readInstruction == 1) { busywait++; }
+		readInstruction = 1;
 		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
+		readInstruction = 0;
 		if (CPU->CurrentProcess->get_status() == WAITING)
 		{
 			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
@@ -53,7 +61,10 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		}
 		if (CPU->CurrentProcess->get_status() == RUNNING)
 		{	//  Decodes and Executes Instruction
+			while (writeInstruction == 1) { busywait++; }
+			writeInstruction = 1;
 			CPU->decode_and_execute(instruct, CPU->CurrentProcess);
+			writeInstruction = 0;
 		}
 		if (CPU->CurrentProcess->get_status() == WAITING)
 		{
@@ -77,12 +88,14 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 #endif // DEBUG
 	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		//while (tq.try_lock() == false) {}
+		while (terminatedQueueLock == 1) { busywait++; }
+		terminatedQueueLock = 1;
 		terminatedQueue.addProcess(CPU->CurrentProcess);
+		terminatedQueueLock = 0;
 		//while (frame.try_lock()) {}
 		LongTerm::DumpProcess(CPU->CurrentProcess);
 		//frame.unlock();
-		//tq.unlock();
+	
 	}
 	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
 																	   //readyQueue.removeProcess();
@@ -149,8 +162,10 @@ void OSDriver::run(std::string fileName) {
 		if (waitingQueue.size() > 0)
 		{
 			
-				//while (wq.try_lock() == false) {}
+				while (waitQueueLock == 1) {}
+				waitQueueLock = 1;
 				pcb = waitingQueue.getProcess();
+				waitQueueLock = 0;
 				//wq.unlock();
 				if (pcb->get_waitformmu() == true)
 				{

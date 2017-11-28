@@ -3,7 +3,7 @@
 
 extern Ram MEM;
 extern Disk DISK;
-extern std::mutex frame;
+extern int freeframeLock;
 
 using std::size_t;
 using std::vector;
@@ -50,7 +50,10 @@ void mmu::dumpProcess(PCB* pcb) {
 			frame = pcb->get_frame(i);
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(pageReplace, false, -1);
+			while (freeframeLock == 1) {}
+			freeframeLock = 1;
 			_freeFrames.push(frame);
+			freeframeLock = 0;
 		}
 	}
 }
@@ -75,11 +78,15 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	{
 		return false;
 	}
-	diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
-	
-	frameNum = _freeFrames.front();
-	
-	address = FrameNumberToLocation(frameNum);
+	else
+	{
+		diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
+		while (freeframeLock == 1) {}
+		freeframeLock = 1;
+		frameNum = _freeFrames.front();
+		freeframeLock = 0;
+		address = FrameNumberToLocation(frameNum);
+	}
 	
 
 	// Sanity check to make sure not allocating more RAM than we have.
@@ -89,8 +96,10 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 
 	// We're confident the frame can be popped.
-	
+	while (freeframeLock == 1) {}
+	freeframeLock = 1;
 	_freeFrames.pop();
+	freeframeLock = 0;
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
 	for(int i = 0; i < ((PAGE_SIZE)/ (INST_SIZE)); i++, diskLoc+=4, address+=4) {
