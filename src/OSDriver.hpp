@@ -2,23 +2,20 @@
 
 #define DEFAULT_CPU_CYCLE_TIME  50
 
-//#include "FIFO.h"
+// TODO: change type of queue to be selected at runtime
+//#include "FIFO.hpp"
 #include "loader.hpp"
 #include "cpu.hpp"
 #include "dispatcher.hpp"
 #include "pcb.hpp"
-#include "PriorityQueue.h"
-#include "LongTerm.h"
-//#include short term scheduler
-//#include long term scheduler
+#include "PriorityQueue.hpp"
+#include "LongTerm.hpp"
+#include "CpuPool.hpp"
 
-//extern PCB process_list;
-//extern PriorityQueue readyQueue;
 
 class OSDriver {
 public:
     OSDriver();
-    ~OSDriver();
 
     int cpu_cycle;
     int current_cycle;
@@ -29,8 +26,8 @@ public:
     LongTerm ltSched;
 
     void run(std::string fileName);  // Runs the OS
-    void run_cpu();
-    void run_shortts();
+//    void run_cpu();
+    void run_shortts(cpu *CPU);
     void run_longts();
 };
 

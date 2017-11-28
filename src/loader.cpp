@@ -14,7 +14,7 @@ process into memory.
 #include <cstdint>
 #include "loader.hpp"
 #include "instruct.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 
 using std::size_t;
 using std::string;

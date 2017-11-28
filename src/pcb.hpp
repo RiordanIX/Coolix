@@ -48,7 +48,9 @@ public:
 			ramAddress(0xDEADBEEF),
 			programCounter(0),
 			registers(16, 0),
-			sectionSizes(4,0)
+			sectionSizes(4,0),
+			hit(0),
+			miss(0)
 		{
 		sectionSizes[section::INSTRUCTION] = instruct;
 		sectionSizes[section::INPUT] = inp;
@@ -70,7 +72,7 @@ public:
 	int get_end_time() { return end_time; }
 	int get_run_time() { return (start_time - end_time); }
 	int get_cycle_start_time() { return cycle_start_time; }
-    
+
 	std::vector<instruct_t> get_registers ();
 	resourceType get_resource_status() { return resource_held; }
 	status get_status() { return currentStatus;}
@@ -87,10 +89,15 @@ public:
 	void set_start_time(int startIn);
 	void set_end_time(int endIn);
 	void set_cycle_start_time(int cycleIn);
-    
+
 	void set_ram_address(std::size_t address);
 	void set_program_counter(std::size_t new_pc);
 	void increment_PC() { programCounter += 4; }
+	void cache_hit() { hit++;}
+	void cache_miss() { miss++;}
+	void cache_stats() {
+		printf("Process %u:\tHit: %d\tMiss: %d\n",pid, hit, miss);
+	}
 
 
 private:
@@ -112,6 +119,8 @@ private:
 
 	std::vector<instruct_t> registers;
 	std::vector<instruct_t> sectionSizes;
+	// for Cache hit and miss
+	int hit, miss;
 };
 
 

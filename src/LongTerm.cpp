@@ -1,10 +1,11 @@
-#include "LongTerm.h"
+#include "LongTerm.hpp"
 
 // GLOBAL VARIABLES!!!
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern Ram MEM;
+extern std::mutex mtx;
 
 LongTerm::LongTerm()
 {
@@ -38,6 +39,7 @@ void LongTerm::DiskToRam()
 						{
 							break;
 						}
+						std::lock_guard<std::mutex> lock(mtx);
 						MEM.allocate_chunk(ess1[i].Sadd, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
 						std::printf("Allocated to RAM Process id:%u", newQueue.getProcess()->get_pid());
 						used.push_back(Used(ess1[i].Sadd, ess1[i].Isize));
@@ -68,6 +70,7 @@ void LongTerm::DiskToRam()
 						if (CheckEmpty(EmptySpace(MaxAddress, MaxAddress+ newQueue.getProcess()->get_end_address()), used))
 						{
 							newQueue.getProcess()->set_ram_address(MaxAddress);
+							std::lock_guard<std::mutex> lock(mtx);
 							MEM.allocate_chunk(MaxAddress, DISK.read_instruction_chunk(newQueue.getProcess()->get_disk_address(), newQueue.getProcess()->get_end_address()));
 							used.push_back(Used(MaxAddress, MaxAddress + newQueue.getProcess()->get_end_address()));
 							MaxAddress = MaxAddress + (newQueue.getProcess()->get_end_address());//not sure about this

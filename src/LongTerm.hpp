@@ -4,7 +4,8 @@
 #include "disk.hpp"
 #include "ram.hpp"
 #include "pcb.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
+#include "cpu.hpp"
 //#include "FIFO.h"
 
 

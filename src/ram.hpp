@@ -18,10 +18,13 @@ private:
 	std::vector<byte_t> _space;
 
 public:
-	Ram(std::size_t size=DEFAULT_RAM);
+	Ram(std::size_t size=DEFAULT_RAM) :
+								_size(size),
+								_space(size, 0) { }
 	std::size_t size() { return _size;}
 	void allocate(std::size_t location, instruct_t data);
 	void allocate(std::size_t location, byte_t data);
+
 	// location must be BYTE addressable
 	void allocate_chunk(std::size_t location, std::deque<instruct_t> instructions);
 	instruct_t get_instruction(std::size_t index);

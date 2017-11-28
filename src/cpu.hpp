@@ -7,6 +7,7 @@
 #include "instruct.hpp"
 #include "pcb.hpp"
 #include "ram.hpp"
+#include "cache.hpp"
 #include "cpu_defs.hpp"
 //#include "debug.hpp"
 
@@ -20,19 +21,27 @@
 * can define the number of registers by passing it in, or just leaving it as
 * the default of 16.
 *****************************************************************************/
-extern std::mutex mtx;
 
 class cpu {
 public:
 	// Public because the dispatcher needs to access it.
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
+	Cache cache;
 
-	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0) {}
-	instruct_t fetch(PCB* pcb);
+	// cache is 16 instructions
+	cpu(std::size_t size = DEFAULT_REG_SIZE) :
+						num_registers(size),
+						registers(size, 0),
+						cache(16),
+						currentProcess(nullptr),
+						current_cycle() {}
 	void set_registers(std::vector<instruct_t> to_switch);
 	void decode_and_execute(instruct_t inst, PCB* pcb);
 	std::string get_info();
+	void update_cache(PCB* pcb);
+	PCB* currentProcess;
+	int current_cycle;
 
 
 	/**************************************************************************
@@ -44,8 +53,7 @@ public:
 	/**************************************************************************
 	*  I/O instructions {{{
 	*************************************************************************/
-	void cpu_rd(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
-	void cpu_wr(instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+	//void cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
 	/**************************************************************************
 	* }}} End I/O instructions
 	*************************************************************************/
@@ -71,8 +79,8 @@ public:
 	* Immediate instructions {{{
 	* When the last 16 bits contain data, the D-reg is always 0000
 	*************************************************************************/
-	void cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset);
-	void cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset);
+	//void cpu_st(instruct_t B_reg, instruct_t D_reg, instruct_t offset);
+	//void cpu_lw(instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset);
 	void cpu_movi(instruct_t D_reg, instruct_t Address);
 	void cpu_addi(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
 	void cpu_muli(instruct_t B_reg, instruct_t D_reg, instruct_t Address);
@@ -140,63 +148,11 @@ public:
 
 
 	/**************************************************************************
-	* Immediate Operations {{{
+	* Immediate Operations
 	*************************************************************************/
-	inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
-		instruct_t B_reg, D_reg, Address;
-		B_reg = (inst & 0x00F00000) >> (5 * 4);
-		D_reg = (inst & 0x000F0000) >> (4 * 4);
-		Address = inst & 0x0000FFFF;
-
-		switch (opcode) {
-		case OP_I_ST:
-			cpu_st(B_reg, D_reg,pcb->get_ram_address());
-			break;
-		case OP_I_LW:
-			cpu_lw(B_reg, D_reg, Address,pcb->get_ram_address());
-			break;
-		case OP_I_MOVI:
-			cpu_movi(D_reg, Address);
-			break;
-		case OP_I_ADDI:
-			cpu_addi(B_reg, D_reg, Address);
-			break;
-		case OP_I_MULI:
-			cpu_muli(B_reg, D_reg, Address);
-			break;
-		case OP_I_DIVI:
-			cpu_divi(D_reg, Address);
-			break;
-		case OP_I_LDI:
-			cpu_ldi(D_reg, Address);
-			break;
-		case OP_I_SLTI:
-			cpu_slti(B_reg, D_reg, Address);
-			break;
-		case OP_I_BEQ:
-			cpu_beq(B_reg, D_reg, Address, pcb);
-			break;
-		case OP_I_BNE:
-			cpu_bne(B_reg, D_reg, Address, pcb);
-			break;
-		case OP_I_BEZ:
-			cpu_bez(B_reg, Address, pcb);
-			break;
-		case OP_I_BNZ:
-			cpu_bnz(B_reg, Address, pcb);
-			break;
-		case OP_I_BGZ:
-			cpu_bgz(B_reg, Address, pcb);
-			break;
-		case OP_I_BLZ:
-			cpu_blz(B_reg, Address, pcb);
-			break;
-		default:
-			throw "Invalid Immediate instruction format";
-		}
-	}
+	inline void cpu_immediate_operation(instruct_t inst, instruct_t opcode, PCB* pcb);
 	/**************************************************************************
-	* }}} End of Immediate Operations
+	* End of Immediate Operations
 	*************************************************************************/
 
 
@@ -227,29 +183,17 @@ public:
 
 
 	/**************************************************************************
-	* IO Operations{{{
+	* IO Operations
 	*************************************************************************/
-	inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb) {
-		instruct_t Reg1, Reg2, Address, offset;
-		Reg1 = (inst & 0x00F00000) >> (5 * 4);
-		Reg2 = (inst & 0x000F0000) >> (4 * 4);
-		Address = inst & 0x0000FFFF;
-		offset = pcb->get_ram_address();
-
-		switch (opcode)
-		{
-		case OP_IO_RD:
-			cpu_rd(Reg1, Reg2, Address, offset);
-			break;
-
-		case OP_IO_WR:
-			cpu_wr(Reg1, Reg2, Address, offset);
-			break;
-		default:
-			throw "Invalid IO instruction format";
-		}
-	}
+	inline void cpu_io_operation(instruct_t inst, instruct_t opcode, PCB* pcb);
 	/**************************************************************************
-	* }}} End of IO operations
+	* End of IO operations
 	*************************************************************************/
 };
+
+// Instructions that have to be global
+instruct_t fetch(cpu *CPU, PCB* pcb);
+void cpu_wr(cpu *CPU, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);
+void cpu_st(cpu *CPU, instruct_t B_reg, instruct_t D_reg, instruct_t offset);
+void cpu_lw(cpu *CPU, instruct_t B_reg, instruct_t D_reg, instruct_t Address, instruct_t offset);
+void cpu_rd(cpu *CPU, PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t Address, instruct_t offset);

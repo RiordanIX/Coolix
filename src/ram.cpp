@@ -7,8 +7,6 @@ using std::vector;
 using std::deque;
 using std::size_t;
 
-Ram::Ram(long unsigned int size) : _size(size), _space(size, 0) { }
-
 
 /** Assigns instruction to ram location
  * \throws illegal_allocation_error
@@ -80,5 +78,5 @@ void Ram::dump_data() {
 }
 
 // GLOBAL VARIABLES
-Ram MEM = Ram(DEFAULT_RAM);
+Ram MEM;
 

@@ -1,5 +1,5 @@
 #include "dispatcher.hpp"
-#include "PriorityQueue.h"
+#include "PriorityQueue.hpp"
 #include "OSDriver.hpp"
 
 extern PriorityQueue terminatedQueue;
