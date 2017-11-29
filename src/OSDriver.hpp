@@ -3,6 +3,7 @@
 #define DEFAULT_CPU_CYCLE_TIME  50
 
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <mutex>
 

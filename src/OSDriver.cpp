@@ -12,6 +12,7 @@ int writeInstruction = 0;
 int waitQueueLock = 0;
 int readyQueueLock = 0;
 int terminatedQueueLock = 0;
+
 std::mutex wq;
 
 std::thread RUN;
@@ -25,7 +26,14 @@ OSDriver::OSDriver() :
 	{ }
 
 OSDriver::~OSDriver() { }
-
+void printOutPut(PCB * pcb)
+{
+	std::fstream myfile;
+	myfile.open("example.txt", std::ios::out | std::ios::app);
+	myfile << "Process complted :" << pcb->get_pid() << "\r\n";
+	myfile.close();
+	
+}
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
@@ -84,6 +92,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		while (terminatedQueueLock == 1) { printf("terminated"); }
 		terminatedQueueLock = 1;
 		terminatedQueue.addProcess(CPU->CurrentProcess);
+		printOutPut(CPU->CurrentProcess);
 		terminatedQueueLock = 0;
 	
 		//frame.unlock();
@@ -210,6 +219,7 @@ void OSDriver::run(std::string fileName) {
 		CPU = CPU_Pool::FreeCPU();
 		
 	}
+
 
 #if (defined DEBUG || defined _DEBUG)
 	MEM.dump_data();
