@@ -102,8 +102,10 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 	
 	diskLoc =  pcb->get_disk_address() + ((pageNumber)*(PAGE_SIZE));
-	
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
 	frameNum = _freeFrames.front();
+	FrameDump = 0;
 	
 	address = FrameNumberToLocation(frameNum);
 	
