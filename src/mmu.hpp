@@ -20,6 +20,7 @@ class mmu
 		void addFreeFrame(int x) { _freeFrames.push(x); };
 		void tableInit(PCB* pcb, std::size_t frameCount);
 		void dumpProcess(PCB* pcb);
+		void dumpPage(PCB * pcb);
 		size_t FrameNumberToLocation(std::size_t Frame);
 		bool processDiskToRam(PCB* pcb, std::size_t pageNumber);
 		void writeToRam(instruct_t location, instruct_t offset, instruct_t data);

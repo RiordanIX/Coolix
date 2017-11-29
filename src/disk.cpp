@@ -25,6 +25,22 @@ void Disk::allocate(size_t location,byte_t data) {
 		throw "Illegal allocation at: " + to_string(location) + ".";
 	}
 }
+void Disk::allocate(size_t location, instruct_t data) {
+	byte_t local = 0;
+
+	local = byte_t((data & 0xFF000000) >> (8 * 3));
+	allocate(location,local);
+
+	local = byte_t((data & 0x00FF0000) >> (8 * 2));
+	allocate(location + 1,local);
+
+	local = byte_t((data & 0x0000FF00) >> (8 * 1));
+	allocate(location + 2,local);
+
+	local = byte_t((data & 0x000000FF) >> (8 * 0));
+	allocate(location + 3,local);
+	debug_printf("Allocated: %#010X\n", this->read_instruction(this->_used - 4));
+}
 /**
  * Everything in the disk is indexed by a byte address.  This is an overloaded
  * method for assigning an entire instruction to disk instead.  The

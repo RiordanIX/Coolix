@@ -11,12 +11,10 @@ void Dispatcher::dispatch(cpu* CPU, PCB* cProcess) {
 	if (!readyQueue.empty())
 	{
 		debug_printf("I am dipatching !!!!!!!!!!!!!!!!!!!!!!!!!%s","\n");
-		// Moves current process to WaitingQueue
-		
-		switchOut(CPU, cProcess);
+	
 		// Removes First Process and gives next process to CPU
 
-		switchIn(CPU);
+		switchIn(CPU,cProcess);
 		
 	}
 }
@@ -29,7 +27,7 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 }
 
 
-void Dispatcher::switchIn(cpu* CPU) {
+void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) {
 	//	If process is terminated. Throw it into the Terminated Queue
 	if (CPU->CurrentProcess != nullptr)
 	{
@@ -38,7 +36,7 @@ void Dispatcher::switchIn(cpu* CPU) {
 			//PCB* exitingProcess = CPU->CurrentProcess;
 			//exitingProcess->set_end_time();
 			//terminatedQueue.addProcess(exitingProcess);
-			LongTerm::DumpProcess(CPU->CurrentProcess);
+			
 		}
 	}
 
@@ -48,10 +46,12 @@ void Dispatcher::switchIn(cpu* CPU) {
 	// Sets the CPU registers to the new PCB registers
 	while (readyQueueLock == 1) { printf("readyQ"); }
 	readyQueueLock = 1;
+	// Moves current process to WaitingQueue
+	switchOut(CPU, cProcess);
 	if (!readyQueue.empty())
 	{
-		CPU->CurrentProcess = readyQueue.getProcess();
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
+		CPU->CurrentProcess = readyQueue.getProcess();
 		readyQueue.getProcess()->set_status(status::RUNNING);
 		readyQueue.removeProcess();
 		debug_printf("Correctly swapped processes!!!!%s","\n");

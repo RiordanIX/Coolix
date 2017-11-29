@@ -40,21 +40,27 @@ instruct_t cpu::fetch(PCB* pcb)
 	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	// Cache hit
-	if (cache.in_cache(pcb->get_pid(), frame)) {
+	/*if (cache.in_cache(pcb->get_pid(), frame)) {
 		debug_printf("Frame is in the cache%s","\n");
 		return cache.get_instruction(frame, offset);
-	}
+	}*/
 	// Cache Miss
-	else if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
+	if (pcb->is_valid_page(pcb->get_program_counter() / (PAGE_SIZE)))
 	{
+	/*	if ((offset + pcb->get_program_counter()) / (INST_SIZE) <= 3)
+		{
 			std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
 			debug_printf("Setting the cache%s", "\n");
 			cache.set_cache(frame, insts);
-		
+		}*/
 		return MMU.get_instruction(pcb);
 	}
 	else
 	{
+		if ((pcb->get_program_counter() / (PAGE_SIZE)) > 100)
+		{
+			int value = 0;
+		}
 		pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING); //fetch method
@@ -94,6 +100,10 @@ inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 			else
 			{
 				//page fault
+				if ((pageNumber) > 100)
+				{
+					int value = 0;
+				}
 				pcb->set_lastRequestedPage(pageNumber);
 				pcb->set_waitformmu(true);
 				pcb->set_status(WAITING);
@@ -107,6 +117,10 @@ inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 			else
 			{
 				//page fault
+				if ((pageNumber) > 100)
+				{
+					int value = 0;
+				}
 				pcb->set_lastRequestedPage(pageNumber);
 				pcb->set_waitformmu(true);
 				pcb->set_status(WAITING);
@@ -133,6 +147,10 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 		else
 		{
 			//page fault
+			if ((Address / (PAGE_SIZE)) > 100)
+			{
+				int value = 0;;
+			}
 			pcb->set_lastRequestedPage(Address / (PAGE_SIZE));
 			pcb->set_waitformmu(true);
 			pcb->set_status(WAITING);
@@ -188,6 +206,10 @@ inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, PCB * pcb) {
 	else
 	{
 		//page fault
+		if ((registers[D_reg] / (PAGE_SIZE)) > 100)
+		{
+			int value = 0;;
+		}
 		pcb->set_lastRequestedPage(registers[D_reg] / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING);
@@ -206,7 +228,11 @@ inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t
 	else
 	{
 		//page fault
-		pcb->set_lastRequestedPage(registers[D_reg] / (PAGE_SIZE));
+		if( ((registers[B_reg] + Address) / (PAGE_SIZE))> 100)
+		{
+			int value = 0;;
+		}
+		pcb->set_lastRequestedPage((registers[B_reg] + Address) / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING);
 	}

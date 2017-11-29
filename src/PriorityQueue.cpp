@@ -3,14 +3,14 @@
 //initialize priority queue
 PriorityQueue::PriorityQueue() {
 	//Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
-	Q = std::deque<PCB*>();
+	//Q = std::deque<PCB*>();
 }
 
 
 PriorityQueue::~PriorityQueue() {
 	while (Q.empty() == false)
 	{
-		Q.pop_front();
+		Q.pop_back();
 	}
 }
 

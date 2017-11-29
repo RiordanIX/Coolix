@@ -24,7 +24,7 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 	
 		if (pcb->get_waitformmu() == true)
 		{	
-			while (waitQueueLock == 1) { printf("waitingQ"); }
+			while (waitQueueLock == 1) { printf("RunningToWait"); }
 			waitQueueLock = 1;
 			waitingQueue.addProcess(pcb);
 			waitQueueLock = 0;
@@ -68,7 +68,7 @@ void ShortTermScheduler::WaitToReady()
 		{   
 			while (readyQueueLock == 1) { printf("readyQ"); }
 			readyQueueLock = 1;
-			readyQueue.Q.push_front(waitingQueue.getProcess());
+			readyQueue.addProcess(waitingQueue.getProcess());
 			waitingQueue.getProcess()->set_status(status::READY);
 			waitingQueue.removeProcess();
 			readyQueueLock = 0;

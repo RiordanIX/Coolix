@@ -14,8 +14,10 @@ LongTerm::LongTerm() {
 
 
 LongTerm::~LongTerm() { }
-
-
+std::size_t LongTerm::FrameSize()
+{
+	return MMU.free_frame_count();
+}
 void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 4 pages into RAM
@@ -40,7 +42,8 @@ void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 1 page into RAM
-	
+	if (!pcb->is_valid_page(pcb->get_lastRequestedPage()))
+	{
 		if (MMU.processDiskToRam(pcb, pagenumber))
 		{
 			pcb->set_status(status::READY);
@@ -50,12 +53,23 @@ bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 		{
 			debug_printf("No frames are available%s", "\n");
 			return false;
-			
+
 		}
+	}
+	else
+	{
+		pcb->set_status(status::READY);
+		return true;
+	}
 }
 void LongTerm::DumpProcess(PCB * pcb)
 {
 	MMU.dumpProcess(pcb);
+}
+
+void LongTerm::DumpFrame(PCB * pcb)
+{
+	MMU.dumpPage(pcb);
 }
 
 

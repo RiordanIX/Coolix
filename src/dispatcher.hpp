@@ -21,8 +21,9 @@ private:
 	//  Copies CPU Register Values to PCB Register Values. Record Keeping
 	//  Variables. Move Process to Waiting Queue
 	void switchOut(cpu* CPU, PCB* cProcess);
+	void switchIn(cpu * CPU, PCB * cProcess);
 	//  Copies PCB Register Values to CPU Register Values. Record Keeping
 	//  Variables. Move Process into CPU.
-	void switchIn(cpu* CPU);
+	//void switchIn(cpu* CPU);
 };
 

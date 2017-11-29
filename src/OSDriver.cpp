@@ -12,10 +12,12 @@ int writeInstruction = 0;
 int waitQueueLock = 0;
 int readyQueueLock = 0;
 int terminatedQueueLock = 0;
+int FrameDump = 0;
 
 std::mutex wq;
 
 std::thread RUN;
+using namespace std::chrono_literals;
 
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
@@ -36,6 +38,7 @@ void printOutPut(PCB * pcb)
 }
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
+	CPU->jobInAction = 1;
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
 	CPU->CurrentProcess = pcb;
@@ -76,6 +79,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		CPU->CurrentProcess->increment_PC();
 		CPU->current_cycle++;
 		current_cycle++;
+		//std::this_thread::sleep_for(1ms);
 	}
 #if (defined DEBUG || defined _DEBUG)
 	//PCB* p = readyQueue.getProcess();
@@ -94,13 +98,13 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		terminatedQueue.addProcess(CPU->CurrentProcess);
 		printOutPut(CPU->CurrentProcess);
 		terminatedQueueLock = 0;
-	
+		LongTerm::DumpProcess(CPU->CurrentProcess);
 		//frame.unlock();
 		//tq.unlock();
 	}
 	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
-																	   //readyQueue.removeProcess();
-	if (RUN.joinable() == true)
+	CPU->jobInAction = 0;																   //readyQueue.removeProcess();
+	/*if (RUN.joinable() == true)
 	{
 		RUN.join();
 	}
@@ -110,7 +114,8 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 			RUN.~thread();
 		}
 		catch (std::exception &ee) {}
-	}
+	}*/
+	
 }
 bool CheckRunLock(cpu * CPU)
 {
@@ -158,9 +163,14 @@ void OSDriver::run(std::string fileName) {
 	debug_printf("Running Long term Scheduler%s","\n");
 	while (!newQueue.empty())
 	{
-		ltSched.loadProcess(newQueue.getProcess(),0);
-		newQueue.removeProcess(); totalJobs++;
+		//if (newQueue.getProcess()->get_pid() == 1)
+		
+			ltSched.loadProcess(newQueue.getProcess(), 0);
+			 totalJobs++;
+		
+		newQueue.removeProcess();
 	}
+	
 #if (defined DEBUG || defined _DEBUG)
 	debug_printf("Beginning MEMORY%s","\n");
 	MEM.dump_data();
@@ -177,13 +187,15 @@ void OSDriver::run(std::string fileName) {
 			{
 				//remove process from the ready queue
 				//while (rq.try_lock() == false) {}
-
-				run_shortts(CPU);//  Context Switches for the next process
-				//rq.unlock();
-				std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
-				if (RUN.joinable() == true)
+				if (CPU->jobInAction == 0)
 				{
-					RUN.join();
+					run_shortts(CPU);//  Context Switches for the next process
+				   //rq.unlock();
+					std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
+					if (RUN.joinable() == true)
+					{
+						RUN.detach();
+					}
 				}
 			}
 			
@@ -193,6 +205,7 @@ void OSDriver::run(std::string fileName) {
 			printf("%s\n",e);
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
+		//std::this_thread::sleep_for(2ms);
 		if (waitingQsize())//check if its greater than 0
 		{
 			
@@ -202,13 +215,22 @@ void OSDriver::run(std::string fileName) {
 				pcb = waitingQueue.getProcess();
 				waitQueueLock = 0;
 				if (pcb->get_waitformmu() == true)
-				{
-					
-					if (pcb->get_lastRequestedPage() < 256)
+				{					
+					if (pcb->get_lastRequestedPage() < 156)
 					{
 						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
 						{
 							pcb->set_waitformmu(false);
+						}
+						else
+						{
+							if (ltSched.FrameSize() == 0)
+							{
+								while (waitQueueLock == 1) { printf("waitingQ"); }
+								waitQueueLock = 1;
+								LongTerm::DumpFrame(pcb);
+								waitQueueLock = 0;
+							}
 						}
 					}
 					//StSched.WaitToReady();

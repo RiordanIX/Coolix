@@ -13,11 +13,14 @@ class LongTerm
 {
 public:
 	LongTerm();//contructor
-	~LongTerm();//distructor
+	~LongTerm();
+	std::size_t FrameSize();
+	//distructor
 	//Move  processes from disk to ram
 	void loadProcess(PCB * pcb,std::size_t pagenumber);
 	bool loadPage(PCB * pcb, std::size_t pagenumber);
 	static void DumpProcess(PCB * pcb);
+	static void DumpFrame(PCB * pcb);
 private:
 	struct EmptySpace
 	{

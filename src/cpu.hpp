@@ -29,7 +29,7 @@ public:
 	int current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
-
+	int jobInAction;
 	// for cache, we want it to be 4 frames
 	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0), cache(4 ) {}
 	instruct_t fetch(PCB* pcb);

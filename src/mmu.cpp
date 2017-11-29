@@ -4,6 +4,7 @@
 extern Ram MEM;
 extern Disk DISK;
 extern int mmuLock;
+extern int FrameDump;
 using std::size_t;
 using std::vector;
 
@@ -47,13 +48,32 @@ void mmu::dumpProcess(PCB* pcb) {
 		if(pcb->is_valid_page(i))
 		{
 			frame = pcb->get_frame(i);
-		//	writePageToDisk(pcb, i);
-			pcb->set_page_table_entry(pageReplace, false, -1);
+			writePageToDisk(pcb, i);
+			pcb->set_page_table_entry(i, false, -1);
+			while (FrameDump == 1) { printf("framelock"); }
+			FrameDump = 1;
 			_freeFrames.push(frame);
+			FrameDump = 0;
 		}
 	}
 }
-
+void mmu::dumpPage(PCB* pcb) {
+	size_t frame;
+	for (unsigned int i = (pcb->get_page_table_length() - 1); i > 0; i--)
+	{
+		if (pcb->is_valid_page(i))
+		{
+			frame = pcb->get_frame(i);
+			writePageToDisk(pcb, i);
+			pcb->set_page_table_entry(i, false, -1);
+			while (FrameDump == 1) { printf("framelock"); }
+			FrameDump = 1;
+			_freeFrames.push(frame);
+			FrameDump = 0;
+			break;
+		}
+	}
+}
 
 
 std::size_t mmu::FrameNumberToLocation(size_t Frame)
@@ -69,12 +89,19 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	size_t diskLoc;
 	size_t frameNum;
 	size_t address;
+	size_t fsize = 0;
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
+	fsize = _freeFrames.size();
+	FrameDump = 0;
 	// No frames are available, failed
-	if (_freeFrames.size() == 0)
+	
+	if (fsize == 0)
 	{
 		return false;
 	}
-	diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
+	
+	diskLoc =  pcb->get_disk_address() + ((pageNumber)*(PAGE_SIZE));
 	
 	frameNum = _freeFrames.front();
 	
@@ -88,8 +115,10 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 
 	// We're confident the frame can be popped.
-	
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
 	_freeFrames.pop();
+	FrameDump = 0;
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
 	while (mmuLock == 1) { printf("mmu6"); }
@@ -149,7 +178,7 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber)
 	mmuLock = 1;
 	for (int i = 0; i < ((PAGE_SIZE) / (INST_SIZE)); i++, diskLoc += 4, address += 4)
 	{
-		DISK.allocate(diskLoc, get_instruction(pcb, address));
+		DISK.allocate(diskLoc, MEM.get_instruction(address));
 	}
 	mmuLock = 0;
 }
@@ -178,9 +207,9 @@ vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	unsigned int counter = pcb->get_program_counter();
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	vector<instruct_t> insts;
-	insts.resize(4);
+	insts.resize(8);
 	for (unsigned int i = 0; i < 4; i++, counter +=4) {
-		offset = (counter % (PAGE_SIZE)) / (4);
+		offset = (offset + counter) / (4);
 		insts[offset]=(get_instructionCache(pcb,counter));
 	}
 	return insts;
@@ -208,6 +237,10 @@ instruct_t mmu::get_instructionCache(PCB* pcb, instruct_t address)
 instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 {
 	size_t pageNumber = (address / (PAGE_SIZE));
+	if (pageNumber > 100)
+	{
+		int value = 0;
+	}
 	pcb->set_lastRequestedPage(pageNumber);
 		if (pcb->is_valid_page(pageNumber))
 		{

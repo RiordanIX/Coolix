@@ -81,7 +81,7 @@ bool PCB::is_valid_page(size_t pageNumber) {
 
 void PCB::set_page_table_entry(size_t entry, bool valid, size_t frame)
 {
-	if ((entry) < (pageTable.size()))
+	if ((entry) < (pageTable.size()-1))
 	{
 		pageTable.pages[entry].first = valid;
 		pageTable.pages[entry].second = frame;
