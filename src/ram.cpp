@@ -37,7 +37,8 @@ void Ram::allocate(size_t location, instruct_t data) {
 
 void Ram::allocate(size_t location, byte_t data) {
 	if (location < _size) {
-		 _space.at(location) = data;
+		//while (frame.try_lock()) {}
+		_space.at(location) = data;
 	}
 	else {
 		throw "Illegal allocation at: " + to_string(location) + ".";
