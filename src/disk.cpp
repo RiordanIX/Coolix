@@ -16,7 +16,15 @@ void Disk::allocate(byte_t data) {
 		_used++;
 	}
 }
-
+void Disk::allocate(size_t location,byte_t data) {
+	if (location < _size) {
+		//while (frame.try_lock()) {}
+		_disk.at(location) = data;
+	}
+	else {
+		throw "Illegal allocation at: " + to_string(location) + ".";
+	}
+}
 /**
  * Everything in the disk is indexed by a byte address.  This is an overloaded
  * method for assigning an entire instruction to disk instead.  The

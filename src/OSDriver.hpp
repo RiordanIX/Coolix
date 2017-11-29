@@ -28,6 +28,7 @@ public:
     int cpu_cycle;
     int current_cycle;
 	int totalJobs;
+	std::vector<PCB *> RunningQ;
     loader ldr;
     Dispatcher Dispatch;
     LongTerm ltSched;

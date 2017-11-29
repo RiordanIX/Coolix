@@ -7,9 +7,13 @@ extern PriorityQueue readyQueue, newQueue , waitingQueue;
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
-std::mutex tq,ex, frame;
+int mmuLock = 0;
+int writeInstruction = 0;
+int waitQueueLock = 0;
+int readyQueueLock = 0;
+int terminatedQueueLock = 0;
 std::mutex wq;
-std::mutex rq;
+
 std::thread RUN;
 
 OSDriver::OSDriver() :
@@ -77,10 +81,11 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 #endif // DEBUG
 	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		//while (tq.try_lock() == false) {}
+		while (terminatedQueueLock == 1) { printf("terminated"); }
+		terminatedQueueLock = 1;
 		terminatedQueue.addProcess(CPU->CurrentProcess);
-		//while (frame.try_lock()) {}
-		LongTerm::DumpProcess(CPU->CurrentProcess);
+		terminatedQueueLock = 0;
+	
 		//frame.unlock();
 		//tq.unlock();
 	}
@@ -98,8 +103,42 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		catch (std::exception &ee) {}
 	}
 }
-
-
+bool CheckRunLock(cpu * CPU)
+{
+	bool there = false;
+	while (readyQueueLock == 1) { printf("readyQ"); }
+	readyQueueLock = 1;
+	if (CPU != nullptr && readyQueue.size() > 0)
+	{
+		there = true;
+	}
+	readyQueueLock = 0;
+	return there;
+}
+bool waitingQsize()
+{
+	bool there = false;
+	while (waitQueueLock == 1) { printf("waitingQ"); }
+	waitQueueLock = 1;
+	if (waitingQueue.size() > 0)
+	{
+		there = true;
+	}
+	waitQueueLock = 0;
+	return there;
+}
+bool TerminateQsize(int totalJobs)
+{
+	bool there = false;
+	while (terminatedQueueLock == 1) { printf("terminated"); }
+	terminatedQueueLock = 1;
+	if (terminatedQueue.size()  < totalJobs )
+	{
+		there = true;
+	}
+	terminatedQueueLock = 0;
+	return there;
+}
 void OSDriver::run(std::string fileName) {
 	//  Load to Disk
 	PCB * pcb;
@@ -121,37 +160,38 @@ void OSDriver::run(std::string fileName) {
 	//  Runs as long as the ReadyQueue is populated as long as there are
 	//  processes to be ran
 	cpu* CPU = CPU_Pool::FreeCPU();
-	while(terminatedQueue.size() < totalJobs)
+	while(TerminateQsize(totalJobs))
 	{
-		
+	
 		try {
-
-			if (CPU != nullptr && readyQueue.size() > 0)
+			if (CheckRunLock(CPU))
 			{
 				//remove process from the ready queue
 				//while (rq.try_lock() == false) {}
-				CPU->CurrentProcess = readyQueue.getProcess();
-				CPU->CurrentProcess->set_status(RUNNING);
-				readyQueue.removeProcess();
+
+				run_shortts(CPU);//  Context Switches for the next process
 				//rq.unlock();
 				std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
 				if (RUN.joinable() == true)
 				{
-					RUN.detach();
+					RUN.join();
 				}
 			}
+			
 		}
 		catch (const char* e) {
 			//  Remove the process if it malfunctions
 			printf("%s\n",e);
 			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
-		if (waitingQueue.size() > 0)
+		if (waitingQsize())//check if its greater than 0
 		{
 			
-				//while (wq.try_lock() == false) {}
+				while (waitQueueLock == 1)
+				{ printf("waitingQ"); }
+				waitQueueLock = 1;
 				pcb = waitingQueue.getProcess();
-				//wq.unlock();
+				waitQueueLock = 0;
 				if (pcb->get_waitformmu() == true)
 				{
 					
@@ -168,23 +208,7 @@ void OSDriver::run(std::string fileName) {
 		//  Load and Move Processes accordingly
 		run_longts();
 		CPU = CPU_Pool::FreeCPU();
-		//  Context Switches for the next process
-		if(CPU != nullptr && CPU->CurrentProcess != nullptr)
-		if ((readyQueue.size() > 0 || (waitingQueue.size() > 0)))
-		{
-			try
-			{
-				if (CPU->CurrentProcess->get_status() != RUNNING)
-				{
-					run_shortts(CPU_Pool::FreeCPU());
-				}
-			}
-			catch (std::exception) {}
-		}
-		if (waitingQueue.size() > 0 && readyQueue.size() == 0)
-		{
-			
-		}
+		
 	}
 
 #if (defined DEBUG || defined _DEBUG)
@@ -227,6 +251,7 @@ void OSDriver::run_longts() {
 
 void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
+	
 	if (!readyQueue.empty()) 
 	{
 		Dispatch.dispatch(CPU, CPU->CurrentProcess);

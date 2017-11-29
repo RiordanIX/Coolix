@@ -21,6 +21,7 @@ private:
 public:
 	Disk(long unsigned int size=DEFAULT_DISK) : _disk(size, 0), _used(0), _size(size){}
 	void allocate(byte_t data);
+	void allocate(size_t address, byte_t data);
 	void allocate(instruct_t data);
 	// pos must be the byte position
 	instruct_t read_instruction(std::size_t pos);

@@ -3,8 +3,9 @@
 
 extern std::vector<PCB> process_list;
 extern PriorityQueue readyQueue, waitingQueue;
-extern std::mutex wq,rq,tq,ex;
-
+extern int readyQueueLock;
+extern int waitQueueLock;
+;
 ShortTermScheduler::ShortTermScheduler()
 {
   
@@ -20,20 +21,23 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 		//places ready queue process into wait queue
 		//set pcb status to waiting
 		//while (mtx.try_lock() == false) {}
-		
+	
 		if (pcb->get_waitformmu() == true)
-		{
-			while (wq.try_lock() == false) {}
+		{	
+			while (waitQueueLock == 1) { printf("waitingQ"); }
+			waitQueueLock = 1;
 			waitingQueue.addProcess(pcb);
-			wq.unlock();
+			waitQueueLock = 0;
 		}
+		
 		
 	
 }
 void ShortTermScheduler::ReadyToWait()
 {
 	/*how to pop ready queue pointer if process goes to wait?*/
-	
+	while (readyQueueLock == 1) { printf("readyQ"); }
+	readyQueueLock = 1;
 	if (readyQueue.size() > 0 )
 	{
 		//places ready queue process into wait queue
@@ -41,33 +45,35 @@ void ShortTermScheduler::ReadyToWait()
 		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == LOCK)
 		{
 			readyQueue.getProcess()->set_status(status::WAITING);
-			while (wq.try_lock() == false) {}
+			while (waitQueueLock == 1) { printf("waitingQ"); }
+			waitQueueLock = 1;
 			waitingQueue.addProcess(readyQueue.getProcess());
-			wq.unlock();
-			
 			readyQueue.removeProcess();
-			
+			waitQueueLock = 0;
 		}
 	}
+	readyQueueLock = 0;
 }
 void ShortTermScheduler::WaitToReady()
 {
 	/*how to pop wait queue pointer if process goes to ready?*/
 	//set pcb status to ready
 	//check to see if resouce is free and process is not waiting for mmu
+	while (waitQueueLock == 1) { printf("waitingQ"); }
+	waitQueueLock = 1;
 	if (waitingQueue.size() > 0 )
-	{
-	while (wq.try_lock() == false) {}
+	{		
 		if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
 			&& waitingQueue.getProcess()->get_waitformmu() == false)
 		{   
-			readyQueue.addProcess(waitingQueue.getProcess());
+			while (readyQueueLock == 1) { printf("readyQ"); }
+			readyQueueLock = 1;
+			readyQueue.Q.push_front(waitingQueue.getProcess());
 			waitingQueue.getProcess()->set_status(status::READY);
 			waitingQueue.removeProcess();
+			readyQueueLock = 0;
 		}
-	wq.unlock();
-		
-
 	}
+	waitQueueLock = 0;
 
 }

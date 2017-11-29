@@ -71,7 +71,7 @@ std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 // returns false if out of bounds.
 bool PCB::is_valid_page(size_t pageNumber) {
 	
-	if ((pageNumber) > (pageTable.size() -1))
+	if ((pageNumber) > (pageTable.size()-1))
 	{
 		return false;
 	}
@@ -81,7 +81,7 @@ bool PCB::is_valid_page(size_t pageNumber) {
 
 void PCB::set_page_table_entry(size_t entry, bool valid, size_t frame)
 {
-	if ((entry) < (pageTable.size() - 1))
+	if ((entry) < (pageTable.size()))
 	{
 		pageTable.pages[entry].first = valid;
 		pageTable.pages[entry].second = frame;

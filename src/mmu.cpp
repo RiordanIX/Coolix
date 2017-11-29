@@ -3,8 +3,7 @@
 
 extern Ram MEM;
 extern Disk DISK;
-extern std::mutex frame;
-
+extern int mmuLock;
 using std::size_t;
 using std::vector;
 
@@ -48,7 +47,7 @@ void mmu::dumpProcess(PCB* pcb) {
 		if(pcb->is_valid_page(i))
 		{
 			frame = pcb->get_frame(i);
-			writePageToDisk(pcb, i);
+		//	writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(pageReplace, false, -1);
 			_freeFrames.push(frame);
 		}
@@ -93,15 +92,19 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	_freeFrames.pop();
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
+	while (mmuLock == 1) { printf("mmu6"); }
+	mmuLock = 1;
 	for(int i = 0; i < ((PAGE_SIZE)/ (INST_SIZE)); i++, diskLoc+=4, address+=4) {
 		try {
 			MEM.allocate(address, DISK.read_instruction((diskLoc)));
 		}
 		catch (char* e) {
 			printf("%s",e);
+			mmuLock = 0;
 			return false;
 		}
 	}
+	mmuLock = 0;
 	return true;
 }
 
@@ -109,13 +112,16 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 void mmu::writeToRam(instruct_t frame,instruct_t offset, instruct_t data) {
 	// Need to make sure that the frame is active. Otherwise, wrong data
 	instruct_t address = FrameNumberToLocation(frame);
+	while (mmuLock == 1) { printf("mmu5"); }
+	mmuLock = 1;
 	MEM.allocate(address + offset, data);
+	mmuLock = 0;
 }
 
 
 
 
-void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
+/*void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
 	size_t frameNumber = pcb->get_frame(pageNumber);
 	//size_t ramLoc;
 	// So we don't get compiler errors from unused variable.
@@ -131,9 +137,22 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber) {
 
 		//DISK.allocate(diskLoc, DISK.read_byte(ramLoc));
 	}
+}*/
+void mmu::writePageToDisk(PCB* pcb, size_t pageNumber)
+{
+	size_t frameNumber = pcb->get_frame(pageNumber);
+	size_t address = FrameNumberToLocation(frameNumber);
+	//size_t ramLoc;
+	// So we don't get compiler errors from unused variable.
+	size_t diskLoc = pcb->get_disk_address() + (pageNumber * (PAGE_SIZE));
+	while (mmuLock == 1) { printf("mmu4"); }
+	mmuLock = 1;
+	for (int i = 0; i < ((PAGE_SIZE) / (INST_SIZE)); i++, diskLoc += 4, address += 4)
+	{
+		DISK.allocate(diskLoc, get_instruction(pcb, address));
+	}
+	mmuLock = 0;
 }
-
-
 
 instruct_t mmu::get_instruction(PCB* pcb)
 {
@@ -143,7 +162,11 @@ instruct_t mmu::get_instruction(PCB* pcb)
 	if (pcb->is_valid_page(pcb->get_program_counter()/(PAGE_SIZE))){
 		frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 		offset = (pcb->get_program_counter() % (PAGE_SIZE));
-		return MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
+		while (mmuLock == 1) { printf("mmu3"); }
+		mmuLock = 1;
+		instruct_t results = MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
+		mmuLock = 0;
+		return results;
 	}
 	else {
 		// Page Fault
@@ -155,9 +178,9 @@ vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	unsigned int counter = pcb->get_program_counter();
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	vector<instruct_t> insts;
-	insts.resize(8);
+	insts.resize(4);
 	for (unsigned int i = 0; i < 4; i++, counter +=4) {
-		offset = (offset + counter) / (4);
+		offset = (counter % (PAGE_SIZE)) / (4);
 		insts[offset]=(get_instructionCache(pcb,counter));
 	}
 	return insts;
@@ -170,7 +193,11 @@ instruct_t mmu::get_instructionCache(PCB* pcb, instruct_t address)
 	{
 		size_t frame = pcb->get_frame(pageNumber);
 		size_t offset = (address % (PAGE_SIZE));
-		return MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
+		while (mmuLock == 1) { printf("mmu2"); }
+		mmuLock = 1;
+		instruct_t results = MEM.get_instruction((frame * (PAGE_SIZE)) + offset);
+		mmuLock = 0;
+		return results;
 	}
 	else {
 		//page fault
@@ -185,7 +212,15 @@ instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 		if (pcb->is_valid_page(pageNumber))
 		{
 			size_t frame = pcb->get_frame(pageNumber);
-			return MEM.get_instruction((frame* (PAGE_SIZE)) + (address % (PAGE_SIZE)));
+			printf("mmu1");
+			while (mmuLock == 1)
+			{
+				printf("mmu1");
+			}
+			mmuLock = 1;
+			instruct_t results = MEM.get_instruction((frame* (PAGE_SIZE)) + (address % (PAGE_SIZE)));
+			mmuLock = 0;
+			return results;
 		}
 		else {
 			//page fault

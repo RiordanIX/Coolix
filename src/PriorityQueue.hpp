@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <deque>
 #include "pcb.hpp"
 
 class PriorityQueue
@@ -12,7 +13,8 @@ public:
 			return lhs->get_priority() > rhs->get_priority();
 		}
 	};
-	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
+	//std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
+	std::deque<PCB*> Q;
 	PriorityQueue();
 	~PriorityQueue();
 
