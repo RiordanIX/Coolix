@@ -1,8 +1,10 @@
 #include "ShortTerm.hpp"
+#include "FIFO.hpp"
 #include <mutex>
 
 extern std::vector<PCB> process_list;
-extern PriorityQueue readyQueue, waitingQueue;
+extern PriorityQueue readyQueue;
+extern FIFO waitingQueue;
 extern int readyQueueLock;
 extern int waitQueueLock;
 ;

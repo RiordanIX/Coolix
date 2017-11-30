@@ -1,14 +1,35 @@
 #include <iostream>
 #include "OSDriver.hpp"
+std::string sortby;
+int cpucount;
 
 int main(int argc, char* argv[]) {
 #if (defined _WIN32 && defined _DEBUG)
-	std::cout << argc << '\n' << argv << std::endl;
+	std::cout << "coolix os" << '\n' << argv << std::endl;
 	OSDriver driver;
+	std::cout << "How you want to sort?: ";
+	while (!sortby._Equal("FIFO")
+		&& !sortby._Equal("P")
+		&& !sortby._Equal("SJF"))
+	{
+		std::cin >> sortby;
+		if (!sortby._Equal("FIFO")
+			&& !sortby._Equal("P")
+			&& !sortby._Equal("SJF"))
+		{
+			printf("please enter correct sort value \n 'FIFO', 'P' , 'SJF'");
+		}
+	}
+	while (cpucount == 0)
+	{
+		std::cout << "How many cpu?: ";
+		std::cin >> cpucount;
+		if (cpucount == 0)
+		{
+			printf("please enter correct cpu count");
+		}
+	}
 	
-	std::string jobfile;
-	std::cout << "Please specify the job file you want to run: ";
-	//std::cin >> jobfile;
 	driver.run("test_job");
 		
 #else
@@ -20,6 +41,8 @@ int main(int argc, char* argv[]) {
 		driver.run(argv[1]);
 	}
 #endif
+	
+
 	return 0;
 }
 

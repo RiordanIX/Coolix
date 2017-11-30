@@ -1,9 +1,10 @@
 #include "LongTerm.hpp"
 #include <mutex>
-
+#include "FIFO.hpp"
 // GLOBAL VARIABLES!!!
 extern std::vector<PCB> process_list;
-extern PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
+extern PriorityQueue readyQueue;
+extern FIFO waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern mmu MMU;
 

@@ -7,7 +7,7 @@
 #include <thread>
 #include <mutex>
 
-//#include "FIFO.hpp"
+#include "FIFO.hpp"
 #include "loader.hpp"
 #include "cpu.hpp"
 #include "dispatcher.hpp"

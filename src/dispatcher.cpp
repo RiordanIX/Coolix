@@ -2,7 +2,8 @@
 #include "PriorityQueue.hpp"
 #include "OSDriver.hpp"
 
-extern PriorityQueue terminatedQueue;
+extern FIFO terminatedQueue;
+extern FIFO waitingQueue;
 extern PriorityQueue readyQueue;
 //extern int total_cycles;
 extern int readyQueueLock;
@@ -34,7 +35,6 @@ void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) {
 		if (CPU->CurrentProcess->get_status() == status::TERMINATED)
 		{
 			//PCB* exitingProcess = CPU->CurrentProcess;
-			//exitingProcess->set_end_time();
 			//terminatedQueue.addProcess(exitingProcess);
 			
 		}

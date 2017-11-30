@@ -2,44 +2,87 @@
 
 //initialize priority queue
 PriorityQueue::PriorityQueue() {
-	//Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
-	//Q = std::deque<PCB*>();
+	Q = std::priority_queue<PCB*, std::deque<PCB*>, LessThanByP>();
+	fifo = std::deque<PCB*>();
 }
 
 
 PriorityQueue::~PriorityQueue() {
 	while (Q.empty() == false)
 	{
-		Q.pop_back();
+		if (sortby._Equal("P") || sortby._Equal("SJF"))
+		{
+			Q.pop();
+		}
+		else
+		{
+			fifo.pop_front();
+		}
 	}
 }
 
 
 PCB* PriorityQueue::getProcess() {
-	if (Q.empty()) {
-		return nullptr;
-	}
-	else {
-		return Q.front();
-	}
+		if (sortby._Equal("P") || sortby._Equal("SJF"))
+		{
+			return Q.top();
+		}
+		else
+		{
+			return fifo.front();
+		}
 }
 
 
 void PriorityQueue::addProcess(PCB* procc) {
-	Q.push_back(procc);
+	if (sortby._Equal("P") || sortby._Equal("SJF"))
+	{
+		Q.push(procc);
+	}
+	else
+	{
+		fifo.push_back(procc);
+	}
 }
 
 
 void PriorityQueue::removeProcess() {
-	Q.pop_front();
+	if (sortby._Equal("P") || sortby._Equal("SJF"))
+	{
+		Q.pop();
+	}
+	else
+	{
+		fifo.pop_front();
+	}
 }
 
 
 int PriorityQueue::size() {
-	return Q.size();
+
+	if (sortby._Equal("P") || sortby._Equal("SJF"))
+	{
+		return Q.size();
+	}
+	else
+	{
+		return fifo.size();
+	}
+}
+
+bool PriorityQueue::empty()
+{
+	if (sortby._Equal("P") || sortby._Equal("SJF"))
+	{
+		 return Q.empty();
+	}
+	else
+	{
+		return fifo.empty();
+	}
 }
 
 
 // GLOBAL VARIABLES
-PriorityQueue readyQueue, waitingQueue, terminatedQueue, newQueue;
+PriorityQueue readyQueue;
 

@@ -17,6 +17,7 @@ process into memory.
 #include "instruct.hpp"
 #include "PriorityQueue.hpp"
 #include "mmu.hpp"
+#include "FIFO.hpp"
 
 using std::size_t;
 using std::string;
@@ -27,7 +28,7 @@ using std::stoul;
 
 extern Disk DISK;
 extern std::vector<PCB> process_list;
-extern PriorityQueue newQueue;
+extern FIFO newQueue;
 extern mmu MMU;
 
 void loader::readFromFile(string filename) {

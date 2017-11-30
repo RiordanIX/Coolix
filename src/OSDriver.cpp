@@ -1,8 +1,10 @@
 #include "OSDriver.hpp"
+
 //#include "PriorityQueue.hpp"
 
-extern PriorityQueue terminatedQueue;
-extern PriorityQueue readyQueue, newQueue , waitingQueue;
+
+extern PriorityQueue readyQueue;
+extern FIFO waitingQueue, terminatedQueue , newQueue;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
@@ -32,7 +34,7 @@ void printOutPut(PCB * pcb)
 {
 	std::fstream myfile;
 	myfile.open("example.txt", std::ios::out | std::ios::app);
-	myfile << "Process complted :" << pcb->get_pid() << "\r\n";
+	myfile << "Process completed :" << pcb->get_pid() << "\r\n";
 	myfile.close();
 	
 }
@@ -93,6 +95,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 #endif // DEBUG
 	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
+		CPU->CurrentProcess->set_end_time();
 		while (terminatedQueueLock == 1) { printf("terminated"); }
 		terminatedQueueLock = 1;
 		terminatedQueue.addProcess(CPU->CurrentProcess);

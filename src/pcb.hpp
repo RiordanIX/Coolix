@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-
+#include <chrono>
 // we have 4 bytes per instruction, 4 instructions per frame.
 #define INST_SIZE 4
 #define PAGE_SIZE 4*4
-
+using namespace std::chrono;
 enum status
 {
 	READY,
@@ -41,25 +41,31 @@ enum resourceType
 class PCB
 {
 public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp, std::size_t out, std::size_t temp, int p) :
-		pid(id),
-		currentStatus(status::NEW),
-		resource_held(resourceType::NONE),
-		priority(p),
-		wait_time(0),
-		diskAddress(daddress),
-		ramAddress(0xDEADBEEF),
-		programCounter(0),
-		registers(16, 0),
-		sectionSizes(4, 0),
-		pageTable(((instruct + inp + out+ temp)/ (PAGE_SIZE)) + 2)
-	{
+	pid(id),
+	currentStatus(status::NEW),
+	resource_held(resourceType::NONE),
+	priority(p),
+	wait_time(0),
+	diskAddress(daddress),
+	ramAddress(0xDEADBEEF),
+	programCounter(0),
+	registers(16, 0),
+	sectionSizes(4, 0),
+	pageTable(((instruct + inp + out + temp) / (PAGE_SIZE)) + 2),
+	wait_time_clock(0),
+	start_time_clock(0),
+	end_time_clock(0),
+	wait_start_clock(0)
+		{
 		sectionSizes[section::INSTRUCTION] = instruct;
 		sectionSizes[section::INPUT] = inp;
 		sectionSizes[section::OUTPUT] = out;
 		sectionSizes[section::TEMP] = temp;
-
+		
+		start_time_clock = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 		//Give the page table enough pages to fit the process
-	}
+		}
+
 
 		// GETTERS
 		int get_priority() { return priority; }
@@ -98,7 +104,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		void set_status(status code);
 		void set_wait_time(int newtime);
 		void set_start_time(int startIn);
-		void set_end_time(int endIn);
+		void set_end_time();
 		void set_cycle_start_time(int cycleIn);
 
 		void set_ram_address(std::size_t address);
@@ -119,6 +125,11 @@ private:
 	int start_time;
 	int end_time;
 	int run_time;
+	milliseconds wait_start_clock;
+	milliseconds wait_time_clock;
+	milliseconds start_time_clock;
+	milliseconds end_time_clock;
+	milliseconds run_time_clcok;
 	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
 	bool waitformmu; //check to see if process is waiting for mmu
 	std::size_t lastRequestedPage; //keep track of last page process request when pagefault occured
