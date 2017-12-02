@@ -1,6 +1,6 @@
 #pragma once
 #include <deque>
-#include "PCB.hpp"
+#include "pcb.hpp"
 #include "mutex.hpp"
 
 class FIFO
