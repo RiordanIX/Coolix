@@ -1,13 +1,12 @@
 #include <iostream>
 #include "OSDriver.hpp"
 std::string sortby;
-int cpucount;
+unsigned int cpucount;
 
 int main(int argc, char* argv[]) {
 #if (defined _WIN32 && defined _DEBUG)
 	std::cout << "coolix os" << '\n' << argv << std::endl;
-	OSDriver driver;
-	std::cout << "How you want to sort?: ";
+	std::cout << "('FIFO', 'P' , 'SJF') How you want to sort?: ";
 	while (!sortby._Equal("FIFO")
 		&& !sortby._Equal("P")
 		&& !sortby._Equal("SJF"))
@@ -29,8 +28,10 @@ int main(int argc, char* argv[]) {
 			printf("please enter correct cpu count");
 		}
 	}
-	
+
+	OSDriver driver;
 	driver.run("test_job");
+	
 		
 #else
 	if (argc == 1) {

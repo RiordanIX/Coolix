@@ -1,123 +1,55 @@
 #include "CpuPool.hpp"
 
 extern cpu CPU0, CPU1, CPU2, CPU3;
-extern int cpucount;
+extern unsigned int cpucount;
+std::vector<cpu*> cpuPool;
 
 CPU_Pool::CPU_Pool()
 {
+	//add cpu's pointers into cpu pool vector
+	CPU0.setId(0);
+	CPU1.setId(1);
+	CPU2.setId(2);
+	CPU3.setId(3);
+	cpuPool.push_back(&CPU0);
+	cpuPool.push_back(&CPU1);
+	cpuPool.push_back(&CPU2);
+	cpuPool.push_back(&CPU3);
+	while (cpucount < cpuPool.size())//sets user defined cpu count
+	{
+		cpuPool.pop_back();
+	}
+}
+//Clear cpu registers that no longer running the same process
+void CPU_Pool::clearCpu(unsigned int CpuID, unsigned int p_id)
+{
+	
+	for (unsigned int x = 0; x < cpuPool.size(); x++)
+	{
+		if (cpuPool[x]->getProcess() != nullptr)
+		{
+			if (cpuPool[x]->getId() != CpuID
+				&& cpuPool[x]->getProcess()->get_pid() == p_id)
+			{
+				cpuPool[x]->clear_registers();
+				cpuPool[x]->setProcess(nullptr);
+				cpuPool[x]->freeLock();
+			}
+		}
+	}
+	
 }
 cpu* CPU_Pool::FreeCPU()//check each cpu then determines which one is not running a process
 {
-	if (cpucount == 1)
-	{
-		if (CPU0.CurrentProcess == nullptr)
+	CPU = nullptr;
+	for (unsigned int x = 0; x < cpuPool.size(); x++) {
+		if (cpuPool[x]->getLock() == FREE)
 		{
-			return &CPU0;
-		}
-		else if (CPU0.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU0;
-		}
-		else
-		{
-			return nullptr;
+			CPU = cpuPool[x]; break;
 		}
 	}
-	else if (cpucount == 2)
-	{
-		if (CPU0.CurrentProcess == nullptr)
-		{
-			return &CPU0;
-		}
-		else if (CPU0.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU0;
-		}
-		else if (CPU1.CurrentProcess == nullptr)
-		{
-			return &CPU1;
-		}
-		else if (CPU1.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU1;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-	else if (cpucount == 3)
-	{
-		if (CPU0.CurrentProcess == nullptr)
-		{
-			return &CPU0;
-		}
-		else if (CPU0.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU0;
-		}
-		else if (CPU1.CurrentProcess == nullptr)
-		{
-			return &CPU1;
-		}
-		else if (CPU1.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU1;
-		}
-		else if (CPU2.CurrentProcess == nullptr)
-		{
-			return &CPU2;
-		}
-		else if (CPU2.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU2;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-	else if (cpucount == 4)
-	{
-
-
-		if (CPU0.CurrentProcess == nullptr)
-		{
-			return &CPU0;
-		}
-		else if (CPU0.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU0;
-		}
-		else if (CPU1.CurrentProcess == nullptr)
-		{
-			return &CPU1;
-		}
-		else if (CPU1.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU1;
-		}
-		else if (CPU2.CurrentProcess == nullptr)
-		{
-			return &CPU2;
-		}
-		else if (CPU2.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU2;
-		}
-		else if (CPU3.CurrentProcess == nullptr)
-		{
-			return &CPU3;
-		}
-		else if (CPU3.CurrentProcess->get_status() != RUNNING)
-		{
-			return &CPU3;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
+	return CPU;
+	
 }
 //Lock Resource by setting the mutex to lock
 void Hardware::LockHardware(resourceType Rt)

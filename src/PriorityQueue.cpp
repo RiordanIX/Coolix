@@ -44,7 +44,16 @@ void PriorityQueue::addProcess(PCB* procc) {
 		fifo.push_back(procc);
 	}
 }
-
+void PriorityQueue::addProcessfront(PCB* procc) {
+	if (sortby._Equal("P") || sortby._Equal("SJF"))
+	{
+		Q.push(procc);
+	}
+	else
+	{
+		fifo.push_front(procc);
+	}
+}
 
 void PriorityQueue::removeProcess() {
 	if (sortby._Equal("P") || sortby._Equal("SJF"))

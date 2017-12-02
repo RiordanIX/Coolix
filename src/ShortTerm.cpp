@@ -56,26 +56,53 @@ void ShortTermScheduler::ReadyToWait()
 	}
 	readyQueueLock = 0;
 }
+bool waitingQueueSize()
+{
+	while (waitQueueLock == 1) { printf("waitingQ"); }
+	waitQueueLock = 1;
+	bool there = false;
+	if (waitingQueue.size() > 0)
+	{
+		there = true;
+	}
+	waitQueueLock = 0;
+	return there;
+}
+bool processNotHardwareMmuWaiting()
+{
+	while (waitQueueLock == 1) { printf("waitingQ"); }
+	waitQueueLock = 1;
+	bool there = false;
+	if (waitingQueue.size() > 0)
+	{
+		if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
+			&& waitingQueue.getProcess()->get_waitformmu() == false)
+		{
+			there = true;
+		}
+	}
+	waitQueueLock = 0;
+	return there;
+}
 void ShortTermScheduler::WaitToReady()
 {
 	/*how to pop wait queue pointer if process goes to ready?*/
 	//set pcb status to ready
 	//check to see if resouce is free and process is not waiting for mmu
-	while (waitQueueLock == 1) { printf("waitingQ"); }
-	waitQueueLock = 1;
-	if (waitingQueue.size() > 0 )
-	{		
-		if (Hardware::GetResourceLock(waitingQueue.getProcess()->get_resource_status()) == FREE
-			&& waitingQueue.getProcess()->get_waitformmu() == false)
-		{   
+	if (waitingQueueSize())
+	{
+		if (processNotHardwareMmuWaiting())
+		{
 			while (readyQueueLock == 1) { printf("readyQ"); }
 			readyQueueLock = 1;
-			readyQueue.addProcess(waitingQueue.getProcess());
+			while (waitQueueLock == 1) { printf("waitingQ"); }
+			waitQueueLock = 1;
+			readyQueue.addProcessfront(waitingQueue.getProcess());
 			waitingQueue.getProcess()->set_status(status::READY);
 			waitingQueue.removeProcess();
 			readyQueueLock = 0;
+			waitQueueLock = 0;
 		}
 	}
-	waitQueueLock = 0;
-
 }
+

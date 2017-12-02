@@ -94,6 +94,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t pop_lru_page() { std::size_t lru = page_stack.back(); page_stack.pop_back(); return lru; }
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 		bool is_valid_page(size_t frame);
+		int get_cpuid() { return cpuId; }
 		
 
 		// SETTERS
@@ -115,6 +116,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		void update_page_stack(std::size_t pageNumber);
 		void set_waitformmu(bool mmuwait) { waitformmu = mmuwait; }
 		void set_lastRequestedPage(std::size_t pageNumber) { lastRequestedPage = pageNumber; }
+		void set_cpuid(int id) { cpuId = id; }
 
 private:
 	unsigned int pid;
@@ -125,6 +127,7 @@ private:
 	int start_time;
 	int end_time;
 	int run_time;
+	int cpuId;
 	milliseconds wait_start_clock;
 	milliseconds wait_time_clock;
 	milliseconds start_time_clock;

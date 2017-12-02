@@ -2,6 +2,8 @@
 #include <queue>
 #include <deque>
 #include "pcb.hpp"
+#include "mutex.hpp"
+
 extern std::string sortby;
 
 class PriorityQueue
@@ -25,6 +27,7 @@ public:
 			}
 		}
 	};
+	Mutex mutex;
 	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
 	std::deque<PCB*> fifo;
 	PriorityQueue();
@@ -32,9 +35,13 @@ public:
 
 	PCB* getProcess();
 	void addProcess(PCB* procc);
+	void addProcessfront(PCB* procc);
 	void removeProcess();
 	int size();
 	bool empty();
+	void setLock() { while (mutex == LOCK) {} mutex = LOCK; }
+	void freeLock() { mutex = FREE; }
+	Mutex getLock() { return mutex; }
 };
 
 

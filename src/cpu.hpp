@@ -7,6 +7,7 @@
 #include "ram.hpp"
 #include "cpu_defs.hpp"
 #include "cache.hpp"
+#include "mutex.hpp"
 //#include "debug.hpp"
 
 // Default Register size is 16.  May change if requirements change.
@@ -25,15 +26,27 @@ public:
 	// Public because the dispatcher needs to access it.
 
 	// process cpu currently running
+private: 
+	unsigned int id;
 	PCB* CurrentProcess;
+public:
+	void setId(unsigned int ID) { id = ID; }
+	int getId() { return id; }
+	void setProcess(PCB* pcb) { CurrentProcess = pcb; }
+	PCB* getProcess() { return CurrentProcess; }
 	int current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
 	int jobInAction;
+	Mutex mutex;
+	void setLock() { mutex = LOCK; }
+	void freeLock() { mutex = FREE; }
+	Mutex getLock();
 	// for cache, we want it to be 4 frames
 	cpu(std::size_t size = DEFAULT_REG_SIZE) : num_registers(size), registers(size, 0), cache(4 ) {}
 	instruct_t fetch(PCB* pcb);
 	void set_registers(std::vector<instruct_t> to_switch);
+	void clear_registers();
 	void decode_and_execute(instruct_t inst, PCB* pcb);
 	std::string get_info();
 

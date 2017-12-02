@@ -50,10 +50,7 @@ void mmu::dumpProcess(PCB* pcb) {
 			frame = pcb->get_frame(i);
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(i, false, -1);
-			while (FrameDump == 1) { printf("framelock"); }
-			FrameDump = 1;
 			_freeFrames.push(frame);
-			FrameDump = 0;
 		}
 	}
 }
@@ -66,10 +63,7 @@ void mmu::dumpPage(PCB* pcb) {
 			frame = pcb->get_frame(i);
 			writePageToDisk(pcb, i);
 			pcb->set_page_table_entry(i, false, -1);
-			while (FrameDump == 1) { printf("framelock"); }
-			FrameDump = 1;
 			_freeFrames.push(frame);
-			FrameDump = 0;
 			break;
 		}
 	}
@@ -90,23 +84,15 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	size_t frameNum;
 	size_t address;
 	size_t fsize = 0;
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
 	fsize = _freeFrames.size();
-	FrameDump = 0;
 	// No frames are available, failed
-	
 	if (fsize == 0)
 	{
 		return false;
 	}
 	
 	diskLoc =  pcb->get_disk_address() + ((pageNumber)*(PAGE_SIZE));
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
 	frameNum = _freeFrames.front();
-	FrameDump = 0;
-	
 	address = FrameNumberToLocation(frameNum);
 	
 
@@ -117,10 +103,7 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	}
 
 	// We're confident the frame can be popped.
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
 	_freeFrames.pop();
-	FrameDump = 0;
 	pcb->set_page_table_entry(pageNumber, true, frameNum);
 	// Now actually allocate data to main memory
 	while (mmuLock == 1) { printf("mmu6"); }
@@ -209,9 +192,9 @@ vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	unsigned int counter = pcb->get_program_counter();
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
 	vector<instruct_t> insts;
-	insts.resize(8);
+	insts.resize(4); //size of 4 instructions in 1 frame
 	for (unsigned int i = 0; i < 4; i++, counter +=4) {
-		offset = (offset + counter) / (4);
+		offset = (counter % (PAGE_SIZE)) / (4);
 		insts[offset]=(get_instructionCache(pcb,counter));
 	}
 	return insts;

@@ -7,6 +7,7 @@ extern PriorityQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern mmu MMU;
+extern int FrameDump;
 
 LongTerm::LongTerm() {
 	ReadySize = 0;
@@ -36,16 +37,23 @@ void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 	}
 	
 	pcb->set_status(status::READY);
-
 	readyQueue.addProcess(pcb);
-	
+}
+bool Getframe(PCB* pcb, std::size_t pagenumber)
+{
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
+	bool there = false;
+	there = MMU.processDiskToRam(pcb, pagenumber);
+	FrameDump = 0;
+	return there;
 }
 bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 {
 	// Load 1 page into RAM
 	if (!pcb->is_valid_page(pcb->get_lastRequestedPage()))
 	{
-		if (MMU.processDiskToRam(pcb, pagenumber))
+		if (Getframe(pcb,pagenumber))
 		{
 			pcb->set_status(status::READY);
 			return true;
@@ -65,12 +73,18 @@ bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 }
 void LongTerm::DumpProcess(PCB * pcb)
 {
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
 	MMU.dumpProcess(pcb);
+	FrameDump = 0;
 }
 
 void LongTerm::DumpFrame(PCB * pcb)
 {
+	while (FrameDump == 1) { printf("framelock"); }
+	FrameDump = 1;
 	MMU.dumpPage(pcb);
+	FrameDump = 0;
 }
 
 

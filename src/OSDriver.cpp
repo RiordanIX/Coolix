@@ -16,7 +16,7 @@ int readyQueueLock = 0;
 int terminatedQueueLock = 0;
 int FrameDump = 0;
 
-std::mutex wq;
+
 
 std::thread RUN;
 using namespace std::chrono_literals;
@@ -26,7 +26,8 @@ OSDriver::OSDriver() :
 		current_cycle(0),
 		ldr(),
 		Dispatch(),
-		ltSched()
+		ltSched(),
+		CpuPool()
 	{ }
 
 OSDriver::~OSDriver() { }
@@ -43,16 +44,17 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	CPU->jobInAction = 1;
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
 	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
-	CPU->CurrentProcess = pcb;
+	//CPU->CurrentProcess = pcb;
 	CPU->cache.current_pid = pcb->get_pid();
 	//set process pcb to running status
-	while (CPU->CurrentProcess->get_status() != status::TERMINATED &&
-		CPU->CurrentProcess->get_status() != status::WAITING)
+	while (pcb->get_status() != status::TERMINATED &&
+		pcb->get_status() != status::WAITING)
 	{
-		instruct_t instruct = CPU->fetch(CPU->CurrentProcess);
-		if (CPU->CurrentProcess->get_status() == WAITING)
+		instruct_t instruct = CPU->fetch(pcb);
+		if (pcb->get_status() == WAITING)
 		{
-			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
+			Dispatcher::switchOut(CPU,pcb);
+			ShortTermScheduler::RunningToWait(pcb);
 			break;
 		}
 		// The fetched instruction is 0, meaning it's accessed some zeroed out
@@ -68,17 +70,20 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 				<< '\n';
 			return;
 		}
-		if (CPU->CurrentProcess->get_status() == RUNNING)
+		if (pcb->get_status() == RUNNING)
 		{	//  Decodes and Executes Instruction
-			CPU->decode_and_execute(instruct, CPU->CurrentProcess);
+			std::cout << "Decodes and Executes" << pcb->get_pid() << 
+				 " Instruction : " << instruct << "\n";
+			CPU->decode_and_execute(instruct, pcb);
 		}
-		if (CPU->CurrentProcess->get_status() == WAITING)
+		if (pcb->get_status() == WAITING)
 		{
-			ShortTermScheduler::RunningToWait(CPU->CurrentProcess);
+			Dispatcher::switchOut(CPU, pcb);
+			ShortTermScheduler::RunningToWait(pcb);
 			break;
 		}
 		// Increment Program counter
-		CPU->CurrentProcess->increment_PC();
+		pcb->increment_PC();
 		CPU->current_cycle++;
 		current_cycle++;
 		//std::this_thread::sleep_for(1ms);
@@ -93,19 +98,19 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 	printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
 	}*/
 #endif // DEBUG
-	if (CPU->CurrentProcess->get_status() == TERMINATED)//if process not in waiting
+	if (pcb->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		CPU->CurrentProcess->set_end_time();
+		pcb->set_end_time();
 		while (terminatedQueueLock == 1) { printf("terminated"); }
 		terminatedQueueLock = 1;
-		terminatedQueue.addProcess(CPU->CurrentProcess);
-		printOutPut(CPU->CurrentProcess);
+		terminatedQueue.addProcess(pcb);
+		//printOutPut(pcb);
 		terminatedQueueLock = 0;
-		LongTerm::DumpProcess(CPU->CurrentProcess);
+		LongTerm::DumpProcess(pcb);
 		//frame.unlock();
 		//tq.unlock();
 	}
-	Hardware::FreeHardware(CPU->CurrentProcess->get_resource_status());//free resource for other processes
+	Hardware::FreeHardware(pcb->get_resource_status());//free resource for other processes
 	CPU->jobInAction = 0;																   //readyQueue.removeProcess();
 	/*if (RUN.joinable() == true)
 	{
@@ -118,7 +123,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		}
 		catch (std::exception &ee) {}
 	}*/
-	
+	CPU->freeLock();
 }
 bool CheckRunLock(cpu * CPU)
 {
@@ -166,11 +171,11 @@ void OSDriver::run(std::string fileName) {
 	debug_printf("Running Long term Scheduler%s","\n");
 	while (!newQueue.empty())
 	{
-		//if (newQueue.getProcess()->get_pid() == 1)
-		
+	//	if (newQueue.getProcess()->get_pid() == 28)
+		{
 			ltSched.loadProcess(newQueue.getProcess(), 0);
-			 totalJobs++;
-		
+			totalJobs++;
+		}
 		newQueue.removeProcess();
 	}
 	
@@ -181,7 +186,7 @@ void OSDriver::run(std::string fileName) {
 	debug_printf("Finished with LongTerm Schdeduler%s","\n");
 	//  Runs as long as the ReadyQueue is populated as long as there are
 	//  processes to be ran
-	cpu* CPU = CPU_Pool::FreeCPU();
+	cpu* CPU = CpuPool.FreeCPU();
 	while(TerminateQsize(totalJobs))
 	{
 	
@@ -192,12 +197,15 @@ void OSDriver::run(std::string fileName) {
 				//while (rq.try_lock() == false) {}
 				if (CPU->jobInAction == 0)
 				{
-					run_shortts(CPU);//  Context Switches for the next process
 				   //rq.unlock();
-					std::thread RUN(run_cpu, CPU, CPU->CurrentProcess, &current_cycle);
-					if (RUN.joinable() == true)
+					if (CPU->getLock() == FREE)
 					{
-						RUN.detach();
+						run_shortts(CPU);//  Context Switches for the next process
+						std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
+						if (RUN.joinable() == true)
+						{
+							RUN.detach();
+						}
 					}
 				}
 			}
@@ -231,6 +239,10 @@ void OSDriver::run(std::string fileName) {
 							{
 								while (waitQueueLock == 1) { printf("waitingQ"); }
 								waitQueueLock = 1;
+								if (pcb->get_registers()[5] == 0 && pcb->get_registers()[9] > 0)
+								{
+									printf("register 5 = 0\n");
+								}
 								LongTerm::DumpFrame(pcb);
 								waitQueueLock = 0;
 							}
@@ -241,7 +253,7 @@ void OSDriver::run(std::string fileName) {
 		}
 		//  Load and Move Processes accordingly
 		run_longts();
-		CPU = CPU_Pool::FreeCPU();
+		CPU = CpuPool.FreeCPU();
 		
 	}
 
@@ -283,16 +295,36 @@ void OSDriver::run_longts() {
 	// Ready Queue, then moves it
 	StSched.WaitToReady();
 }
-
+bool checkReadyQsize()
+{
+	bool there;
+	while (readyQueueLock == 1) { printf("readyQ"); }
+	readyQueueLock = 1;
+	if (!readyQueue.empty())
+	{
+		there = true;
+	}
+	else
+	{
+		there = false;
+	}
+	readyQueueLock = 0;
+	return there;
+}
 void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
-	
-	if (!readyQueue.empty()) 
+	if (checkReadyQsize())
 	{
-		Dispatch.dispatch(CPU, CPU->CurrentProcess);
-		if(current_cycle >= cpu_cycle)
+		Dispatch.dispatch(CPU, CPU->getProcess());
+		if (current_cycle >= cpu_cycle)
 			current_cycle = 0;
 	}
-
 }
+void OSDriver::ClearCPU(unsigned int CpuID, unsigned int p_id)
+{
+	CPU_Pool::clearCpu(CpuID, p_id);
+}
+	
+
+
 

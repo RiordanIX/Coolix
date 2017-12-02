@@ -1,9 +1,6 @@
 #include "cpu.hpp"
-enum Mutex
-{
-	FREE = 0,
-	LOCK = 1
-};
+#include "mutex.hpp"
+
 struct Hardware
 {
 private:
@@ -27,7 +24,10 @@ class CPU_Pool
 {
 public:
 	CPU_Pool();
-	static cpu * FreeCPU();
+	static void clearCpu(unsigned int CpuID, unsigned int p_id);
+	cpu * FreeCPU();
+private:
+	cpu * CPU; //keep track of last cpu given out
 };
 static Hardware IO1 = Hardware(resourceType::DISK_IO, Mutex::FREE);
 static Hardware IO2 = Hardware(resourceType::KEYBOARD, Mutex::FREE);

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
-#include <mutex>
 
 #include "FIFO.hpp"
 #include "loader.hpp"
@@ -29,18 +28,18 @@ public:
     int cpu_cycle;
     int current_cycle;
 	int totalJobs;
-	std::vector<PCB *> RunningQ;
-    loader ldr;
+	loader ldr;
     Dispatcher Dispatch;
     LongTerm ltSched;
 	ShortTermScheduler StSched;
-
+	CPU_Pool CpuPool;
+	static void ClearCPU(unsigned int CpuID, unsigned int p_id);
     void run(std::string fileName);  // Runs the OS
 
 private:
   //  void run_cpu(cpu* CPU);
     void run_shortts(cpu * CPU);
-    void run_longts();
+	void run_longts();
 	void print_error(PCB* p);
 	
 };
