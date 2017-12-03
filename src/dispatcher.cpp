@@ -1,17 +1,15 @@
 #include "dispatcher.hpp"
-#include "PriorityQueue.hpp"
+#include "pcbQueue.hpp"
 #include "OSDriver.hpp"
 
 extern FIFO terminatedQueue;
 extern FIFO waitingQueue;
-extern PriorityQueue readyQueue;
+extern pcbQueue readyQueue;
 //extern int total_cycles;
-extern int readyQueueLock;
 bool checkReadysize()
 {
 	bool there;
-	while (readyQueueLock == 1) { printf("readyQ"); }
-	readyQueueLock = 1;
+	readyQueue.setLock();
 	if (!readyQueue.empty())
 	{
 		there = true;
@@ -20,7 +18,7 @@ bool checkReadysize()
 	{
 		there = false;
 	}
-	readyQueueLock = 0;
+	readyQueue.freeLock();
 	return there;
 }
 void Dispatcher::dispatch(cpu* CPU, PCB* cProcess) {
@@ -43,43 +41,31 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 	{
 		if (CPU->getId() == cProcess->get_cpuid())
 		{
+			// Copy current process registers to pcb
 			cProcess->set_registers(CPU->registers);
 		}
 	}
 }
 
 
-void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) {
-	//	If process is terminated. Throw it into the Terminated Queue
-	if (CPU->getProcess() != nullptr)
-	{
-		if (CPU->getProcess()->get_status() == status::TERMINATED)
-		{
-			//PCB* exitingProcess = CPU->CurrentProcess;
-			//terminatedQueue.addProcess(exitingProcess);
-			
-		}
-	}
-
-	// Removes the Current Running Process, so the next one will be the new
-	// active process
-	//readyQueue.removeProcess();
-	// Sets the CPU registers to the new PCB registers
-	while (readyQueueLock == 1) { printf("readyQ"); }
-	readyQueueLock = 1;
-	// Copy current process registers to pcb
+void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) 
+{
+	
+	readyQueue.setLock();
 	if (!readyQueue.empty())
 	{
 		CPU->setLock();
 		CPU->setProcess(readyQueue.getProcess());
 		readyQueue.removeProcess();
+		//clear any cpu's registers if they were running the same process
 		OSDriver::ClearCPU(CPU->getId(),CPU->getProcess()->get_pid());
+		// Sets the CPU registers to the new PCB registers
 		CPU->set_registers(CPU->getProcess()->get_registers());
 		CPU->getProcess()->set_cpuid(CPU->getId());
 		CPU->getProcess()->set_status(status::RUNNING);
 		
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}
-	readyQueueLock = 0;
+	readyQueue.freeLock();
 }
 

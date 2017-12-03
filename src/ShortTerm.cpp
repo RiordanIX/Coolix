@@ -1,22 +1,10 @@
 #include "ShortTerm.hpp"
 #include "FIFO.hpp"
-#include <mutex>
 
 extern std::vector<PCB> process_list;
-extern PriorityQueue readyQueue;
+extern pcbQueue readyQueue;
 extern FIFO waitingQueue;
-extern int readyQueueLock;
-extern int waitQueueLock;
-;
-ShortTermScheduler::ShortTermScheduler()
-{
-  
-}
 
-ShortTermScheduler::~ShortTermScheduler()
-{
-
-}
 void ShortTermScheduler::RunningToWait(PCB* pcb)
 {
 		/*If process is running and page faults */
@@ -26,10 +14,9 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 	
 		if (pcb->get_waitformmu() == true)
 		{	
-			while (waitQueueLock == 1) { printf("RunningToWait"); }
-			waitQueueLock = 1;
+			waitingQueue.setLock();
 			waitingQueue.addProcess(pcb);
-			waitQueueLock = 0;
+			waitingQueue.freeLock();
 		}
 		
 		
@@ -38,8 +25,7 @@ void ShortTermScheduler::RunningToWait(PCB* pcb)
 void ShortTermScheduler::ReadyToWait()
 {
 	/*how to pop ready queue pointer if process goes to wait?*/
-	while (readyQueueLock == 1) { printf("readyQ"); }
-	readyQueueLock = 1;
+	readyQueue.setLock();
 	if (readyQueue.size() > 0 )
 	{
 		//places ready queue process into wait queue
@@ -47,31 +33,28 @@ void ShortTermScheduler::ReadyToWait()
 		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == LOCK)
 		{
 			readyQueue.getProcess()->set_status(status::WAITING);
-			while (waitQueueLock == 1) { printf("waitingQ"); }
-			waitQueueLock = 1;
+			waitingQueue.setLock();
 			waitingQueue.addProcess(readyQueue.getProcess());
 			readyQueue.removeProcess();
-			waitQueueLock = 0;
+			waitingQueue.freeLock();
 		}
 	}
-	readyQueueLock = 0;
+	readyQueue.freeLock();
 }
 bool waitingQueueSize()
 {
-	while (waitQueueLock == 1) { printf("waitingQ"); }
-	waitQueueLock = 1;
+	waitingQueue.setLock();
 	bool there = false;
 	if (waitingQueue.size() > 0)
 	{
 		there = true;
 	}
-	waitQueueLock = 0;
+	waitingQueue.freeLock();
 	return there;
 }
 bool processNotHardwareMmuWaiting()
 {
-	while (waitQueueLock == 1) { printf("waitingQ"); }
-	waitQueueLock = 1;
+	waitingQueue.setLock();
 	bool there = false;
 	if (waitingQueue.size() > 0)
 	{
@@ -81,7 +64,7 @@ bool processNotHardwareMmuWaiting()
 			there = true;
 		}
 	}
-	waitQueueLock = 0;
+	waitingQueue.freeLock();
 	return there;
 }
 void ShortTermScheduler::WaitToReady()
@@ -93,15 +76,13 @@ void ShortTermScheduler::WaitToReady()
 	{
 		if (processNotHardwareMmuWaiting())
 		{
-			while (readyQueueLock == 1) { printf("readyQ"); }
-			readyQueueLock = 1;
-			while (waitQueueLock == 1) { printf("waitingQ"); }
-			waitQueueLock = 1;
+			readyQueue.setLock();
+			waitingQueue.setLock();
 			readyQueue.addProcessfront(waitingQueue.getProcess());
 			waitingQueue.getProcess()->set_status(status::READY);
 			waitingQueue.removeProcess();
-			readyQueueLock = 0;
-			waitQueueLock = 0;
+			readyQueue.freeLock();
+			waitingQueue.freeLock();
 		}
 	}
 }

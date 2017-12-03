@@ -15,7 +15,7 @@ process into memory.
 #include "loader.hpp"
 #include "pcb.hpp"
 #include "instruct.hpp"
-#include "PriorityQueue.hpp"
+#include "pcbQueue.hpp"
 #include "mmu.hpp"
 #include "FIFO.hpp"
 

@@ -1,25 +1,11 @@
 #include "OSDriver.hpp"
 
-//#include "PriorityQueue.hpp"
-
-
-extern PriorityQueue readyQueue;
+extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
 
 #if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
 #endif
-int mmuLock = 0;
-int writeInstruction = 0;
-int waitQueueLock = 0;
-int readyQueueLock = 0;
-int terminatedQueueLock = 0;
-int FrameDump = 0;
-
-
-
-std::thread RUN;
-using namespace std::chrono_literals;
 
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
@@ -41,12 +27,11 @@ void printOutPut(PCB * pcb)
 }
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
-	CPU->jobInAction = 1;
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
-	//set pcb pointer to cpu local variable to keep track of running processes for each cpu
-	//CPU->CurrentProcess = pcb;
+	
+	//set cpu cache id to running process
 	CPU->cache.current_pid = pcb->get_pid();
-	//set process pcb to running status
+	
 	while (pcb->get_status() != status::TERMINATED &&
 		pcb->get_status() != status::WAITING)
 	{
@@ -72,8 +57,6 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		}
 		if (pcb->get_status() == RUNNING)
 		{	//  Decodes and Executes Instruction
-			std::cout << "Decodes and Executes" << pcb->get_pid() << 
-				 " Instruction : " << instruct << "\n";
 			CPU->decode_and_execute(instruct, pcb);
 		}
 		if (pcb->get_status() == WAITING)
@@ -84,81 +67,58 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		}
 		// Increment Program counter
 		pcb->increment_PC();
-		CPU->current_cycle++;
+		//increument cpu cycle
+		CPU->current_cycle++; 
+		//osdriver cycle increument
 		current_cycle++;
-		//std::this_thread::sleep_for(1ms);
-	}
-#if (defined DEBUG || defined _DEBUG)
-	//PCB* p = readyQueue.getProcess();
-	/*
-	printf("Ram Address:\t%lu\n", CPU->CurrentProcess->get_ram_address());
-	for (unsigned int i = CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_out_address();
-	i < CPU->CurrentProcess->get_ram_address() + CPU->CurrentProcess->get_end_address();
-	i+=4) {
-	printf("Output %d:\t%d\n", i, MEM.get_instruction(i));
-	}*/
-#endif // DEBUG
+	}//while loop
+	//	If process is terminated. Throw it into the Terminated Queue
 	if (pcb->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
 		pcb->set_end_time();
-		while (terminatedQueueLock == 1) { printf("terminated"); }
-		terminatedQueueLock = 1;
+		terminatedQueue.setLock();
 		terminatedQueue.addProcess(pcb);
 		//printOutPut(pcb);
-		terminatedQueueLock = 0;
+		terminatedQueue.freeLock();
+		std::cout << "terminated" << pcb->get_pid() << "\n";
 		LongTerm::DumpProcess(pcb);
 		//frame.unlock();
 		//tq.unlock();
 	}
 	Hardware::FreeHardware(pcb->get_resource_status());//free resource for other processes
-	CPU->jobInAction = 0;																   //readyQueue.removeProcess();
-	/*if (RUN.joinable() == true)
-	{
-		RUN.join();
-	}
-	else
-	{
-		try {
-			RUN.~thread();
-		}
-		catch (std::exception &ee) {}
-	}*/
-	CPU->freeLock();
+	CPU->freeLock();//free cpu lock when thread is completed
 }
 bool CheckRunLock(cpu * CPU)
 {
 	bool there = false;
-	while (readyQueueLock == 1) { printf("readyQ"); }
-	readyQueueLock = 1;
+	readyQueue.setLock();
 	if (CPU != nullptr && readyQueue.size() > 0)
 	{
 		there = true;
 	}
-	readyQueueLock = 0;
+	readyQueue.freeLock();
 	return there;
 }
 bool waitingQsize()
 {
 	bool there = false;
-	while (waitQueueLock == 1) { printf("waitingQ"); }
-	waitQueueLock = 1;
+	waitingQueue.setLock();
 	if (waitingQueue.size() > 0)
 	{
 		there = true;
 	}
-	waitQueueLock = 0;
+	waitingQueue.freeLock();
 	return there;
 }
 bool TerminateQsize(int totalJobs)
 {
 	bool there = false;
-	while (terminatedQueueLock == 1) { printf("terminated"); }
-	terminatedQueueLock = 1;
+	terminatedQueue.setLock();
 	if (terminatedQueue.size()  < totalJobs )
 	{
 		there = true;
 	}
-	terminatedQueueLock = 0;
+	terminatedQueue.freeLock();
 	return there;
 }
 void OSDriver::run(std::string fileName) {
@@ -166,19 +126,12 @@ void OSDriver::run(std::string fileName) {
 	PCB * pcb;
 	ldr.readFromFile(fileName);
 
-
 	//  Does an initial load from Disk to RAM and ReadyQueue
-	debug_printf("Running Long term Scheduler%s","\n");
-	while (!newQueue.empty())
-	{
-	//	if (newQueue.getProcess()->get_pid() == 28)
-		{
-			ltSched.loadProcess(newQueue.getProcess(), 0);
-			totalJobs++;
-		}
-		newQueue.removeProcess();
-	}
-	
+	// loads only 4 pages per process
+	debug_printf("Running Long term Scheduler%s", "\n");
+	totalJobs = LongTerm::initialLoad();
+
+		
 #if (defined DEBUG || defined _DEBUG)
 	debug_printf("Beginning MEMORY%s","\n");
 	MEM.dump_data();
@@ -193,98 +146,64 @@ void OSDriver::run(std::string fileName) {
 		try {
 			if (CheckRunLock(CPU))
 			{
-				//remove process from the ready queue
-				//while (rq.try_lock() == false) {}
-				if (CPU->jobInAction == 0)
+
+				if (CPU->getLock() == FREE)
 				{
-				   //rq.unlock();
-					if (CPU->getLock() == FREE)
+					run_shortts(CPU);//  Context Switches for the next process
+					std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
+					if (RUN.joinable() == true)
 					{
-						run_shortts(CPU);//  Context Switches for the next process
-						std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
-						if (RUN.joinable() == true)
-						{
-							RUN.detach();
-						}
+						RUN.detach();
 					}
 				}
 			}
-			
 		}
 		catch (const char* e) {
-			//  Remove the process if it malfunctions
+			// malfunctions print out
 			printf("%s\n",e);
-			//readyQueue.removeProcess(); we pop the queue when we ran the process already
 		}
-		//std::this_thread::sleep_for(2ms);
 		if (waitingQsize())//check if its greater than 0
-		{
-			
-				while (waitQueueLock == 1)
-				{ printf("waitingQ"); }
-				waitQueueLock = 1;
+		{			
+				waitingQueue.setLock();
 				pcb = waitingQueue.getProcess();
-				waitQueueLock = 0;
+				waitingQueue.freeLock();
 				if (pcb->get_waitformmu() == true)
 				{					
 					if (pcb->get_lastRequestedPage() < 156)
-					{
+					{	//get requested frame 
 						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
 						{
+							//if frame is aquired than set the wait for mmu event to false
 							pcb->set_waitformmu(false);
 						}
 						else
 						{
 							if (ltSched.FrameSize() == 0)
 							{
-								while (waitQueueLock == 1) { printf("waitingQ"); }
-								waitQueueLock = 1;
-								if (pcb->get_registers()[5] == 0 && pcb->get_registers()[9] > 0)
-								{
-									printf("register 5 = 0\n");
-								}
-								LongTerm::DumpFrame(pcb);
-								waitQueueLock = 0;
+								//free up frames if there are no more frames left for 
+								//processes in ready queue
+								waitingQueue.setLock();
+								LongTerm::DumpFrame(pcb); 
+								waitingQueue.freeLock();
 							}
 						}
 					}
-					//StSched.WaitToReady();
 				}
 		}
-		//  Load and Move Processes accordingly
-		run_longts();
-		CPU = CpuPool.FreeCPU();
+		//  run short time scheduler to move processes 
+		//  from wait queue to ready or vice versa
+		run_sortsch();
+		CPU = CpuPool.FreeCPU(); //find free cpu to schedule next item in ready queue
 		
 	}
 
 
 #if (defined DEBUG || defined _DEBUG)
-	MEM.dump_data();
+	MEM.dump_data(); //memory dump
 #endif
-
-	//  Calcualtes the AverageCycleRunTime
-	/*
-	int averageCycleRunTime = 0;
-	for(int i = 0; i < terminatedQueue.size(); i++)
-	{
-		averageCycleRunTime += (terminatedQueue.getProcess()->get_cycle_start_time());
-		terminatedQueue.removeProcess();
-	}
-	*/
 }
 
-void OSDriver::print_error(PCB* p) {
-	auto note = p->get_ram_address() + p->get_program_counter();
-	std::cout << "Instruction at "
-			<< note << " is 0\n"
-			<< "Process Ram address is "
-			<< p->get_ram_address()
-			<< "\nProgram Counter is "
-			<< p->get_program_counter()
-			<< '\n';
-}
-
-void OSDriver::run_longts() {
+void OSDriver::run_sortsch() {
 	// Populate RAM and ReadyQueue
 
 	// Checks to see if any process in the Ready Queue should be moved to
@@ -298,8 +217,7 @@ void OSDriver::run_longts() {
 bool checkReadyQsize()
 {
 	bool there;
-	while (readyQueueLock == 1) { printf("readyQ"); }
-	readyQueueLock = 1;
+	readyQueue.setLock();
 	if (!readyQueue.empty())
 	{
 		there = true;
@@ -308,7 +226,7 @@ bool checkReadyQsize()
 	{
 		there = false;
 	}
-	readyQueueLock = 0;
+	readyQueue.freeLock();
 	return there;
 }
 void OSDriver::run_shortts(cpu * CPU) {
@@ -322,6 +240,8 @@ void OSDriver::run_shortts(cpu * CPU) {
 }
 void OSDriver::ClearCPU(unsigned int CpuID, unsigned int p_id)
 {
+	//clear cpu registers if same cpu doesn't take over process it was running
+	//previously
 	CPU_Pool::clearCpu(CpuID, p_id);
 }
 	

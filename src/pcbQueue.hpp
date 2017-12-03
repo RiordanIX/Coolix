@@ -6,18 +6,18 @@
 
 extern std::string sortby;
 
-class PriorityQueue
+class pcbQueue
 {
 public:
 	struct LessThanByP
 	{
 		bool operator()(PCB *const lhs, PCB * const rhs) const
 		{
-			if (sortby._Equal("P"))
+			if (sortby.compare("P") == 0)
 			{
 				return lhs->get_priority() > rhs->get_priority();
 			}
-			else if(sortby._Equal("SJF"))
+			else if(sortby.compare("SJF") == 0)
 			{
 				return lhs->get_inp_address() > rhs->get_inp_address();
 			}
@@ -30,9 +30,8 @@ public:
 	Mutex mutex;
 	std::priority_queue<PCB*, std::deque<PCB *>,LessThanByP> Q; // Means Queue
 	std::deque<PCB*> fifo;
-	PriorityQueue();
-	~PriorityQueue();
-
+	pcbQueue();
+	~pcbQueue();
 	PCB* getProcess();
 	void addProcess(PCB* procc);
 	void addProcessfront(PCB* procc);

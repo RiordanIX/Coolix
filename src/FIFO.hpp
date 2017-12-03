@@ -15,7 +15,11 @@ public:
 	void removeProcess();
 	int size() { return Q.size(); }
 	bool empty();
-	void setLock() { while (mutex == LOCK) {} mutex = LOCK; }
+	void setLock() 
+	{ 
+		while (mutex == LOCK) {}
+		mutex = LOCK; 
+	}
 	void freeLock() { mutex = FREE; }
 	Mutex getLock() { return mutex; }
 };

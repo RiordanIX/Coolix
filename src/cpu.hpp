@@ -37,7 +37,6 @@ public:
 	int current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
-	int jobInAction;
 	Mutex mutex;
 	void setLock() { mutex = LOCK; }
 	void freeLock() { mutex = FREE; }

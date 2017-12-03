@@ -3,22 +3,22 @@
 #include "FIFO.hpp"
 // GLOBAL VARIABLES!!!
 extern std::vector<PCB> process_list;
-extern PriorityQueue readyQueue;
+extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue, newQueue;
 extern Disk DISK;
 extern mmu MMU;
-extern int FrameDump;
 
-LongTerm::LongTerm() {
-	ReadySize = 0;
-	MaxAddress = 0;
-}
+//mutex for free frames add and drops
+Mutex mutex;
+void setLock() { while (mutex == LOCK) {} mutex = LOCK; }
+void freeLock() { mutex = FREE; }
 
-
-LongTerm::~LongTerm() { }
 std::size_t LongTerm::FrameSize()
 {
-	return MMU.free_frame_count();
+	setLock();
+	size_t fframes = MMU.free_frame_count();
+	freeLock();
+	return fframes;
 }
 void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 {
@@ -41,11 +41,10 @@ void LongTerm::loadProcess(PCB * pcb, std::size_t pagenumber)
 }
 bool Getframe(PCB* pcb, std::size_t pagenumber)
 {
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
+	setLock();
 	bool there = false;
 	there = MMU.processDiskToRam(pcb, pagenumber);
-	FrameDump = 0;
+	freeLock();
 	return there;
 }
 bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
@@ -73,18 +72,26 @@ bool LongTerm::loadPage(PCB * pcb, std::size_t pagenumber)
 }
 void LongTerm::DumpProcess(PCB * pcb)
 {
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
+	setLock();
 	MMU.dumpProcess(pcb);
-	FrameDump = 0;
+	freeLock();
 }
 
 void LongTerm::DumpFrame(PCB * pcb)
 {
-	while (FrameDump == 1) { printf("framelock"); }
-	FrameDump = 1;
+	setLock();
 	MMU.dumpPage(pcb);
-	FrameDump = 0;
+	freeLock();
 }
 
-
+int LongTerm::initialLoad()
+{	
+	int numberofjobs = 0;
+	while (!newQueue.empty())
+	{
+		loadProcess(newQueue.getProcess(), 0);
+		numberofjobs++;
+		newQueue.removeProcess();
+	}
+	return numberofjobs;
+}
