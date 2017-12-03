@@ -24,7 +24,7 @@ void RunClock()
 {
 	while (programEnd == false)
 	{
-		std::this_thread::sleep_for(0.001ms);//increments 1 mirco sec
+		std::this_thread::sleep_for(std::chrono::microseconds(1));//increments 1 mirco sec
 		clock_Tick++;
 	}
 }
