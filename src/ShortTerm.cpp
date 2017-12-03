@@ -33,6 +33,7 @@ void ShortTermScheduler::ReadyToWait()
 		if (Hardware::GetResourceLock(readyQueue.getProcess()->get_resource_status()) == LOCK)
 		{
 			readyQueue.getProcess()->set_status(status::WAITING);
+			readyQueue.getProcess()->set_wait_start_clock();
 			waitingQueue.setLock();
 			waitingQueue.addProcess(readyQueue.getProcess());
 			readyQueue.removeProcess();

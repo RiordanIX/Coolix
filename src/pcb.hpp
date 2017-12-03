@@ -10,6 +10,7 @@
 // we have 4 bytes per instruction, 4 instructions per frame.
 #define INST_SIZE 4
 #define PAGE_SIZE 4*4
+extern long int clock_Tick;
 using namespace std::chrono;
 enum status
 {
@@ -52,19 +53,24 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 	registers(16, 0),
 	sectionSizes(4, 0),
 	pageTable(((instruct + inp + out + temp) / (PAGE_SIZE)) + 2),
-	wait_time_clock(0),
-	start_time_clock(0),
-	end_time_clock(0),
-	wait_start_clock(0)
-		{
-		sectionSizes[section::INSTRUCTION] = instruct;
-		sectionSizes[section::INPUT] = inp;
-		sectionSizes[section::OUTPUT] = out;
-		sectionSizes[section::TEMP] = temp;
-		
-		start_time_clock = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-		//Give the page table enough pages to fit the process
-		}
+	page_fault_start_clock(0),
+	page_fault_end_clock(0),
+	page_fault_time_clock(0),
+	exec_time_clock(0),//entire time
+	end_time_clock(0),//end pcb time stamp
+	wait_time_clock(0),//total wait
+	wait_start_clock(0),//start wait stamp
+	wait_end_clock(0)//end wait stamp
+{
+	sectionSizes[section::INSTRUCTION] = instruct;
+	sectionSizes[section::INPUT] = inp;
+	sectionSizes[section::OUTPUT] = out;
+	sectionSizes[section::TEMP] = temp;
+	page_fault_time_clock = 0;
+	start_time_clock = clock_Tick;
+	wait_start_clock = clock_Tick;
+	//Give the page table enough pages to fit the process
+}
 
 
 		// GETTERS
@@ -76,11 +82,11 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::size_t get_out_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT]; }
 		std::size_t get_temp_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT]; }
 		std::size_t get_end_address() { return sectionSizes[INSTRUCTION] + sectionSizes[INPUT] + sectionSizes[OUTPUT] + sectionSizes[TEMP]; }
-		int get_wait_time() { return wait_time; }
-		int get_start_time() { return start_time; }
-		int get_end_time() { return end_time; }
-		int get_run_time() { return (start_time - end_time); }
-		int get_cycle_start_time() { return cycle_start_time; }
+		long int get_wait_time() { return wait_time; }
+		long int get_start_time() { return start_time; }
+		long int get_end_time() { return end_time; }
+		long int get_run_time() { return run_time; }
+		long int get_cycle_start_time() { return cycle_start_time; }
 		bool get_waitformmu() { return waitformmu; }
 		std::size_t get_lastRequestedPage() { return lastRequestedPage; }
 
@@ -95,7 +101,7 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		std::pair<bool, size_t> get_page_table_entry(std::size_t pageNumber);
 		bool is_valid_page(size_t frame);
 		int get_cpuid() { return cpuId; }
-		
+
 
 		// SETTERS
 
@@ -105,7 +111,6 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		void set_status(status code);
 		void set_wait_time(int newtime);
 		void set_start_time(int startIn);
-		void set_end_time();
 		void set_cycle_start_time(int cycleIn);
 
 		void set_ram_address(std::size_t address);
@@ -118,6 +123,46 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		void set_lastRequestedPage(std::size_t pageNumber) { lastRequestedPage = pageNumber; }
 		void set_cpuid(int id) { cpuId = id; }
 
+		//	STATISTICS
+		void increment_io_count() { io_count++; }
+		int get_io_count() { return io_count; }
+		void set_max_frames(int framesIn) { max_frames = framesIn; }
+		int get_max_frames() { return max_frames; }
+		void increment_page_fault_count() { page_fault_count++; }
+		int get_page_fault_count() { return page_fault_count; }
+		void increment_page_fault_service() { fault_service_time++; }
+		int get_page_fault_service() { return fault_service_time; }
+		void increment_cache_hit() { cache_hit++; }
+		void increment_cache_miss() { cache_miss++; }
+		int get_cache_hit() { return cache_hit; }
+		int get_cache_miss() { return cache_miss; }
+
+		//	Counting Cycles
+		void increment_wait() { wait_cycles++; }
+		int get_wait() { return wait_cycles; }
+		void increment_run() { run_cycles++; }
+		int get_run() { return run_cycles; }
+
+		//	Counting Microseconds
+		void set_wait_start_clock() { wait_start_clock = clock_Tick; }
+		void set_wait_end_clock() {wait_end_clock = clock_Tick; 
+									wait_time_clock += (wait_end_clock - wait_start_clock);
+		}
+		void set_start_clock() {start_time_clock = clock_Tick;}//time when loaded to newqueue
+		void set_end_clock() {end_time_clock = clock_Tick;}//when pcb terminated
+		void set_page_fault_start_clock() { page_fault_start_clock = clock_Tick; }
+		void set_page_fault_end_clock() 
+		{ 
+			page_fault_end_clock = clock_Tick; 
+			page_fault_time_clock += (page_fault_end_clock - page_fault_start_clock);
+		}
+		long int get_wait_time_clock() { return wait_time_clock; }
+		
+		long int get_exec_time_clock() { return (end_time_clock - start_time_clock); }
+		
+		long int get_page_fault_time_clock() { return page_fault_time_clock; }
+
+
 private:
 	unsigned int pid;
 	status currentStatus;
@@ -128,11 +173,25 @@ private:
 	int end_time;
 	int run_time;
 	int cpuId;
-	milliseconds wait_start_clock;
-	milliseconds wait_time_clock;
-	milliseconds start_time_clock;
-	milliseconds end_time_clock;
-	milliseconds run_time_clcok;
+
+	long int wait_start_clock;
+	long int wait_end_clock;
+	long int wait_time_clock;
+	long int start_time_clock;
+	long int end_time_clock;
+	long int exec_time_clock;
+	long int page_fault_start_clock;
+	long int page_fault_end_clock;
+	long int page_fault_time_clock;
+	//  STATISTICS  [MAX_RAM_USED = (max_frames * PAGE_SIZE)] Insert in pcb.hpp under 115 private:
+	int run_cycles, wait_cycles;
+	int io_count;
+	int max_frames; // Max Frames in RAM
+	int cache_hit;
+	int cache_miss;
+	int page_fault_count;
+	int fault_service_time;
+
 	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
 	bool waitformmu; //check to see if process is waiting for mmu
 	std::size_t lastRequestedPage; //keep track of last page process request when pagefault occured
@@ -143,7 +202,7 @@ private:
 	std::vector<instruct_t> registers;
 	std::vector<instruct_t> sectionSizes;
 	std::deque<std::size_t> page_stack;		//stack of most recently used pages
-	public:
+public:
 	struct PageTable
 	{
 		std::vector<std::pair<bool, instruct_t>> pages;

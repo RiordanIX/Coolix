@@ -26,6 +26,7 @@ void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 		cpu_unconditional_operation(inst, opcode, pcb);
 	}
 	else if (format_code == INST_IO) {
+		pcb->increment_io_count();
 		cpu_io_operation(inst, opcode, pcb);
 	}
 	else {
@@ -45,6 +46,7 @@ instruct_t cpu::fetch(PCB* pcb)
 	// Cache hit
 	if (cache.in_cache(pcb->get_pid(), frame)) {
 		debug_printf("Frame is in the cache%s","\n");
+		pcb->increment_cache_hit();
 		return cache.get_instruction(frame, offset);
 	}
 	// Cache Miss
@@ -53,15 +55,19 @@ instruct_t cpu::fetch(PCB* pcb)
 		std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
 		debug_printf("Setting the cache%s", "\n");
 		cache.set_cache(frame, insts);
+		pcb->increment_cache_miss();
 		//return MMU.get_instruction(pcb);
 		return cache.get_instruction(frame, offset);
 	}
 	else
 	{
 		//page fault
+		pcb->increment_page_fault_count();
+		pcb->set_page_fault_start_clock();
 		pcb->set_lastRequestedPage(pcb->get_program_counter() / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING); //fetch method
+		pcb->set_wait_start_clock();
 		return -1;
 	}
 }
@@ -105,9 +111,12 @@ inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 			else
 			{
 				//page fault
+				pcb->increment_page_fault_count();
+				pcb->set_page_fault_start_clock();
 				pcb->set_lastRequestedPage(pageNumber);
 				pcb->set_waitformmu(true);
 				pcb->set_status(WAITING);
+				pcb->set_wait_start_clock();
 			}
 		}
 		else {
@@ -118,9 +127,12 @@ inline void cpu::cpu_rd(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 			else
 			{
 				//page fault
+				pcb->increment_page_fault_count();
+				pcb->set_page_fault_start_clock();
 				pcb->set_lastRequestedPage(pageNumber);
 				pcb->set_waitformmu(true);
 				pcb->set_status(WAITING);
+				pcb->set_wait_start_clock();
 			}
 		}
 }
@@ -144,9 +156,12 @@ inline void cpu::cpu_wr(PCB* pcb, instruct_t Reg1, instruct_t Reg2, instruct_t A
 		else
 		{
 			//page fault
+			pcb->increment_page_fault_count();
+			pcb->set_page_fault_start_clock();
 			pcb->set_lastRequestedPage(Address / (PAGE_SIZE));
 			pcb->set_waitformmu(true);
 			pcb->set_status(WAITING);
+			pcb->set_wait_start_clock();
 		}
 	}
 }
@@ -199,9 +214,12 @@ inline void cpu::cpu_st(instruct_t B_reg, instruct_t D_reg, PCB * pcb) {
 	else
 	{
 		//page fault
+		pcb->increment_page_fault_count();
+		pcb->set_page_fault_start_clock();
 		pcb->set_lastRequestedPage(registers[D_reg] / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING);
+		pcb->set_wait_start_clock();
 	}
 
 }
@@ -217,9 +235,12 @@ inline void	cpu::cpu_lw(PCB* pcb, instruct_t B_reg, instruct_t D_reg, instruct_t
 	else
 	{
 		//page fault
+		pcb->increment_page_fault_count();
+		pcb->set_page_fault_start_clock();
 		pcb->set_lastRequestedPage((registers[B_reg] + Address) / (PAGE_SIZE));
 		pcb->set_waitformmu(true);
 		pcb->set_status(WAITING);
+		pcb->set_wait_start_clock();
 	}
 }
 

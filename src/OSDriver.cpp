@@ -3,7 +3,7 @@
 extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
 extern Ram MEM;
-int clock_Tick;
+long int clock_Tick;
 bool programEnd;
 #if (defined DEBUG || defined _DEBUG)
 
@@ -42,7 +42,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 
 	//set cpu cache id to running process
 	CPU->cache.current_pid = pcb->get_pid();
-
+	pcb->set_wait_end_clock();
 	while (pcb->get_status() != status::TERMINATED &&
 		pcb->get_status() != status::WAITING)
 	{
@@ -83,10 +83,21 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		//osdriver cycle increument
 		current_cycle++;
 	}//while loop
+	 //	Calculating Max Frames
+	int vPages = 0;
+	for (unsigned int i = 0; i < pcb->get_page_table_length(); i++)
+	{
+		if (pcb->is_valid_page(i))
+			vPages++;
+	}
+	if (vPages > pcb->get_max_frames())
+	{
+		pcb->set_max_frames(vPages);
+	}
 	//	If process is terminated. Throw it into the Terminated Queue
 	if (pcb->get_status() == TERMINATED)//if process not in waiting
 	{	//  Since the Processes 'Should' be completed, it will be thrown into the TerminatedQueue
-		pcb->set_end_time();
+		pcb->set_end_clock();
 		terminatedQueue.setLock();
 		terminatedQueue.addProcess(pcb);
 		//printOutPut(pcb);
@@ -193,6 +204,7 @@ void OSDriver::run(std::string fileName) {
 						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
 						{
 							//if frame is aquired than set the wait for mmu event to false
+							pcb->set_page_fault_end_clock();
 							pcb->set_waitformmu(false);
 						}
 						else

@@ -33,7 +33,7 @@ void mmu::dumpProcess(PCB* pcb) {
 		}
 	}
 }
-//free only one from process
+//free only one frame from process
 void mmu::dumpPage(PCB* pcb) {
 	size_t frame;
 	for (unsigned int i = (pcb->get_page_table_length() - 1); i > 0; i--)
@@ -136,6 +136,8 @@ instruct_t mmu::get_instruction(PCB* pcb)
 	}
 	else {
 		// Page Fault
+		pcb->increment_page_fault_count();
+		pcb->set_page_fault_start_clock();
 		return -1;
 	}
 }
@@ -166,6 +168,8 @@ instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 		}
 		else {
 			//page fault
+			pcb->increment_page_fault_count();
+			pcb->set_page_fault_start_clock();
 			return -1;
 		}
 }

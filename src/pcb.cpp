@@ -33,11 +33,6 @@ void PCB::set_wait_time(int newtime) {
 	wait_time = newtime;
 }
 
-void PCB::set_end_time()
-{
-	end_time_clock = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-}
-
 void PCB::set_start_time(int startIn)
 {
 	start_time = startIn;
