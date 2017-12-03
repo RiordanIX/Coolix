@@ -53,7 +53,8 @@ instruct_t cpu::fetch(PCB* pcb)
 		std::vector<instruct_t> insts = MMU.get_frame_data(pcb);
 		debug_printf("Setting the cache%s", "\n");
 		cache.set_cache(frame, insts);
-		return MMU.get_instruction(pcb);
+		//return MMU.get_instruction(pcb);
+		return cache.get_instruction(frame, offset);
 	}
 	else
 	{

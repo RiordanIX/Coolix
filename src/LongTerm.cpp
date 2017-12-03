@@ -10,7 +10,14 @@ extern mmu MMU;
 
 //mutex for free frames add and drops
 Mutex mutex;
-void setLock() { while (mutex == LOCK) {} mutex = LOCK; }
+void setLock() 
+{ 
+	while (mutex == LOCK) 
+	{
+		printf("frameLock");
+	} 
+	mutex = LOCK; 
+}
 void freeLock() { mutex = FREE; }
 
 std::size_t LongTerm::FrameSize()

@@ -2,10 +2,13 @@
 
 extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
-
-#if (defined DEBUG || defined _DEBUG)
 extern Ram MEM;
+int clock_Tick;
+bool programEnd;
+#if (defined DEBUG || defined _DEBUG)
+
 #endif
+
 
 OSDriver::OSDriver() :
 		cpu_cycle(DEFAULT_CPU_CYCLE_TIME),
@@ -17,6 +20,14 @@ OSDriver::OSDriver() :
 	{ }
 
 OSDriver::~OSDriver() { }
+void RunClock()
+{
+	while (programEnd == false)
+	{
+		std::this_thread::sleep_for(0.001ms);//increments 1 mirco sec
+		clock_Tick++;
+	}
+}
 void printOutPut(PCB * pcb)
 {
 	std::fstream myfile;
@@ -28,24 +39,24 @@ void printOutPut(PCB * pcb)
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
-	
+
 	//set cpu cache id to running process
 	CPU->cache.current_pid = pcb->get_pid();
-	
+
 	while (pcb->get_status() != status::TERMINATED &&
 		pcb->get_status() != status::WAITING)
 	{
 		instruct_t instruct = CPU->fetch(pcb);
 		if (pcb->get_status() == WAITING)
 		{
-			Dispatcher::switchOut(CPU,pcb);
+			Dispatcher::switchOut(CPU, pcb);
 			ShortTermScheduler::RunningToWait(pcb);
 			break;
 		}
 		// The fetched instruction is 0, meaning it's accessed some zeroed out
 		// data.  This shouldn't happen.
 		if (instruct == 0) {
-			auto note = pcb->get_frame(pcb->get_program_counter()/(PAGE_SIZE));
+			auto note = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
 			std::cout << "Instruction at "
 				<< note << " is 0\n"
 				<< "Process page is "
@@ -68,7 +79,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		// Increment Program counter
 		pcb->increment_PC();
 		//increument cpu cycle
-		CPU->current_cycle++; 
+		CPU->current_cycle++;
 		//osdriver cycle increument
 		current_cycle++;
 	}//while loop
@@ -80,13 +91,14 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		terminatedQueue.addProcess(pcb);
 		//printOutPut(pcb);
 		terminatedQueue.freeLock();
-		std::cout << "terminated" << pcb->get_pid() << "\n";
+		std::cout << "terminated :" << pcb->get_pid() << "\n";
+		printf("dump pcb start\n");
 		LongTerm::DumpProcess(pcb);
-		//frame.unlock();
-		//tq.unlock();
+		printf("dump pcb end\n");
 	}
 	Hardware::FreeHardware(pcb->get_resource_status());//free resource for other processes
 	CPU->freeLock();//free cpu lock when thread is completed
+
 }
 bool CheckRunLock(cpu * CPU)
 {
@@ -124,6 +136,12 @@ bool TerminateQsize(int totalJobs)
 void OSDriver::run(std::string fileName) {
 	//  Load to Disk
 	PCB * pcb;
+	programEnd = false;
+	std::thread RUN(RunClock);
+	if (RUN.joinable() == true)
+	{
+		RUN.detach();
+	}
 	ldr.readFromFile(fileName);
 
 	//  Does an initial load from Disk to RAM and ReadyQueue
@@ -142,18 +160,19 @@ void OSDriver::run(std::string fileName) {
 	cpu* CPU = CpuPool.FreeCPU();
 	while(TerminateQsize(totalJobs))
 	{
-	
 		try {
 			if (CheckRunLock(CPU))
 			{
-
-				if (CPU->getLock() == FREE)
+				if (CPU->getLock() == FREE)//check if cpu is still free
 				{
 					run_shortts(CPU);//  Context Switches for the next process
-					std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
-					if (RUN.joinable() == true)
+					if (CPU->getLock() == LOCK)//make sure cpu is locked with a process first
 					{
-						RUN.detach();
+						std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
+						if (RUN.joinable() == true)
+						{
+							RUN.detach();
+						}
 					}
 				}
 			}
@@ -196,7 +215,7 @@ void OSDriver::run(std::string fileName) {
 		CPU = CpuPool.FreeCPU(); //find free cpu to schedule next item in ready queue
 		
 	}
-
+	programEnd = true; //stop cpu clock;
 
 #if (defined DEBUG || defined _DEBUG)
 	MEM.dump_data(); //memory dump

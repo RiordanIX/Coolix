@@ -51,21 +51,23 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) 
 {
 	
-	readyQueue.setLock();
-	if (!readyQueue.empty())
+	
+	if (checkReadysize())
 	{
 		CPU->setLock();
-		CPU->setProcess(readyQueue.getProcess());
-		readyQueue.removeProcess();
-		//clear any cpu's registers if they were running the same process
-		OSDriver::ClearCPU(CPU->getId(),CPU->getProcess()->get_pid());
+		readyQueue.setLock();
 		// Sets the CPU registers to the new PCB registers
-		CPU->set_registers(CPU->getProcess()->get_registers());
+		CPU->set_registers(readyQueue.getProcess()->get_registers());
+		CPU->setProcess(readyQueue.getProcess());
+
+		//clear any cpu's registers if they were running the same process
+		OSDriver::ClearCPU(CPU->getId(), CPU->getProcess()->get_pid());
+		readyQueue.removeProcess();
+		readyQueue.freeLock();
 		CPU->getProcess()->set_cpuid(CPU->getId());
 		CPU->getProcess()->set_status(status::RUNNING);
-		
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}
-	readyQueue.freeLock();
+	
 }
 
