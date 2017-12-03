@@ -1,4 +1,4 @@
-CXXFLAGS := -Wall -Werror -Wextra -pthread
+CXXFLAGS := -Wall -Wextra -pthread
 
 BIN := coolix
 
