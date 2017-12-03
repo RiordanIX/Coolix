@@ -26,11 +26,11 @@ void Dispatcher::dispatch(cpu* CPU, PCB* cProcess) {
 	if (checkReadysize())
 	{
 		debug_printf("I am dipatching !!!!!!!!!!!!!!!!!!!!!!!!!%s","\n");
-	
+
 		// Removes First Process and gives next process to CPU
 
 		switchIn(CPU,cProcess);
-		
+
 	}
 }
 
@@ -48,10 +48,11 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 }
 
 
-void Dispatcher::switchIn(cpu* CPU,PCB * cProcess) 
+void Dispatcher::switchIn(cpu* CPU,PCB * cProcess)
 {
-	
-	
+
+	debug_printf("Trying to switch In%s","\n");
+
 	if (checkReadysize())
 	{
 		CPU->setLock();
@@ -68,6 +69,9 @@ void Dispatcher::switchIn(cpu* CPU,PCB * cProcess)
 		CPU->getProcess()->set_status(status::RUNNING);
 		debug_printf("Correctly swapped processes!!!!%s","\n");
 	}
-	
+	else {
+		debug_printf("Failed to switch In%s","\n");
+	}
+
 }
 

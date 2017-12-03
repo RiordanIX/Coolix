@@ -5,7 +5,7 @@ unsigned int cpucount;
 extern std::vector<PCB> process_list;
 
 int main(int argc, char* argv[]) {
-#if (defined _WIN32 && defined _DEBUG)
+//#if (defined _WIN32 && defined _DEBUG)
 	std::cout << "coolix os" << '\n' << argv << std::endl;
 	std::cout << "('FIFO', 'P' , 'SJF') How you want to sort?: ";
 	while (sortby.compare("FIFO") != 0
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 			printf("please enter correct cpu count\n value must be between : 1 - 4 :");
 		}
 	}
-	
+
 	OSDriver driver;
 	driver.run("test_job");
 	std::ofstream analyiticFile;
@@ -51,19 +51,19 @@ int main(int argc, char* argv[]) {
 }
 
 	analyiticFile.close();
-	
-		
-#else
-	if (argc == 1) {
-		std::cout << "Usage:  coolix <run_file>" << std::endl;
-	}
-	else {
-		OSDriver driver;
-		driver.run(argv[1]);
-	}
-#endif
-	
 
+
+//#else
+//	if (argc == 1) {
+//		std::cout << "Usage:  coolix <run_file>" << std::endl;
+//	}
+//	else {
+//		OSDriver driver;
+//		driver.run(argv[1]);
+//	}
+//#endif
+//
+//
 	return 0;
 }
 

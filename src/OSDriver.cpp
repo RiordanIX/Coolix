@@ -34,7 +34,7 @@ void printOutPut(PCB * pcb)
 	myfile.open("example.txt", std::ios::out | std::ios::app);
 	myfile << "Process completed :" << pcb->get_pid() << "\r\n";
 	myfile.close();
-	
+
 }
 void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
@@ -100,7 +100,7 @@ void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 		pcb->set_end_clock();
 		terminatedQueue.setLock();
 		terminatedQueue.addProcess(pcb);
-		//printOutPut(pcb);
+		printOutPut(pcb);
 		terminatedQueue.freeLock();
 		std::cout << "terminated :" << pcb->get_pid() << "\n";
 		printf("dump pcb start\n");
@@ -160,7 +160,7 @@ void OSDriver::run(std::string fileName) {
 	debug_printf("Running Long term Scheduler%s", "\n");
 	totalJobs = LongTerm::initialLoad();
 
-		
+
 #if (defined DEBUG || defined _DEBUG)
 	debug_printf("Beginning MEMORY%s","\n");
 	MEM.dump_data();
@@ -174,18 +174,25 @@ void OSDriver::run(std::string fileName) {
 		try {
 			if (CheckRunLock(CPU))
 			{
+				debug_printf("CPU is not null and ready queue is > 0%s","\n");
 				if (CPU->getLock() == FREE)//check if cpu is still free
 				{
+					debug_printf("CPU is not Locked.%s","\n");
 					run_shortts(CPU);//  Context Switches for the next process
 					if (CPU->getLock() == LOCK)//make sure cpu is locked with a process first
 					{
 						std::thread RUN(run_cpu, CPU, CPU->getProcess(), &current_cycle);
 						if (RUN.joinable() == true)
 						{
+							debug_printf("Creating new thread%s","\n");
+
 							RUN.detach();
 						}
 					}
 				}
+			}
+			else {
+				debug_printf("CPU is null or ready queue is not > 0%s","\n");
 			}
 		}
 		catch (const char* e) {
@@ -193,39 +200,42 @@ void OSDriver::run(std::string fileName) {
 			printf("%s\n",e);
 		}
 		if (waitingQsize())//check if its greater than 0
-		{			
-				waitingQueue.setLock();
-				pcb = waitingQueue.getProcess();
-				waitingQueue.freeLock();
-				if (pcb->get_waitformmu() == true)
-				{					
-					if (pcb->get_lastRequestedPage() < 156)
-					{	//get requested frame 
-						if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
+		{
+			debug_printf("Waiting Queue has things%s", "\n");
+			waitingQueue.setLock();
+			pcb = waitingQueue.getProcess();
+			waitingQueue.freeLock();
+			if (pcb->get_waitformmu() == true)
+			{
+				if (pcb->get_lastRequestedPage() < 256)
+				{	//get requested frame
+					if(ltSched.loadPage(pcb, pcb->get_lastRequestedPage()))
+					{
+						//if frame is aquired than set the wait for mmu event to false
+						pcb->set_page_fault_end_clock();
+						pcb->set_waitformmu(false);
+					}
+					else
+					{
+						if (ltSched.FrameSize() == 0)
 						{
-							//if frame is aquired than set the wait for mmu event to false
-							pcb->set_page_fault_end_clock();
-							pcb->set_waitformmu(false);
-						}
-						else
-						{
-							if (ltSched.FrameSize() == 0)
-							{
-								//free up frames if there are no more frames left for 
-								//processes in ready queue
-								waitingQueue.setLock();
-								LongTerm::DumpFrame(pcb); 
-								waitingQueue.freeLock();
-							}
+							//free up frames if there are no more frames left for
+							//processes in ready queue
+							waitingQueue.setLock();
+							LongTerm::DumpFrame(pcb);
+							debug_printf("Dumping Frame%s", "\n");
+							waitingQueue.freeLock();
 						}
 					}
 				}
+			}
 		}
-		//  run short time scheduler to move processes 
+		//  run short time scheduler to move processes
 		//  from wait queue to ready or vice versa
 		run_sortsch();
 		CPU = CpuPool.FreeCPU(); //find free cpu to schedule next item in ready queue
-		
+		//debug_printf("This is doing stuff still%s", "\n");
+
 	}
 	programEnd = true; //stop cpu clock;
 
@@ -275,7 +285,4 @@ void OSDriver::ClearCPU(unsigned int CpuID, unsigned int p_id)
 	//previously
 	CPU_Pool::clearCpu(CpuID, p_id);
 }
-	
-
-
 
