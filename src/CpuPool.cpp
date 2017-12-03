@@ -34,7 +34,6 @@ void CPU_Pool::clearCpu(unsigned int CpuID, unsigned int p_id)
 				cpuPool[x]->clear_registers();
 				cpuPool[x]->setProcess(nullptr);
 				cpuPool[x]->freeLock();
-				break;
 			}
 		}
 	}
