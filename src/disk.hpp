@@ -2,6 +2,7 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <cstdio>
 #include "instruct.hpp"
 #include "debug.hpp"
 
@@ -36,6 +37,7 @@ public:
 	std::size_t get_used() { return _used;}
 	std::size_t size()	   { return _size;}
 	std::string get_info();
+	void dump_data(char* filename);
 
 };
 

@@ -3,6 +3,7 @@
 extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
 extern Ram MEM;
+extern Disk DISK;
 long int clock_Tick;
 bool programEnd;
 #if (defined DEBUG || defined _DEBUG)
@@ -164,6 +165,7 @@ void OSDriver::run(std::string fileName) {
 #if (defined DEBUG || defined _DEBUG)
 	debug_printf("Beginning MEMORY%s","\n");
 	MEM.dump_data("Begin_RAM");
+	DISK.dump_data("Begin_DISK");
 #endif
 	debug_printf("Finished with LongTerm Schdeduler%s","\n");
 	//  Runs as long as the ReadyQueue is populated as long as there are
@@ -241,6 +243,7 @@ void OSDriver::run(std::string fileName) {
 
 #if (defined DEBUG || defined _DEBUG)
 	MEM.dump_data("End_RAM"); //memory dump
+	DISK.dump_data("End_DISK");
 #endif
 }
 

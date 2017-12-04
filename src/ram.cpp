@@ -1,5 +1,4 @@
 #include "ram.hpp"
-#include <cstdio>
 
 using std::string;
 using std::to_string;

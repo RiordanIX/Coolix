@@ -119,5 +119,19 @@ deque<instruct_t> Disk::read_instruction_chunk(size_t pos, size_t size) {
 	return to_send;
 }
 
+void Disk::dump_data(char* filename) {
+	FILE *file;
+	file = fopen(filename, "w");
+	for (unsigned int i = 0; i < size(); i +=6*4) {
+		for (unsigned int j = i; j < i + 6*4 && j < size(); j+=4) {
+			fprintf(file, "%4u: 0x%08x   ", j, read_instruction(j));
+			printf("%4u: 0x%08x   ", j, read_instruction(j));
+		}
+		fprintf(file, "\n");
+		printf("\n");
+	}
+	fclose (file);
+}
+
 Disk DISK;
 

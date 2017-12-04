@@ -4,6 +4,7 @@
 #include <string>
 #include <mutex>
 #include <fstream>
+#include <cstdio>
 #include "debug.hpp"
 #include "instruct.hpp"
 
