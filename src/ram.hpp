@@ -2,6 +2,9 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <mutex>
+#include <fstream>
+#include "debug.hpp"
 #include "instruct.hpp"
 
 // Default ram size in Bytes. 1024 words of size 4
@@ -28,7 +31,7 @@ public:
 	instruct_t get_instruction(std::size_t index);
 
 	std::string get_info();
-	void dump_data();
+	void dump_data(char* filename);
 
 };
 

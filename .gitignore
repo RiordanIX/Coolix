@@ -2,7 +2,10 @@
 *.o
 *.d
 
+# Executable files
 coolix
+coolix.exe
+
 # vc project files
 *.vcxproj
 *.filters
