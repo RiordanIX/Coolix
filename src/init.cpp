@@ -44,9 +44,9 @@ int main(int argc, char* argv[]) {
 		analyiticFile << process_list[i].get_pid()
 			<< "\t" << process_list[i].get_io_count()
 			<< "\t" << process_list[i].get_max_frames()
-			<< "\t" << (process_list[i].get_max_frames() * PAGE_SIZE)
-			<< "\t" << ((float)(process_list[i].get_cache_hit()) / (float)(process_list[i].get_cache_hit() + process_list[i].get_cache_miss()) * 100) << "\t" << process_list[i].get_page_fault_count()
-			<< "\t" << process_list[i].get_page_fault_time_clock() << "\t" << wtime << "\t" << (ttime-wtime) << std::endl;
+			<< "\t\t" << (process_list[i].get_max_frames() * PAGE_SIZE)
+			<< "\t" << ((float)(process_list[i].get_cache_hit()) / (float)(process_list[i].get_cache_hit() + process_list[i].get_cache_miss()) * 100) << "\t\t" << process_list[i].get_page_fault_count()
+			<< "\t\t" << process_list[i].get_page_fault_time_clock() << "\t\t\t" << wtime << "\t" << (ttime-wtime) << std::endl;
 		  //<< "\t" << process_list[i].get_page_fault_service() << "\t" << (process_list[i].get_wait() / 4) << "\t" << process_list[i].get_run() << std::endl;
 }
 

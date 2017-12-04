@@ -26,15 +26,15 @@ public:
 	// Public because the dispatcher needs to access it.
 
 	// process cpu currently running
-private: 
-	unsigned int id;
+private:
+	std::size_t id;
 	PCB* CurrentProcess;
 public:
 	void setId(unsigned int ID) { id = ID; }
-	int getId() { return id; }
+	std::size_t getId() { return id; }
 	void setProcess(PCB* pcb) { CurrentProcess = pcb; }
 	PCB* getProcess() { return CurrentProcess; }
-	int current_cycle; //cpu cycle
+	std::size_t current_cycle; //cpu cycle
 	std::size_t num_registers;
 	std::vector<instruct_t> registers;
 	Mutex mutex;
@@ -54,8 +54,8 @@ public:
 
 	// Cache information. Setting and getting
 	void set_running_pid(int id) { cache.current_pid = id;}
-	int current_pid() { return cache.current_pid;}
-	bool in_cache(unsigned int pid, std::size_t frame) {
+	std::size_t current_pid() { return cache.current_pid;}
+	bool in_cache(std::size_t pid, std::size_t frame) {
 		return cache.in_cache(pid, frame);
 	}
 	void set_cache(std::size_t frame, std::vector<instruct_t> instructs) {
