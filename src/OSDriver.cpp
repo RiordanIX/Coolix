@@ -3,7 +3,7 @@
 extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
 extern Ram MEM;
-std::size_t clock_Tick;
+long int clock_Tick;
 bool programEnd;
 #if (defined DEBUG || defined _DEBUG)
 
@@ -36,7 +36,7 @@ void printOutPut(PCB * pcb)
 	myfile.close();
 
 }
-void run_cpu(cpu * CPU, PCB * pcb, std::size_t *counter)
+void run_cpu(cpu * CPU, PCB * pcb, int * current_cycle)
 {
 	Hardware::LockHardware(pcb->get_resource_status()); //locks resource
 
@@ -81,10 +81,10 @@ void run_cpu(cpu * CPU, PCB * pcb, std::size_t *counter)
 		//increument cpu cycle
 		CPU->current_cycle++;
 		//osdriver cycle increument
-		(*counter)++;
+		current_cycle++;
 	}//while loop
 	 //	Calculating Max Frames
-	std::size_t vPages = 0;
+	int vPages = 0;
 	for (unsigned int i = 0; i < pcb->get_page_table_length(); i++)
 	{
 		if (pcb->is_valid_page(i))
@@ -274,7 +274,7 @@ void OSDriver::run_shortts(cpu * CPU) {
 	// Dispatches the current Processes. Context Switches In AND Out
 	if (checkReadyQsize())
 	{
-		Dispatch.dispatch(CPU);
+		Dispatch.dispatch(CPU, CPU->getProcess());
 		if (current_cycle >= cpu_cycle)
 			current_cycle = 0;
 	}

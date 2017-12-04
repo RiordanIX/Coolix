@@ -21,7 +21,7 @@ bool checkReadysize()
 	readyQueue.freeLock();
 	return there;
 }
-void Dispatcher::dispatch(cpu* CPU) {
+void Dispatcher::dispatch(cpu* CPU, PCB* cProcess) {
 	debug_printf("I am trying to dispatch%s","\n");
 	if (checkReadysize())
 	{
@@ -29,7 +29,7 @@ void Dispatcher::dispatch(cpu* CPU) {
 
 		// Removes First Process and gives next process to CPU
 
-		switchIn(CPU);
+		switchIn(CPU,cProcess);
 
 	}
 }
@@ -48,8 +48,9 @@ void Dispatcher::switchOut(cpu* CPU, PCB* cProcess) {
 }
 
 
-void Dispatcher::switchIn(cpu* CPU)
+void Dispatcher::switchIn(cpu* CPU,PCB * cProcess)
 {
+
 	debug_printf("Trying to switch In%s","\n");
 
 	if (checkReadysize())

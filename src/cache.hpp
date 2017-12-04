@@ -13,8 +13,8 @@ public:
 
 	// first should be the frame number
 	std::vector<std::pair<std::size_t, std::vector<instruct_t>>> data;
-	std::size_t current_pid;
-	std::size_t nextFrame;
+	unsigned int current_pid;
+	int nextFrame;
 	void next_frame() {
 		if (nextFrame == 3) nextFrame = 0;
 		else nextFrame++;
@@ -35,7 +35,7 @@ public:
 		return -1;
 	}
 
-	bool in_cache(std::size_t pid, std::size_t frame) {
+	bool in_cache(unsigned int pid, std::size_t frame) {
 		if (pid != current_pid) return false;
 		else {
 			for (auto it = data.begin(); it != data.end(); it++) {

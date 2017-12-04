@@ -17,8 +17,8 @@ public:
     OSDriver();
     ~OSDriver();
 
-    std::size_t cpu_cycle;
-    std::size_t current_cycle;
+    int cpu_cycle;
+    int current_cycle;
 	int totalJobs;
 	loader ldr;
     Dispatcher Dispatch;
@@ -32,6 +32,6 @@ private:
   //  void run_cpu(cpu* CPU);
     void run_shortts(cpu * CPU);
 	void run_sortsch();
-
+	
 };
 

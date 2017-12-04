@@ -9,7 +9,7 @@ vector<instruct_t> PCB::get_registers(){
 	return to_return;
 }
 
-void PCB::set_priority(size_t priorityIn){
+void PCB::set_priority(int priorityIn){
 	priority = priorityIn;
 }
 
@@ -29,16 +29,16 @@ void PCB::set_status(status code) {
 	currentStatus = code;
 }
 
-void PCB::set_wait_time(size_t newtime) {
+void PCB::set_wait_time(int newtime) {
 	wait_time = newtime;
 }
 
-void PCB::set_start_time(size_t startIn)
+void PCB::set_start_time(int startIn)
 {
 	start_time = startIn;
 }
 
-void PCB::set_cycle_start_time(size_t cycleIn)
+void PCB::set_cycle_start_time(int cycleIn)
 {
 	cycle_start_time = cycleIn;
 }
@@ -54,7 +54,7 @@ void PCB::set_ram_address(size_t address){
 
 std::size_t PCB::get_frame(std::size_t pageNumber)
 {
-	 return pageTable.pages[pageNumber].second;
+	 return pageTable.pages[pageNumber].second; 
 }
 
 //PAGE TABLE
@@ -65,7 +65,7 @@ std::pair<bool,size_t> PCB::get_page_table_entry(size_t pageNumber)
 
 // returns false if out of bounds.
 bool PCB::is_valid_page(size_t pageNumber) {
-
+	
 	if ((pageNumber) > (pageTable.size()-1))
 	{
 		return false;
