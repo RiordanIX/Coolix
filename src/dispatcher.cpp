@@ -60,7 +60,14 @@ void Dispatcher::switchIn(cpu* CPU,PCB * cProcess)
 		// Sets the CPU registers to the new PCB registers
 		CPU->set_registers(readyQueue.getProcess()->get_registers());
 		CPU->setProcess(readyQueue.getProcess());
-
+		switch (CPU->getId())
+		{
+		case 0:CPU->getProcess()->increment_cpu0(); break;
+		case 1:CPU->getProcess()->increment_cpu1(); break;
+		case 2:CPU->getProcess()->increment_cpu2(); break;
+		case 3:CPU->getProcess()->increment_cpu3(); break;
+		default: break;
+		}
 		//clear any cpu's registers if they were running the same process
 		OSDriver::ClearCPU(CPU->getId(), CPU->getProcess()->get_pid());
 		readyQueue.removeProcess();

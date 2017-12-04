@@ -162,6 +162,14 @@ public:	PCB(int id, std::size_t daddress, std::size_t instruct, std::size_t inp,
 		
 		long int get_page_fault_time_clock() { return page_fault_time_clock; }
 
+		void increment_cpu0() { Cpu0count++; }
+		void increment_cpu1() { Cpu1count++; }
+		void increment_cpu2() { Cpu2count++; }
+		void increment_cpu3() { Cpu3count++; }
+		int get_cpu0_count() { return Cpu0count; }
+		int get_cpu1_count() { return Cpu1count; }
+		int get_cpu2_count() { return Cpu2count; }
+		int get_cpu3_count() { return Cpu3count; }
 
 private:
 	unsigned int pid;
@@ -191,6 +199,11 @@ private:
 	int cache_miss;
 	int page_fault_count;
 	int fault_service_time;
+
+	int Cpu0count;
+	int Cpu1count;
+	int Cpu2count;
+	int Cpu3count;
 
 	int cycle_start_time; // number of cycles ran before this PCB is pushed into RAM
 	bool waitformmu; //check to see if process is waiting for mmu
