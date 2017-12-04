@@ -49,9 +49,12 @@ int main(int argc, char* argv[]) {
 			<< "\t" << process_list[i].get_page_fault_count()
 			<< "\t" << process_list[i].get_page_fault_time_clock() << "\t" << wtime << "\t" << (ttime-wtime) << std::endl;
 		  //<< "\t" << process_list[i].get_page_fault_service() << "\t" << (process_list[i].get_wait() / 4) << "\t" << process_list[i].get_run() << std::endl;
-}
+	}
 
 	analyiticFile.close();
+	std::cout << "Enter 0 to exit";
+	std::cin >> sortby;
+	std::exit(0);
 
 
 //#else

@@ -52,9 +52,7 @@ void loader::readFromFile(string filename) {
             debug_printf("Creating process...%s","\n");
 
 			address = DISK.get_used();
-		//	address = (DISK.get_used() / (PAGE_SIZE));
-		
-
+	
 			//Read process id
             file >> x;
             pid = stoul(x, NULL, 16);

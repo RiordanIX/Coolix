@@ -3,7 +3,10 @@
 extern pcbQueue readyQueue;
 extern FIFO waitingQueue, terminatedQueue , newQueue;
 extern Ram MEM;
+
 extern Disk DISK;
+extern std::vector<PCB> process_list;
+
 long int clock_Tick;
 bool programEnd;
 #if (defined DEBUG || defined _DEBUG)
@@ -245,6 +248,26 @@ void OSDriver::run(std::string fileName) {
 	MEM.dump_data("End_RAM"); //memory dump
 	DISK.dump_data("End_DISK");
 #endif
+	long int wtime;
+	long int ttime;
+	for (unsigned int i = 0; i < process_list.size(); i++)
+	{
+		wtime = process_list[i].get_wait_time_clock();	//	Wait Time
+		ttime = process_list[i].get_exec_time_clock();	//	Total Time
+		std::cout << "\n\nProcess id: " << process_list[i].get_pid()
+			<< "\nIO count: " << process_list[i].get_io_count()
+			<< "\nMaxFrames: " << process_list[i].get_max_frames()
+			<< "\nMaxRam:" << (process_list[i].get_max_frames() * PAGE_SIZE) 
+			<< "\nPercentCache:" << ((float)(process_list[i].get_cache_hit()) / (float)(process_list[i].get_cache_hit() + process_list[i].get_cache_miss()) * 100)
+			<< "\ncpu0 count:" << process_list[i].get_cpu0_count() 
+			<< "\ncpu1 count: " << process_list[i].get_cpu1_count() 
+			<< "\ncpu2 count: " << process_list[i].get_cpu2_count() 
+			<< "\ncpu3 count: " << process_list[i].get_cpu3_count()
+			<< "\nPageFault count: " << process_list[i].get_page_fault_count()
+			<< "\nFaultServiceTime: " << process_list[i].get_page_fault_time_clock() 
+			<< "\nWait Time : " << wtime 
+			<< "\nRun Time : " << (ttime - wtime) << std::endl;
+	}
 }
 
 void OSDriver::run_sortsch() {
