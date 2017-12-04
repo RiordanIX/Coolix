@@ -19,7 +19,8 @@ void mmu::SetFreeFrames()
 //	for (auto i = _freeFrames.begin(); i != _freeFrames.end(); ++i)
 //		debug_printf("%lu ", *i);
 }
-//free frame from process
+
+//Free up the frames used by a given process
 void mmu::dumpProcess(PCB* pcb) {
 	size_t frame;
 	for(unsigned int i = 0; i < pcb->get_page_table_length(); i++)
@@ -49,7 +50,7 @@ void mmu::dumpPage(PCB* pcb) {
 	}
 }
 
-
+//Return the start address of a given frame
 std::size_t mmu::FrameNumberToLocation(size_t Frame)
 {
 	return Frame * PAGE_SIZE;
@@ -99,6 +100,7 @@ bool mmu::processDiskToRam(PCB* pcb, size_t pageNumber) {
 	return true;
 }
 
+//Write a single word of data to memory
 void mmu::writeToRam(instruct_t frame,instruct_t offset, instruct_t data) {
 	// Need to make sure that the frame is active. Otherwise, wrong data
 	instruct_t address = FrameNumberToLocation(frame);
@@ -106,6 +108,8 @@ void mmu::writeToRam(instruct_t frame,instruct_t offset, instruct_t data) {
 	MEM.allocate(address + offset, data);
 	freeLock();
 }
+
+//Transfer a page from memory to the disk
 void mmu::writePageToDisk(PCB* pcb, size_t pageNumber)
 {
 	size_t frameNumber = pcb->get_frame(pageNumber);
@@ -121,6 +125,7 @@ void mmu::writePageToDisk(PCB* pcb, size_t pageNumber)
 	freeLock();
 }
 
+//Translate PCB's program counter to a physical address
 instruct_t mmu::get_instruction(PCB* pcb)
 {
 	size_t frame;
@@ -142,6 +147,7 @@ instruct_t mmu::get_instruction(PCB* pcb)
 	}
 }
 
+
 vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	unsigned int counter = pcb->get_program_counter();
 	size_t offset = (pcb->get_program_counter() % (PAGE_SIZE));
@@ -153,6 +159,8 @@ vector<instruct_t> mmu::get_frame_data(PCB* pcb) {
 	}
 	return insts;
 }
+
+//Translates a virtual address to a physical address, if one exists
 instruct_t mmu::get_instruction(PCB* pcb, instruct_t address)
 {
 	size_t pageNumber = (address / (PAGE_SIZE));

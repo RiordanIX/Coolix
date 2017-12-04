@@ -25,6 +25,8 @@ void Disk::allocate(size_t location,byte_t data) {
 		throw "Illegal allocation at: " + to_string(location) + ".";
 	}
 }
+
+//Add a single word of data to the disk at a given location
 void Disk::allocate(size_t location, instruct_t data) {
 	byte_t local = 0;
 
@@ -86,13 +88,12 @@ instruct_t Disk::read_instruction(size_t pos) {
 	return instruct;
 }
 
-
 string Disk::get_info() {
 	return "Disk size: " + to_string(_size) + "\nDisk used: " +
 			to_string(_used);
 }
 
-
+//Read a specific number of bytes from the disk starting at a given location
 deque<byte_t> Disk::read_byte_chunk(size_t pos, size_t size) {
 	deque<byte_t> to_send;
 	size_t pos_copy = pos;
@@ -102,7 +103,7 @@ deque<byte_t> Disk::read_byte_chunk(size_t pos, size_t size) {
 	return to_send;
 }
 
-
+//Read a number of words from the disk starting at a given location
 deque<instruct_t> Disk::read_instruction_chunk(size_t pos, size_t size) {
 	deque<instruct_t> to_send;
 	instruct_t temp;

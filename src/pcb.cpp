@@ -83,6 +83,7 @@ void PCB::set_page_table_entry(size_t entry, bool valid, size_t frame)
 	}
 }
 
+//Update stack of most recently used pages (byproduct of when we tried to add page replacement)
 void PCB::update_page_stack(size_t pageNumber)
 {
 	auto contains = std::find(page_stack.begin(), page_stack.end(), pageNumber);

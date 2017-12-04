@@ -9,6 +9,7 @@
 using std::size_t;
 extern mmu MMU;
 
+//Determine the type of operation of the given instruction and execute it
 void cpu::decode_and_execute(instruct_t inst, PCB* pcb) {
 	printf("This Instruction: %#010X\n", inst);
 
@@ -39,6 +40,8 @@ Mutex cpu::getLock()
 {
 	return mutex;
 }
+
+//Get the next instruction to execute
 instruct_t cpu::fetch(PCB* pcb)
 {
 	size_t frame = pcb->get_frame(pcb->get_program_counter() / (PAGE_SIZE));
